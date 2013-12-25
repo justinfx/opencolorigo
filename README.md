@@ -9,7 +9,7 @@ While the tests currently pass, there are still problems.
 
 *TODO*
 
-* The `config` struct wrapper is not safely maintaining the `OCIO::ConstConfigRcPtr` (a shared_ptr). The calls work fine within the same scope, but reusing the `config` across functions is a seg fault because the pointer is getting deleted. Need to figure out how to properly preserve it.
+* The `Config` struct wrapper is not safely maintaining the `OCIO::ConstConfigRcPtr` (a shared_ptr). The calls work fine within the same scope, but reusing the `Config` across functions is a seg fault because the pointer is getting deleted. Need to figure out how to properly preserve it.
 * Error Handling
 * Implement all of the API
 
@@ -24,3 +24,8 @@ Installation
 ------------
 
     go get github.com/justinfx/opencolorigo
+
+Documentation
+-------------
+
+[http://godoc.org/github.com/justinfx/opencolorigo](http://godoc.org/github.com/justinfx/opencolorigo)
