@@ -5,7 +5,7 @@ import (
     "testing"
 )
 
-var CONFIG config
+var CONFIG Config
 
 func init() {
     CONFIG = ConfigCreateFromData(OCIO_CONFIG)

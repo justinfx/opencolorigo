@@ -38,8 +38,8 @@ func GetVersion() string {
 // Get the version number for the library, as a single 4-byte hex number
 // (e.g., 0x01050200 for “1.5.2”), to be used for numeric comparisons.
 // This is also available at compile time as OCIO_VERSION_HEX.
-func GetVersionHex() C.int {
-    return C.GetVersionHex()
+func GetVersionHex() int {
+    return int(C.GetVersionHex())
 }
 
 /*
@@ -47,7 +47,7 @@ Config
 */
 
 // A config defines all the color spaces to be available at runtime.
-type config struct {
+type Config struct {
     ptr unsafe.Pointer
 }
 
@@ -58,27 +58,27 @@ Config Initialization
 // Get the current configuration.
 // If a current config had not yet been set, it will be automatically
 // initialized from the environment.
-func GetCurrentConfig() config {
-    return config{C.GetCurrentConfig()}
+func GetCurrentConfig() Config {
+    return Config{C.GetCurrentConfig()}
 }
 
 // Create a Config by checking the OCIO environment variable
-func ConfigCreateFromEnv() config {
-    return config{C.Config_CreateFromEnv()}
+func ConfigCreateFromEnv() Config {
+    return Config{C.Config_CreateFromEnv()}
 }
 
-// Create a Config from an existing yaml config file
-func ConfigCreateFromFile(filename string) config {
+// Create a Config from an existing yaml Config file
+func ConfigCreateFromFile(filename string) Config {
     c_str := C.CString(filename)
     defer C.free(unsafe.Pointer(c_str))
-    return config{C.Config_CreateFromFile(c_str)}
+    return Config{C.Config_CreateFromFile(c_str)}
 }
 
 // Create a Config from a valid yaml string
-func ConfigCreateFromData(data string) config {
+func ConfigCreateFromData(data string) Config {
     c_str := C.CString(data)
     defer C.free(unsafe.Pointer(c_str))
-    return config{C.Config_CreateFromData(c_str)}
+    return Config{C.Config_CreateFromData(c_str)}
 }
 
 /*
@@ -86,24 +86,24 @@ This will produce a hash of the all colorspace definitions, etc.
 All external references, such as files used in FileTransforms, etc.,
 will be incorporated into the cacheID. While the contents of the files
 are not read, the file system is queried for relavent information (mtime, inode)
-so that the config’s cacheID will change when the underlying luts are updated.
+so that the Config’s cacheID will change when the underlying luts are updated.
 If a context is not provided, the current Context will be used.
 If a null context is provided, file references will not be taken into account
 (this is essentially a hash of Config::serialize).
 */
-func (c config) GetCacheID() string {
+func (c Config) GetCacheID() string {
     return C.GoString(C.Config_getCacheID(c.ptr))
 }
 
-func (c config) GetDescription() string {
+func (c Config) GetDescription() string {
     return C.GoString(C.Config_getDescription(c.ptr))
 }
 
-func (c config) IsStrictParsingEnabled() bool {
+func (c Config) IsStrictParsingEnabled() bool {
     return bool(C.Config_isStrictParsingEnabled(c.ptr))
 }
 
-func (c config) SetStrictParsingEnabled(enabled bool) {
+func (c Config) SetStrictParsingEnabled(enabled bool) {
     C.Config_setStrictParsingEnabled(c.ptr, C.bool(enabled))
 }
 
@@ -112,12 +112,12 @@ Config Resources
 */
 
 // Given a lut src name, where should we find it?
-func (c config) GetSearchPath() string {
+func (c Config) GetSearchPath() string {
     return C.GoString(C.Config_getSearchPath(c.ptr))
 }
 
 // Given a lut src name, where should we find it?
-func (c config) GetWorkingDir() string {
+func (c Config) GetWorkingDir() string {
     return C.GoString(C.Config_getWorkingDir(c.ptr))
 }
 
@@ -125,16 +125,16 @@ func (c config) GetWorkingDir() string {
 Config ColorSpaces
 */
 
-func (c config) GetNumColorSpaces() int {
+func (c Config) GetNumColorSpaces() int {
     return int(C.Config_getNumColorSpaces(c.ptr))
 }
 
 // This will null if an invalid index is specified
-func (c config) GetColorSpaceNameByIndex(index int) string {
+func (c Config) GetColorSpaceNameByIndex(index int) string {
     return C.GoString(C.Config_getColorSpaceNameByIndex(c.ptr, C.int(index)))
 }
 
-func (c config) GetIndexForColorSpace(name string) int {
+func (c Config) GetIndexForColorSpace(name string) int {
     c_str := C.CString(name)
     defer C.free(unsafe.Pointer(c_str))
     return int(C.Config_getIndexForColorSpace(c.ptr, c_str))
@@ -148,7 +148,7 @@ corresponding to a role using the normal getColorSpace fcn.
 */
 
 // Setting the colorSpaceName name to a null string unsets it.
-func (c config) SetRole(role, colorSpaceName string) {
+func (c Config) SetRole(role, colorSpaceName string) {
     c_role := C.CString(role)
     defer C.free(unsafe.Pointer(c_role))
 
@@ -161,12 +161,12 @@ func (c config) SetRole(role, colorSpaceName string) {
     C.Config_setRole(c.ptr, c_role, c_space)
 }
 
-func (c config) GetNumRoles() int {
+func (c Config) GetNumRoles() int {
     return int(C.Config_getNumRoles(c.ptr))
 }
 
 // Return true if the role has been defined.
-func (c config) HasRole(role string) bool {
+func (c Config) HasRole(role string) bool {
     c_str := C.CString(role)
     defer C.free(unsafe.Pointer(c_str))
     return bool(C.Config_hasRole(c.ptr, c_str))
@@ -174,6 +174,6 @@ func (c config) HasRole(role string) bool {
 
 // Get the role name at index, this will return values like ‘scene_linear’,
 // ‘compositing_log’. Return empty string if index is out of range.
-func (c config) GetRoleName(index int) string {
+func (c Config) GetRoleName(index int) string {
     return C.GoString(C.Config_getRoleName(c.ptr, C.int(index)))
 }
