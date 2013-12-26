@@ -38,27 +38,27 @@ func TestConfigGetFromData(t *testing.T) {
 }
 
 func TestConfigGetCacheID(t *testing.T) {
-    fmt.Println(GetCurrentConfig().GetCacheID())
+    fmt.Println(CONFIG.GetCacheID())
 }
 
 func TestConfigGetDescription(t *testing.T) {
-    fmt.Println(GetCurrentConfig().GetDescription())
+    fmt.Println(CONFIG.GetDescription())
 }
 
 func TestConfigGetSearchPath(t *testing.T) {
-    fmt.Println(GetCurrentConfig().GetSearchPath())
+    fmt.Println(CONFIG.GetSearchPath())
 }
 
 func TestConfigGetWorkingDir(t *testing.T) {
-    fmt.Println(GetCurrentConfig().GetWorkingDir())
+    fmt.Println(CONFIG.GetWorkingDir())
 }
 
 func TestConfigGetNumColorSpaces(t *testing.T) {
-    fmt.Println(GetCurrentConfig().GetNumColorSpaces())
+    fmt.Println(CONFIG.GetNumColorSpaces())
 }
 
 func TestConfigGetColorSpaceNameByIndex(t *testing.T) {
-    c := GetCurrentConfig()
+    c := CONFIG
     num := c.GetNumColorSpaces()
     if num > 0 {
         var names []string
@@ -70,7 +70,7 @@ func TestConfigGetColorSpaceNameByIndex(t *testing.T) {
 }
 
 func TestConfigGetIndexForColorSpace(t *testing.T) {
-    c := GetCurrentConfig()
+    c := CONFIG
     num := c.GetNumColorSpaces()
     if num > 0 {
         for i := 0; i < num; i++ {
@@ -84,11 +84,11 @@ func TestConfigGetIndexForColorSpace(t *testing.T) {
 }
 
 func TestConfigIsStrictParsingEnabled(t *testing.T) {
-    fmt.Println(GetCurrentConfig().IsStrictParsingEnabled())
+    fmt.Println(CONFIG.IsStrictParsingEnabled())
 }
 
 func TestConfigSetStrictParsingEnabled(t *testing.T) {
-    c := GetCurrentConfig()
+    c := CONFIG
     orig := c.IsStrictParsingEnabled()
 
     c.SetStrictParsingEnabled(!orig)
@@ -103,7 +103,7 @@ func TestConfigSetStrictParsingEnabled(t *testing.T) {
 }
 
 func TestRoles(t *testing.T) {
-    c := GetCurrentConfig()
+    c := CONFIG
     origCount := c.GetNumRoles()
 
     role := `__unittest_role__`

@@ -11,7 +11,10 @@ package ocio
 */
 import "C"
 
-import "unsafe"
+import (
+    "runtime"
+    "unsafe"
+)
 
 /*
 Global
@@ -46,7 +49,7 @@ func GetVersionHex() int {
 Config
 */
 
-// A config defines all the color spaces to be available at runtime.
+// A Config defines all the colorspaces available at runtime.
 type Config struct {
     ptr unsafe.Pointer
 }
@@ -55,30 +58,40 @@ type Config struct {
 Config Initialization
 */
 
+func newConfig(p unsafe.Pointer) Config {
+    cfg := Config{p}
+    runtime.SetFinalizer(&cfg, deleteConfig)
+    return cfg
+}
+
+func deleteConfig(c *Config) {
+    C.free(c.ptr)
+}
+
 // Get the current configuration.
 // If a current config had not yet been set, it will be automatically
 // initialized from the environment.
 func GetCurrentConfig() Config {
-    return Config{C.GetCurrentConfig()}
+    return newConfig(C.GetCurrentConfig())
 }
 
 // Create a Config by checking the OCIO environment variable
 func ConfigCreateFromEnv() Config {
-    return Config{C.Config_CreateFromEnv()}
+    return newConfig(C.Config_CreateFromEnv())
 }
 
 // Create a Config from an existing yaml Config file
 func ConfigCreateFromFile(filename string) Config {
     c_str := C.CString(filename)
     defer C.free(unsafe.Pointer(c_str))
-    return Config{C.Config_CreateFromFile(c_str)}
+    return newConfig(C.Config_CreateFromFile(c_str))
 }
 
 // Create a Config from a valid yaml string
 func ConfigCreateFromData(data string) Config {
     c_str := C.CString(data)
     defer C.free(unsafe.Pointer(c_str))
-    return Config{C.Config_CreateFromData(c_str)}
+    return newConfig(C.Config_CreateFromData(c_str))
 }
 
 /*
