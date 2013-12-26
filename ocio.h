@@ -29,8 +29,11 @@ const char* Config_getSearchPath(Config *p);
 const char* Config_getWorkingDir(Config *p);
 
 // Config ColorSpaces
+typedef void ColorSpace;
+
 int Config_getNumColorSpaces(Config *p);
 const char* Config_getColorSpaceNameByIndex(Config *p, int index);
+const ColorSpace* Config_getColorSpace(Config *p, const char* name);
 int Config_getIndexForColorSpace(Config *p, const char* name);
 bool Config_isStrictParsingEnabled(Config *p);
 void Config_setStrictParsingEnabled(Config *p, bool enabled);

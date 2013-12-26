@@ -68,6 +68,12 @@ extern "C" {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getColorSpaceNameByIndex(index);
     }
 
+    const ColorSpace* Config_getColorSpace(Config *p, const char* name) {
+        OCIO::ConstColorSpaceRcPtr ptr = static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getColorSpace(name);
+        return (ColorSpace*) new OCIO::ConstColorSpaceRcPtr(ptr);
+
+    }
+
     int Config_getIndexForColorSpace(Config *p, const char* name) {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getIndexForColorSpace(name);
     }
