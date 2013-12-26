@@ -139,6 +139,19 @@ func (c *Config) GetWorkingDir() (string, error) {
 Config ColorSpaces
 */
 
+// This will return null if the specified name is not found.
+// Accepts either a color space OR role name. (Colorspace names take precedence over roles.)
+func (c *Config) GetColorSpace(name string) (*ColorSpace, error) {
+    c_str := C.CString(name)
+    defer C.free(unsafe.Pointer(c_str))
+
+    cs, err := C.Config_getColorSpace(c.ptr, c_str)
+    if err != nil {
+        return nil, err
+    }
+    return newColorSpace(cs), err
+}
+
 func (c *Config) GetNumColorSpaces() int {
     num, err := C.Config_getNumColorSpaces(c.ptr)
     if err != nil {

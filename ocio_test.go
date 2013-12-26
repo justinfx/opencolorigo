@@ -262,6 +262,17 @@ func TestRoles(t *testing.T) {
     }
 }
 
+func TestGetColorSpace(t *testing.T) {
+    c := CONFIG
+
+    name, _ := c.GetColorSpaceNameByIndex(0)
+    cs, err := c.GetColorSpace(name)
+    if err != nil {
+        t.Errorf("Error getting a ColorSpace from name %s: %s", name, err.Error())
+    }
+    t.Logf("ColorSpace: %+v", cs)
+}
+
 func getConfigFromFile() (*Config, string, error) {
     tmpfile, err := ioutil.TempFile("", "ocio_config_unittest_")
     if err != nil {
