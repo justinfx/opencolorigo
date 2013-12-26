@@ -1,14 +1,19 @@
-package ocio
+package opencolorigo
 
 import (
-    "fmt"
+    "io/ioutil"
+    "os"
     "testing"
 )
 
-var CONFIG Config
+var CONFIG *Config
 
 func init() {
-    CONFIG = ConfigCreateFromData(OCIO_CONFIG)
+    var err error
+    CONFIG, err = ConfigCreateFromData(OCIO_CONFIG)
+    if err != nil {
+        panic(err)
+    }
 }
 
 // Global
@@ -17,126 +22,259 @@ func TestClearAllCaches(t *testing.T) {
 }
 
 func TestGetVersion(t *testing.T) {
-    fmt.Println(GetVersion())
+    t.Log(GetVersion())
 }
 
 func TestGetVersionHex(t *testing.T) {
-    fmt.Println(GetVersionHex())
+    t.Log(GetVersionHex())
 }
 
 // Config
 func TestGetCurrentConfig(t *testing.T) {
-    fmt.Println(GetCurrentConfig())
+    c, err := GetCurrentConfig()
+    if err != nil {
+        t.Error(err)
+        return
+    }
+    t.Logf("Config: %+v", c)
 }
 
 func TestConfigGetFromEnv(t *testing.T) {
-    fmt.Println(ConfigCreateFromEnv())
+    c, err := ConfigCreateFromEnv()
+    if err != nil {
+        t.Error(err)
+        return
+    }
+    t.Logf("Config: %+v", c)
+}
+
+func TestConfigGetFromFile(t *testing.T) {
+    c, fname, err := getConfigFromFile()
+    defer os.Remove(fname)
+
+    if err != nil {
+        t.Error(err)
+    }
+
+    t.Logf("Config read from temp file %s (%v)", fname, c)
 }
 
 func TestConfigGetFromData(t *testing.T) {
-    fmt.Println(ConfigCreateFromData(OCIO_CONFIG))
+    c, err := ConfigCreateFromData(OCIO_CONFIG)
+    if err != nil {
+        t.Error(err)
+        return
+    }
+    t.Logf("Config: %+v", c)
 }
 
 func TestConfigGetCacheID(t *testing.T) {
-    fmt.Println(CONFIG.GetCacheID())
+    c, _ := GetCurrentConfig()
+    id, err := c.GetCacheID()
+    if err != nil {
+        t.Error(err)
+        return
+    }
+    t.Log(id)
 }
 
 func TestConfigGetDescription(t *testing.T) {
-    fmt.Println(CONFIG.GetDescription())
+    d, err := CONFIG.GetDescription()
+    if err != nil {
+        t.Error(err)
+        return
+    }
+    t.Log(d)
 }
 
 func TestConfigGetSearchPath(t *testing.T) {
-    fmt.Println(CONFIG.GetSearchPath())
+    p, err := CONFIG.GetSearchPath()
+    if err != nil {
+        t.Error(err)
+        return
+    }
+    t.Log(p)
 }
 
 func TestConfigGetWorkingDir(t *testing.T) {
-    fmt.Println(CONFIG.GetWorkingDir())
+    p, err := CONFIG.GetWorkingDir()
+    if err != nil {
+        t.Error(err)
+        return
+    }
+    t.Log(p)
 }
 
 func TestConfigGetNumColorSpaces(t *testing.T) {
-    fmt.Println(CONFIG.GetNumColorSpaces())
+    n := CONFIG.GetNumColorSpaces()
+    if n <= 0 {
+        t.Error("Expected number of colorspaces to be greater than 0")
+        return
+    }
+    t.Log(n)
 }
 
 func TestConfigGetColorSpaceNameByIndex(t *testing.T) {
     c := CONFIG
+
     num := c.GetNumColorSpaces()
+
     if num > 0 {
         var names []string
         for i := 0; i < num; i++ {
-            names = append(names, c.GetColorSpaceNameByIndex(i))
+            s, err := c.GetColorSpaceNameByIndex(i)
+            if err != nil {
+                t.Error(err)
+                return
+            }
+            names = append(names, s)
         }
-        fmt.Println(names)
+        t.Logf("ColorSpace names: %v", names)
     }
 }
 
 func TestConfigGetIndexForColorSpace(t *testing.T) {
     c := CONFIG
+
     num := c.GetNumColorSpaces()
+    if num <= 0 {
+        t.Error("Expected number of colorspaces to be greater than 0")
+        return
+    }
+
+    var (
+        name string
+        idx  int
+        err  error
+    )
     if num > 0 {
         for i := 0; i < num; i++ {
-            name := c.GetColorSpaceNameByIndex(i)
-            idx := c.GetIndexForColorSpace(name)
+            name, err = c.GetColorSpaceNameByIndex(i)
+            if err != nil {
+                t.Error(err)
+                return
+            }
+
+            idx, err = c.GetIndexForColorSpace(name)
+            if err != nil {
+                t.Error(err)
+                return
+            }
+
             if idx != i {
                 t.Errorf("Expected %d for colorspace %s, got %d", i, name, idx)
+                return
             }
         }
     }
 }
 
 func TestConfigIsStrictParsingEnabled(t *testing.T) {
-    fmt.Println(CONFIG.IsStrictParsingEnabled())
+    t.Log(CONFIG.IsStrictParsingEnabled())
 }
 
 func TestConfigSetStrictParsingEnabled(t *testing.T) {
     c := CONFIG
+
     orig := c.IsStrictParsingEnabled()
 
-    c.SetStrictParsingEnabled(!orig)
-    if c.IsStrictParsingEnabled() == orig {
-        t.Errorf("Expected %v, got %v", !orig, orig)
+    err := c.SetStrictParsingEnabled(!orig)
+    if err != nil {
+        t.Error(err)
     }
 
-    c.SetStrictParsingEnabled(orig)
+    if c.IsStrictParsingEnabled() == orig {
+        t.Errorf("Expected %v, got %v", !orig, orig)
+        return
+    }
+
+    err = c.SetStrictParsingEnabled(orig)
+    if err != nil {
+        t.Error(err)
+        return
+    }
+
     if c.IsStrictParsingEnabled() != orig {
         t.Errorf("Expected %v, got %v", orig, !orig)
+        return
     }
 }
 
 func TestRoles(t *testing.T) {
     c := CONFIG
+
     origCount := c.GetNumRoles()
+    if origCount <= 0 {
+        t.Error("Expected number of roles to be greater than 0")
+        return
+    }
 
     role := `__unittest_role__`
-    space := c.GetColorSpaceNameByIndex(0)
 
-    c.SetRole(role, space)
+    space, err := c.GetColorSpaceNameByIndex(0)
+    if err != nil {
+        t.Error(err)
+        return
+    }
+
+    err = c.SetRole(role, space)
+    if err != nil {
+        t.Error(err)
+        return
+    }
+
     if count := c.GetNumRoles(); count != (origCount + 1) {
         t.Errorf("Expected number of roles to be %d, but got %d", origCount+1, count)
+        return
     }
 
     if !c.HasRole(role) {
         t.Errorf("Expected config to have the role %v", role)
+        return
     }
 
     found := false
     for i := 0; i < c.GetNumRoles(); i++ {
-        if c.GetRoleName(i) == role {
+        name, _ := c.GetRoleName(i)
+        if name == role {
             found = true
             break
         }
     }
     if !found {
         t.Errorf("Expected to find role name %v in list of roles", role)
+        return
     }
 
-    c.SetRole(role, "")
+    err = c.SetRole(role, "")
+    if err != nil {
+        t.Error(err)
+        return
+    }
     if count := c.GetNumRoles(); count != origCount {
         t.Errorf("Expected number of roles to be %d, but got %d", origCount, count)
+        return
     }
 
     if c.HasRole(role) {
         t.Errorf("Expected config to not have the role %v", role)
+        return
     }
+}
+
+func getConfigFromFile() (*Config, string, error) {
+    tmpfile, err := ioutil.TempFile("", "ocio_config_unittest_")
+    if err != nil {
+        return nil, "", err
+    }
+
+    name := tmpfile.Name()
+
+    tmpfile.WriteString(OCIO_CONFIG)
+    tmpfile.Close()
+
+    c, err := ConfigCreateFromFile(name)
+    return c, name, err
 }
 
 const OCIO_CONFIG = `
