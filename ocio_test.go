@@ -273,6 +273,131 @@ func TestGetColorSpace(t *testing.T) {
     t.Logf("ColorSpace: %+v", cs)
 }
 
+/*
+
+ColorSpaces
+
+*/
+
+func TestColorSpaceName(t *testing.T) {
+    cs, err := CONFIG.ColorSpace("linear")
+    if err != nil {
+        t.Error(err.Error())
+    }
+    t.Logf("ColorSpace Name: %s", cs.Name())
+}
+
+func TestColorSpaceSetName(t *testing.T) {
+    cs, _ := CONFIG.ColorSpace("linear")
+    cs.SetName("FOO")
+    defer cs.SetName("linear")
+
+    if cs.Name() != "FOO" {
+        t.Errorf("Expected ColorSpace name to be FOO, got %s", cs.Name())
+        return
+    }
+}
+
+func TestColorSpaceFamily(t *testing.T) {
+    cs, err := CONFIG.ColorSpace("linear")
+    if err != nil {
+        t.Error(err.Error())
+    }
+    t.Logf("ColorSpace Family: %s", cs.Family())
+}
+
+func TestColorSpaceSetFamily(t *testing.T) {
+    cs, _ := CONFIG.ColorSpace("linear")
+    family := cs.Family()
+    cs.SetFamily("FOO")
+    defer cs.SetFamily(family)
+
+    if cs.Family() != "FOO" {
+        t.Errorf("Expected ColorSpace family to be FOO, got %s", cs.Family())
+        return
+    }
+}
+
+func TestColorSpaceEqualityGroup(t *testing.T) {
+    cs, err := CONFIG.ColorSpace("linear")
+    if err != nil {
+        t.Error(err.Error())
+    }
+    t.Logf("ColorSpace EqualityGroup: %s", cs.EqualityGroup())
+}
+
+func TestColorSpaceSetEqualityGroup(t *testing.T) {
+    cs, _ := CONFIG.ColorSpace("linear")
+    group := cs.EqualityGroup()
+    cs.SetEqualityGroup("FOO")
+    defer cs.SetEqualityGroup(group)
+
+    if cs.EqualityGroup() != "FOO" {
+        t.Errorf("Expected ColorSpace EqualityGroup to be FOO, got %s", cs.EqualityGroup())
+        return
+    }
+}
+
+func TestColorSpaceDescription(t *testing.T) {
+    cs, err := CONFIG.ColorSpace("linear")
+    if err != nil {
+        t.Error(err.Error())
+    }
+    t.Logf("ColorSpace Description: %s", cs.Description())
+}
+
+func TestColorSpaceSetDescription(t *testing.T) {
+    cs, _ := CONFIG.ColorSpace("linear")
+    desc := cs.Description()
+    cs.SetDescription("FOO")
+    defer cs.SetDescription(desc)
+
+    if cs.Description() != "FOO" {
+        t.Errorf("Expected ColorSpace Description to be FOO, got %s", cs.Description())
+        return
+    }
+}
+
+func TestColorSpaceBitDepth(t *testing.T) {
+    cs, err := CONFIG.ColorSpace("linear")
+    if err != nil {
+        t.Error(err.Error())
+    }
+    t.Logf("ColorSpace BitDepth: %v", cs.BitDepth())
+}
+
+func TestColorSpaceSetBitDepth(t *testing.T) {
+    cs, _ := CONFIG.ColorSpace("linear")
+    depth := cs.BitDepth()
+    defer cs.SetBitDepth(depth)
+
+    depths := []int{
+        BIT_DEPTH_UNKNOWN,
+        BIT_DEPTH_UINT8,
+        BIT_DEPTH_UINT10,
+        BIT_DEPTH_UINT12,
+        BIT_DEPTH_UINT14,
+        BIT_DEPTH_UINT16,
+        BIT_DEPTH_UINT32,
+        BIT_DEPTH_F16,
+        BIT_DEPTH_F32,
+    }
+
+    for _, d := range depths {
+        cs.SetBitDepth(d)
+        if cs.BitDepth() != d {
+            t.Errorf("Expected ColorSpace BitDepth to be %v, got %v", d, cs.BitDepth())
+            return
+        }
+    }
+
+}
+
+/*
+
+Utility
+
+*/
 func getConfigFromFile() (*Config, string, error) {
     tmpfile, err := ioutil.TempFile("", "ocio_config_unittest_")
     if err != nil {
