@@ -7,6 +7,15 @@ extern "C" {
 
     namespace OCIO = OCIO_NAMESPACE;
 
+    ColorSpace* ColorSpace_Create() {
+        return (ColorSpace*) new OCIO::ColorSpaceRcPtr(OCIO::ColorSpace::Create());
+    }
+
+    ColorSpace* ColorSpace_createEditableCopy(ColorSpace *p) {
+        OCIO::ColorSpaceRcPtr ptr = static_cast<OCIO::ConstColorSpaceRcPtr*>(p)->get()->createEditableCopy();
+        return (ColorSpace*) new OCIO::ColorSpaceRcPtr(ptr);
+    }
+
     const char* ColorSpace_getName(ColorSpace *p) {
         return static_cast<OCIO::ConstColorSpaceRcPtr*>(p)->get()->getName();
     }

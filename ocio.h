@@ -70,6 +70,8 @@ bool Config_hasRole(Config *p, const char* role);
 const char* Config_getRoleName(Config *p, int index);
 
 // ColorSpaces
+ColorSpace* ColorSpace_Create();
+ColorSpace* ColorSpace_createEditableCopy(ColorSpace *p);
 const char* ColorSpace_getName(ColorSpace *p);
 void ColorSpace_setName(ColorSpace *p, const char* name);
 const char* ColorSpace_getFamily(ColorSpace *p);

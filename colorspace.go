@@ -7,6 +7,7 @@ package opencolorigo
 import "C"
 
 import (
+    "fmt"
     "runtime"
     "unsafe"
 )
@@ -23,6 +24,17 @@ const (
     BIT_DEPTH_F32     = C.BIT_DEPTH_F32
 )
 
+/*
+The ColorSpace is the state of an image with respect to colorimetry and color encoding.
+Transforming images between different ColorSpaces is the primary motivation for this library.
+
+While a complete discussion of colorspaces is beyond the scope of documentation,
+traditional uses would be to have ColorSpaces corresponding to: physical capture devices
+(known cameras, scanners), and internal ‘convenience’ spaces (such as scene linear, logarithmic).
+
+ColorSpaces are specific to a particular image precision (float32, uint8, etc.), and the set
+of ColorSpaces that provide equivalent mappings (at different precisions) are referred to as a ‘family’.
+*/
 type ColorSpace struct {
     ptr unsafe.Pointer
 }
@@ -34,6 +46,24 @@ func newColorSpace(p unsafe.Pointer) *ColorSpace {
 }
 
 func deleteColorspace(c *ColorSpace) { C.free(c.ptr) }
+
+// Create a new empty ColorSpace
+func NewColorSpace() *ColorSpace {
+    return newColorSpace(C.ColorSpace_Create())
+}
+
+func (c *ColorSpace) String() string {
+    name := ""
+    if c.ptr != nil {
+        name = c.Name()
+    }
+    return fmt.Sprintf("ColorSpace: %q", name)
+}
+
+// Create a new editable copy of this ColorSpace
+func (c *ColorSpace) EditableCopy() *ColorSpace {
+    return newColorSpace(C.ColorSpace_createEditableCopy(c.ptr))
+}
 
 func (c *ColorSpace) Name() string {
     return C.GoString(C.ColorSpace_getName(c.ptr))
@@ -55,6 +85,12 @@ func (c *ColorSpace) SetFamily(family string) {
     C.ColorSpace_setFamily(c.ptr, c_str)
 }
 
+// Get the ColorSpace group name (used for equality comparisons)
+// This allows no-op transforms between different colorspaces.
+// If an equalityGroup is not defined (an empty string), it will be
+// considered unique (i.e., it will not compare as equal to other
+// ColorSpaces with an empty equality group).
+// This is often, though not always, set to the same value as ‘family’.
 func (c *ColorSpace) EqualityGroup() string {
     return C.GoString(C.ColorSpace_getEqualityGroup(c.ptr))
 }

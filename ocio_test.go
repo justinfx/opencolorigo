@@ -344,13 +344,27 @@ func TestColorSpace(t *testing.T) {
 ColorSpaces
 
 */
+func TestColorSpaceCreate(t *testing.T) {
+    cs := NewColorSpace()
+    t.Log(cs)
+}
+
+func TestColorSpaceEditableCopy(t *testing.T) {
+    cs, _ := CONFIG.ColorSpace("linear")
+    cs_copy := cs.EditableCopy()
+    t.Logf("%s is a copy of %s", cs_copy, cs)
+
+    if cs.Name() != cs_copy.Name() {
+        t.Errorf("Copy colorspace name is %s, but expected %s", cs_copy.Name(), cs.Name())
+    }
+}
 
 func TestColorSpaceName(t *testing.T) {
     cs, err := CONFIG.ColorSpace("linear")
     if err != nil {
         t.Error(err.Error())
     }
-    t.Logf("ColorSpace Name: %s", cs.Name())
+    t.Log(cs)
 }
 
 func TestColorSpaceSetName(t *testing.T) {
@@ -456,7 +470,6 @@ func TestColorSpaceSetBitDepth(t *testing.T) {
             return
         }
     }
-
 }
 
 /*
