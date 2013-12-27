@@ -54,6 +54,15 @@ func TestSetLoggingLevel(t *testing.T) {
 }
 
 // Config
+func TestCreateConfig(t *testing.T) {
+    c := NewConfig()
+
+    num := c.NumColorSpaces()
+    if num != 0 {
+        t.Errorf("Expected number of colorspaces to be 0, got %d", num)
+    }
+}
+
 func TestCurrentConfig(t *testing.T) {
     c, err := CurrentConfig()
     if err != nil {
@@ -61,6 +70,16 @@ func TestCurrentConfig(t *testing.T) {
         return
     }
     t.Logf("Config: %+v", c)
+}
+
+func TestSetCurrentConfig(t *testing.T) {
+    prev, _ := CurrentConfig()
+    defer SetCurrentConfig(prev)
+
+    err := SetCurrentConfig(CONFIG)
+    if err != nil {
+        t.Error(err.Error())
+    }
 }
 
 func TestConfigFromEnv(t *testing.T) {
@@ -90,6 +109,28 @@ func TestConfigFromData(t *testing.T) {
         return
     }
     t.Logf("Config: %+v", c)
+}
+
+func TestConfigSerialize(t *testing.T) {
+    ser, err := CONFIG.Serialize()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if ser == "" {
+        t.Error("Serialized config string is empty")
+    }
+}
+
+func TestConfigEditableCopy(t *testing.T) {
+    c_copy := CONFIG.EditableCopy()
+    t.Logf("Config: %+v is a copy of Config: %+v", c_copy, CONFIG)
+}
+
+func TestConfigSanityCheck(t *testing.T) {
+    if err := CONFIG.SanityCheck(); err != nil {
+        t.Error(err.Error())
+    }
 }
 
 func TestConfigCacheID(t *testing.T) {

@@ -30,6 +30,11 @@ func deleteConfig(c *Config) {
     C.free(c.ptr)
 }
 
+// Create a new empty Config
+func NewConfig() *Config {
+    return newConfig(C.Config_Create())
+}
+
 // Get the current configuration.
 // If a current config had not yet been set, it will be automatically
 // initialized from the environment.
@@ -39,6 +44,12 @@ func CurrentConfig() (*Config, error) {
         return nil, err
     }
     return newConfig(c), err
+}
+
+// Set the current configuration. This will then store a copy of the specified config.
+func SetCurrentConfig(config *Config) error {
+    _, err := C.SetCurrentConfig(config.ptr)
+    return err
 }
 
 // Create a Config by checking the OCIO environment variable
@@ -72,6 +83,26 @@ func ConfigCreateFromData(data string) (*Config, error) {
         return nil, err
     }
     return newConfig(c), err
+}
+
+// Create a new editable copy of this Config
+func (c *Config) EditableCopy() *Config {
+    return newConfig(C.Config_createEditableCopy(c.ptr))
+}
+
+// This will return a non-nil error if the config is malformed.
+// The most common error occurs when references are made to colorspaces that do not exist.
+func (c *Config) SanityCheck() error {
+    _, err := C.Config_sanityCheck(c.ptr)
+    return err
+}
+
+func (c *Config) Serialize() (string, error) {
+    c_str, err := C.Config_serialize(c.ptr)
+    if err != nil {
+        return "", err
+    }
+    return C.GoString(c_str), err
 }
 
 /*

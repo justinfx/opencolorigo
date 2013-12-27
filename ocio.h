@@ -38,11 +38,16 @@ LoggingLevel GetLoggingLevel();
 void SetLoggingLevel(LoggingLevel level);
 
 // Config Init
+Config* Config_Create();
 const Config* GetCurrentConfig();
+void SetCurrentConfig(Config *p);
 const Config* Config_CreateFromEnv();
 const Config* Config_CreateFromFile(const char* filename);
 const Config* Config_CreateFromData(const char* data);
+Config* Config_createEditableCopy(Config *p);
+void Config_sanityCheck(Config *p);
 
+const char* Config_serialize(Config *p);
 const char* Config_getCacheID(Config *p);
 const char* Config_getDescription(Config *p);
 
@@ -51,7 +56,6 @@ const char* Config_getSearchPath(Config *p);
 const char* Config_getWorkingDir(Config *p);
 
 // Config ColorSpaces
-
 int Config_getNumColorSpaces(Config *p);
 const char* Config_getColorSpaceNameByIndex(Config *p, int index);
 const ColorSpace* Config_getColorSpace(Config *p, const char* name);
