@@ -21,92 +21,116 @@ func TestClearAllCaches(t *testing.T) {
     ClearAllCaches()
 }
 
-func TestGetVersion(t *testing.T) {
-    t.Log(GetVersion())
+func TestVersion(t *testing.T) {
+    t.Log(Version())
 }
 
-func TestGetVersionHex(t *testing.T) {
-    t.Log(GetVersionHex())
+func TestVersionHex(t *testing.T) {
+    t.Log(VersionHex())
+}
+
+func TestLoggingLevel(t *testing.T) {
+    t.Log(LoggingLevel())
+}
+
+func TestSetLoggingLevel(t *testing.T) {
+    original := LoggingLevel()
+    defer SetLoggingLevel(original)
+
+    levels := []int{
+        LOGGING_LEVEL_NONE,
+        LOGGING_LEVEL_DEBUG,
+        LOGGING_LEVEL_INFO,
+        LOGGING_LEVEL_WARNING,
+    }
+
+    for _, level := range levels {
+        SetLoggingLevel(level)
+        actual := LoggingLevel()
+        if level != actual {
+            t.Errorf("Execpted logging level %d, but got %d", level, actual)
+        }
+    }
 }
 
 // Config
-func TestGetCurrentConfig(t *testing.T) {
-    c, err := GetCurrentConfig()
+func TestCurrentConfig(t *testing.T) {
+    c, err := CurrentConfig()
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
     t.Logf("Config: %+v", c)
 }
 
-func TestConfigGetFromEnv(t *testing.T) {
+func TestConfigFromEnv(t *testing.T) {
     c, err := ConfigCreateFromEnv()
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
     t.Logf("Config: %+v", c)
 }
 
-func TestConfigGetFromFile(t *testing.T) {
+func TestConfigFromFile(t *testing.T) {
     c, fname, err := getConfigFromFile()
     defer os.Remove(fname)
 
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
     }
 
     t.Logf("Config read from temp file %s (%v)", fname, c)
 }
 
-func TestConfigGetFromData(t *testing.T) {
+func TestConfigFromData(t *testing.T) {
     c, err := ConfigCreateFromData(OCIO_CONFIG)
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
     t.Logf("Config: %+v", c)
 }
 
-func TestConfigGetCacheID(t *testing.T) {
-    c, _ := GetCurrentConfig()
-    id, err := c.GetCacheID()
+func TestConfigCacheID(t *testing.T) {
+    c, _ := CurrentConfig()
+    id, err := c.CacheID()
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
     t.Log(id)
 }
 
-func TestConfigGetDescription(t *testing.T) {
-    d, err := CONFIG.GetDescription()
+func TestConfigDescription(t *testing.T) {
+    d, err := CONFIG.Description()
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
     t.Log(d)
 }
 
-func TestConfigGetSearchPath(t *testing.T) {
-    p, err := CONFIG.GetSearchPath()
+func TestConfigSearchPath(t *testing.T) {
+    p, err := CONFIG.SearchPath()
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
     t.Log(p)
 }
 
-func TestConfigGetWorkingDir(t *testing.T) {
-    p, err := CONFIG.GetWorkingDir()
+func TestConfigWorkingDir(t *testing.T) {
+    p, err := CONFIG.WorkingDir()
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
     t.Log(p)
 }
 
-func TestConfigGetNumColorSpaces(t *testing.T) {
-    n := CONFIG.GetNumColorSpaces()
+func TestConfigNumColorSpaces(t *testing.T) {
+    n := CONFIG.NumColorSpaces()
     if n <= 0 {
         t.Error("Expected number of colorspaces to be greater than 0")
         return
@@ -114,17 +138,17 @@ func TestConfigGetNumColorSpaces(t *testing.T) {
     t.Log(n)
 }
 
-func TestConfigGetColorSpaceNameByIndex(t *testing.T) {
+func TestConfigColorSpaceNameByIndex(t *testing.T) {
     c := CONFIG
 
-    num := c.GetNumColorSpaces()
+    num := c.NumColorSpaces()
 
     if num > 0 {
         var names []string
         for i := 0; i < num; i++ {
-            s, err := c.GetColorSpaceNameByIndex(i)
+            s, err := c.ColorSpaceNameByIndex(i)
             if err != nil {
-                t.Error(err)
+                t.Error(err.Error())
                 return
             }
             names = append(names, s)
@@ -133,10 +157,10 @@ func TestConfigGetColorSpaceNameByIndex(t *testing.T) {
     }
 }
 
-func TestConfigGetIndexForColorSpace(t *testing.T) {
+func TestConfigIndexForColorSpace(t *testing.T) {
     c := CONFIG
 
-    num := c.GetNumColorSpaces()
+    num := c.NumColorSpaces()
     if num <= 0 {
         t.Error("Expected number of colorspaces to be greater than 0")
         return
@@ -149,15 +173,15 @@ func TestConfigGetIndexForColorSpace(t *testing.T) {
     )
     if num > 0 {
         for i := 0; i < num; i++ {
-            name, err = c.GetColorSpaceNameByIndex(i)
+            name, err = c.ColorSpaceNameByIndex(i)
             if err != nil {
-                t.Error(err)
+                t.Error(err.Error())
                 return
             }
 
-            idx, err = c.GetIndexForColorSpace(name)
+            idx, err = c.IndexForColorSpace(name)
             if err != nil {
-                t.Error(err)
+                t.Error(err.Error())
                 return
             }
 
@@ -180,7 +204,7 @@ func TestConfigSetStrictParsingEnabled(t *testing.T) {
 
     err := c.SetStrictParsingEnabled(!orig)
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
     }
 
     if c.IsStrictParsingEnabled() == orig {
@@ -190,7 +214,7 @@ func TestConfigSetStrictParsingEnabled(t *testing.T) {
 
     err = c.SetStrictParsingEnabled(orig)
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
 
@@ -203,7 +227,7 @@ func TestConfigSetStrictParsingEnabled(t *testing.T) {
 func TestRoles(t *testing.T) {
     c := CONFIG
 
-    origCount := c.GetNumRoles()
+    origCount := c.NumRoles()
     if origCount <= 0 {
         t.Error("Expected number of roles to be greater than 0")
         return
@@ -211,19 +235,19 @@ func TestRoles(t *testing.T) {
 
     role := `__unittest_role__`
 
-    space, err := c.GetColorSpaceNameByIndex(0)
+    space, err := c.ColorSpaceNameByIndex(0)
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
 
     err = c.SetRole(role, space)
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
 
-    if count := c.GetNumRoles(); count != (origCount + 1) {
+    if count := c.NumRoles(); count != (origCount + 1) {
         t.Errorf("Expected number of roles to be %d, but got %d", origCount+1, count)
         return
     }
@@ -234,8 +258,8 @@ func TestRoles(t *testing.T) {
     }
 
     found := false
-    for i := 0; i < c.GetNumRoles(); i++ {
-        name, _ := c.GetRoleName(i)
+    for i := 0; i < c.NumRoles(); i++ {
+        name, _ := c.RoleName(i)
         if name == role {
             found = true
             break
@@ -248,10 +272,10 @@ func TestRoles(t *testing.T) {
 
     err = c.SetRole(role, "")
     if err != nil {
-        t.Error(err)
+        t.Error(err.Error())
         return
     }
-    if count := c.GetNumRoles(); count != origCount {
+    if count := c.NumRoles(); count != origCount {
         t.Errorf("Expected number of roles to be %d, but got %d", origCount, count)
         return
     }
@@ -262,13 +286,14 @@ func TestRoles(t *testing.T) {
     }
 }
 
-func TestGetColorSpace(t *testing.T) {
+func TestColorSpace(t *testing.T) {
     c := CONFIG
 
-    name, _ := c.GetColorSpaceNameByIndex(0)
-    cs, err := c.GetColorSpace(name)
+    name, _ := c.ColorSpaceNameByIndex(0)
+    cs, err := c.ColorSpace(name)
     if err != nil {
         t.Errorf("Error getting a ColorSpace from name %s: %s", name, err.Error())
+        return
     }
     t.Logf("ColorSpace: %+v", cs)
 }

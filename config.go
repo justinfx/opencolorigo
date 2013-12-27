@@ -33,7 +33,7 @@ func deleteConfig(c *Config) {
 // Get the current configuration.
 // If a current config had not yet been set, it will be automatically
 // initialized from the environment.
-func GetCurrentConfig() (*Config, error) {
+func CurrentConfig() (*Config, error) {
     c, err := C.GetCurrentConfig()
     if err != nil {
         return nil, err
@@ -84,7 +84,7 @@ If a context is not provided, the current Context will be used.
 If a null context is provided, file references will not be taken into account
 (this is essentially a hash of Config::serialize).
 */
-func (c *Config) GetCacheID() (string, error) {
+func (c *Config) CacheID() (string, error) {
     id, err := C.Config_getCacheID(c.ptr)
     if err != nil {
         return "", err
@@ -92,7 +92,7 @@ func (c *Config) GetCacheID() (string, error) {
     return C.GoString(id), err
 }
 
-func (c *Config) GetDescription() (string, error) {
+func (c *Config) Description() (string, error) {
     d, err := C.Config_getDescription(c.ptr)
     if err != nil {
         return "", err
@@ -118,7 +118,7 @@ Config Resources
 */
 
 // Given a lut src name, where should we find it?
-func (c *Config) GetSearchPath() (string, error) {
+func (c *Config) SearchPath() (string, error) {
     path, err := C.Config_getSearchPath(c.ptr)
     if err != nil {
         return "", err
@@ -127,7 +127,7 @@ func (c *Config) GetSearchPath() (string, error) {
 }
 
 // Given a lut src name, where should we find it?
-func (c *Config) GetWorkingDir() (string, error) {
+func (c *Config) WorkingDir() (string, error) {
     dir, err := C.Config_getWorkingDir(c.ptr)
     if err != nil {
         return "", err
@@ -141,7 +141,7 @@ Config ColorSpaces
 
 // This will return null if the specified name is not found.
 // Accepts either a color space OR role name. (Colorspace names take precedence over roles.)
-func (c *Config) GetColorSpace(name string) (*ColorSpace, error) {
+func (c *Config) ColorSpace(name string) (*ColorSpace, error) {
     c_str := C.CString(name)
     defer C.free(unsafe.Pointer(c_str))
 
@@ -152,7 +152,7 @@ func (c *Config) GetColorSpace(name string) (*ColorSpace, error) {
     return newColorSpace(cs), err
 }
 
-func (c *Config) GetNumColorSpaces() int {
+func (c *Config) NumColorSpaces() int {
     num, err := C.Config_getNumColorSpaces(c.ptr)
     if err != nil {
         return 0
@@ -161,7 +161,7 @@ func (c *Config) GetNumColorSpaces() int {
 }
 
 // This will null if an invalid index is specified
-func (c *Config) GetColorSpaceNameByIndex(index int) (string, error) {
+func (c *Config) ColorSpaceNameByIndex(index int) (string, error) {
     name, err := C.Config_getColorSpaceNameByIndex(c.ptr, C.int(index))
     if err != nil {
         return "", err
@@ -170,7 +170,7 @@ func (c *Config) GetColorSpaceNameByIndex(index int) (string, error) {
 }
 
 // Accepts either a color space OR role name. (Colorspace names take precedence over roles.)
-func (c *Config) GetIndexForColorSpace(name string) (int, error) {
+func (c *Config) IndexForColorSpace(name string) (int, error) {
     c_str := C.CString(name)
     defer C.free(unsafe.Pointer(c_str))
 
@@ -203,7 +203,7 @@ func (c *Config) SetRole(role, colorSpaceName string) error {
     return err
 }
 
-func (c *Config) GetNumRoles() int {
+func (c *Config) NumRoles() int {
     num, err := C.Config_getNumRoles(c.ptr)
     if err != nil {
         return 0
@@ -225,7 +225,7 @@ func (c *Config) HasRole(role string) bool {
 
 // Get the role name at index, this will return values like ‘scene_linear’,
 // ‘compositing_log’. Return empty string if index is out of range.
-func (c *Config) GetRoleName(index int) (string, error) {
+func (c *Config) RoleName(index int) (string, error) {
     name, err := C.Config_getRoleName(c.ptr, C.int(index))
     if err != nil {
         return "", err
