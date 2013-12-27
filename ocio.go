@@ -11,6 +11,14 @@ package opencolorigo
 */
 import "C"
 
+const (
+    LOGGING_LEVEL_NONE    = C.LOGGING_LEVEL_NONE
+    LOGGING_LEVEL_WARNING = C.LOGGING_LEVEL_WARNING
+    LOGGING_LEVEL_INFO    = C.LOGGING_LEVEL_INFO
+    LOGGING_LEVEL_DEBUG   = C.LOGGING_LEVEL_DEBUG
+    LOGGING_LEVEL_UNKNOWN = C.LOGGING_LEVEL_UNKNOWN
+)
+
 /*
 Errors
 */
@@ -51,4 +59,19 @@ func GetVersion() string {
 // This is also available at compile time as OCIO_VERSION_HEX.
 func GetVersionHex() int {
     return int(C.GetVersionHex())
+}
+
+// Get the global logging level. You can override this at runtime using the
+// OCIO_LOGGING_LEVEL environment variable. The client application that sets
+// this should use SetLoggingLevel(), and not the environment variable.
+// The default value is INFO.
+//
+// Returns on of the LOGGING_LEVEL_* const values
+func LoggingLevel() int {
+    return int(C.GetLoggingLevel())
+}
+
+// Set the global logging level.
+func SetLoggingLevel(level int) {
+    C.SetLoggingLevel(C.LoggingLevel(level))
 }

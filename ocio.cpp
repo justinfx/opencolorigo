@@ -11,17 +11,15 @@ extern "C" {
     namespace OCIO = OCIO_NAMESPACE;
 
     // Global
-    void ClearAllCaches() {
-        OCIO::ClearAllCaches();
-    }
+    void ClearAllCaches() { OCIO::ClearAllCaches(); }
 
-    const char* GetVersion() {
-        return OCIO::GetVersion();
-    }
+    const char* GetVersion() { return OCIO::GetVersion(); }
 
-    int GetVersionHex() {
-        return OCIO::GetVersionHex();
-    }
+    int GetVersionHex() { return OCIO::GetVersionHex(); }
+
+    LoggingLevel GetLoggingLevel() { return (LoggingLevel)OCIO::GetLoggingLevel(); }
+
+    void SetLoggingLevel(LoggingLevel level) { OCIO::SetLoggingLevel((OCIO::LoggingLevel)level); };
 
     // Config Init
     const Config* GetCurrentConfig() {
@@ -71,7 +69,6 @@ extern "C" {
     const ColorSpace* Config_getColorSpace(Config *p, const char* name) {
         OCIO::ConstColorSpaceRcPtr ptr = static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getColorSpace(name);
         return (ColorSpace*) new OCIO::ConstColorSpaceRcPtr(ptr);
-
     }
 
     int Config_getIndexForColorSpace(Config *p, const char* name) {
@@ -97,7 +94,6 @@ extern "C" {
 
     bool Config_hasRole(Config *p, const char* role) {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->hasRole(role);
-
     }
 
     const char* Config_getRoleName(Config *p, int index) {

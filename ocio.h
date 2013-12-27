@@ -7,6 +7,14 @@
 extern "C" {
 #endif
 
+typedef enum LoggingLevel {
+    LOGGING_LEVEL_NONE = 0,
+    LOGGING_LEVEL_WARNING = 1,
+    LOGGING_LEVEL_INFO = 2,
+    LOGGING_LEVEL_DEBUG = 3,
+    LOGGING_LEVEL_UNKNOWN = 255
+} LoggingLevel;
+
 // Global
 void ClearAllCaches();
 const char* GetVersion();
@@ -14,6 +22,8 @@ int GetVersionHex();
 
 // Config
 typedef void Config;
+LoggingLevel GetLoggingLevel();
+void SetLoggingLevel(LoggingLevel level);
 
 // Config Init
 const Config* GetCurrentConfig();
