@@ -30,12 +30,10 @@ func TestVersionHex(t *testing.T) {
 }
 
 func TestLoggingLevel(t *testing.T) {
-    t.Log(LoggingLevel())
-}
-
-func TestSetLoggingLevel(t *testing.T) {
     original := LoggingLevel()
     defer SetLoggingLevel(original)
+
+    t.Logf("Current logging level: %v", original)
 
     levels := []int{
         LOGGING_LEVEL_NONE,
@@ -65,18 +63,15 @@ func TestCreateConfig(t *testing.T) {
 
 func TestCurrentConfig(t *testing.T) {
     c, err := CurrentConfig()
+    defer SetCurrentConfig(c)
+
     if err != nil {
         t.Error(err.Error())
         return
     }
     t.Logf("Config: %+v", c)
-}
 
-func TestSetCurrentConfig(t *testing.T) {
-    prev, _ := CurrentConfig()
-    defer SetCurrentConfig(prev)
-
-    err := SetCurrentConfig(CONFIG)
+    err = SetCurrentConfig(CONFIG)
     if err != nil {
         t.Error(err.Error())
     }
@@ -135,12 +130,28 @@ func TestConfigSanityCheck(t *testing.T) {
 
 func TestConfigCacheID(t *testing.T) {
     c, _ := CurrentConfig()
+
     id, err := c.CacheID()
     if err != nil {
         t.Error(err.Error())
-        return
+    } else {
+        t.Log(id)
     }
-    t.Log(id)
+
+    id, err = c.CacheIDWithContext(nil)
+    if err != nil {
+        t.Error(err.Error())
+    } else {
+        t.Log(id)
+    }
+
+    context, _ := c.CurrentContext()
+    id, err = c.CacheIDWithContext(context)
+    if err != nil {
+        t.Error(err.Error())
+    } else {
+        t.Log(id)
+    }
 }
 
 func TestConfigDescription(t *testing.T) {
@@ -150,6 +161,16 @@ func TestConfigDescription(t *testing.T) {
         return
     }
     t.Log(d)
+}
+
+func TestConfigCurrentContext(t *testing.T) {
+    c, _ := CurrentConfig()
+    p, err := c.CurrentContext()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    t.Logf("Current Context: %+v", p)
 }
 
 func TestConfigSearchPath(t *testing.T) {
@@ -234,13 +255,8 @@ func TestConfigIndexForColorSpace(t *testing.T) {
     }
 }
 
-func TestConfigIsStrictParsingEnabled(t *testing.T) {
-    t.Log(CONFIG.IsStrictParsingEnabled())
-}
-
-func TestConfigSetStrictParsingEnabled(t *testing.T) {
+func TestConfigStrictParsingEnabled(t *testing.T) {
     c := CONFIG
-
     orig := c.IsStrictParsingEnabled()
 
     err := c.SetStrictParsingEnabled(!orig)
@@ -360,14 +376,6 @@ func TestColorSpaceEditableCopy(t *testing.T) {
 }
 
 func TestColorSpaceName(t *testing.T) {
-    cs, err := CONFIG.ColorSpace("linear")
-    if err != nil {
-        t.Error(err.Error())
-    }
-    t.Log(cs)
-}
-
-func TestColorSpaceSetName(t *testing.T) {
     cs, _ := CONFIG.ColorSpace("linear")
     cs.SetName("FOO")
     defer cs.SetName("linear")
@@ -379,14 +387,6 @@ func TestColorSpaceSetName(t *testing.T) {
 }
 
 func TestColorSpaceFamily(t *testing.T) {
-    cs, err := CONFIG.ColorSpace("linear")
-    if err != nil {
-        t.Error(err.Error())
-    }
-    t.Logf("ColorSpace Family: %s", cs.Family())
-}
-
-func TestColorSpaceSetFamily(t *testing.T) {
     cs, _ := CONFIG.ColorSpace("linear")
     family := cs.Family()
     cs.SetFamily("FOO")
@@ -399,14 +399,6 @@ func TestColorSpaceSetFamily(t *testing.T) {
 }
 
 func TestColorSpaceEqualityGroup(t *testing.T) {
-    cs, err := CONFIG.ColorSpace("linear")
-    if err != nil {
-        t.Error(err.Error())
-    }
-    t.Logf("ColorSpace EqualityGroup: %s", cs.EqualityGroup())
-}
-
-func TestColorSpaceSetEqualityGroup(t *testing.T) {
     cs, _ := CONFIG.ColorSpace("linear")
     group := cs.EqualityGroup()
     cs.SetEqualityGroup("FOO")
@@ -422,12 +414,8 @@ func TestColorSpaceDescription(t *testing.T) {
     cs, err := CONFIG.ColorSpace("linear")
     if err != nil {
         t.Error(err.Error())
+        return
     }
-    t.Logf("ColorSpace Description: %s", cs.Description())
-}
-
-func TestColorSpaceSetDescription(t *testing.T) {
-    cs, _ := CONFIG.ColorSpace("linear")
     desc := cs.Description()
     cs.SetDescription("FOO")
     defer cs.SetDescription(desc)
@@ -442,12 +430,9 @@ func TestColorSpaceBitDepth(t *testing.T) {
     cs, err := CONFIG.ColorSpace("linear")
     if err != nil {
         t.Error(err.Error())
+        return
     }
-    t.Logf("ColorSpace BitDepth: %v", cs.BitDepth())
-}
 
-func TestColorSpaceSetBitDepth(t *testing.T) {
-    cs, _ := CONFIG.ColorSpace("linear")
     depth := cs.BitDepth()
     defer cs.SetBitDepth(depth)
 
@@ -470,6 +455,77 @@ func TestColorSpaceSetBitDepth(t *testing.T) {
             return
         }
     }
+}
+
+/*
+
+Context
+
+*/
+
+func TestContextCreate(t *testing.T) {
+    c := NewContext()
+    t.Logf("New Context: %+v", c)
+}
+
+func TestContextEditableCopy(t *testing.T) {
+    c := NewContext()
+    c.SetStringVar("FOO", "BAR")
+    c_copy := c.EditableCopy()
+
+    if c_copy.StringVar("FOO") != "BAR" {
+        t.Errorf("Expected FOO=BAR, got %s", c_copy.StringVar("FOO"))
+    }
+
+}
+
+func TestContextCacheID(t *testing.T) {
+    c, _ := CurrentConfig()
+    context, _ := c.CurrentContext()
+
+    id, err := context.CacheID()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    t.Log(id)
+}
+
+func TestContextSearchPath(t *testing.T) {
+    c, _ := CurrentConfig()
+    context, _ := c.CurrentContext()
+
+    orig := context.SearchPath()
+    defer context.SetSearchPath(orig)
+
+    expected := "/FOO/BAR"
+    context.SetSearchPath(expected)
+    actual := context.SearchPath()
+
+    if actual != expected {
+        t.Errorf("Expected search path to be %q, got %q", expected, actual)
+    }
+}
+
+func TestContextWorkingDir(t *testing.T) {
+    c, _ := CurrentConfig()
+    context, _ := c.CurrentContext()
+
+    orig := context.WorkingDir()
+    defer context.SetWorkingDir(orig)
+
+    expected := "/FOO/BAR"
+    context.SetWorkingDir(expected)
+    actual := context.WorkingDir()
+
+    if actual != expected {
+        t.Errorf("Expected working dir to be %q, got %q", expected, actual)
+    }
+}
+
+func TestContextLoadEnvironment(t *testing.T) {
+    c := NewContext()
+    c.LoadEnvironment()
 }
 
 /*

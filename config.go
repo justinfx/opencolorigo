@@ -111,12 +111,33 @@ All external references, such as files used in FileTransforms, etc.,
 will be incorporated into the cacheID. While the contents of the files
 are not read, the file system is queried for relavent information (mtime, inode)
 so that the Config’s cacheID will change when the underlying luts are updated.
-If a context is not provided, the current Context will be used.
-If a null context is provided, file references will not be taken into account
-(this is essentially a hash of Config::serialize).
+
+The current Context will be used.
 */
 func (c *Config) CacheID() (string, error) {
     id, err := C.Config_getCacheID(c.ptr)
+    if err != nil {
+        return "", err
+    }
+    return C.GoString(id), err
+}
+
+/*
+This will produce a hash of the all colorspace definitions, etc.
+All external references, such as files used in FileTransforms, etc.,
+will be incorporated into the cacheID. While the contents of the files
+are not read, the file system is queried for relavent information (mtime, inode)
+so that the Config’s cacheID will change when the underlying luts are updated.
+
+If a nil context is provided, file references will not be taken into account
+(this is essentially a hash of Config.Serialize).
+*/
+func (c *Config) CacheIDWithContext(context *Context) (string, error) {
+    if context == nil {
+        context = NewContext()
+    }
+
+    id, err := C.Config_getCacheIDWithContext(c.ptr, context.ptr)
     if err != nil {
         return "", err
     }
@@ -147,6 +168,14 @@ func (c *Config) SetStrictParsingEnabled(enabled bool) error {
 /*
 Config Resources
 */
+
+func (c *Config) CurrentContext() (*Context, error) {
+    ptr, err := C.Config_getCurrentContext(c.ptr)
+    if err != nil {
+        return nil, err
+    }
+    return newContext(ptr), err
+}
 
 // Given a lut src name, where should we find it?
 func (c *Config) SearchPath() (string, error) {

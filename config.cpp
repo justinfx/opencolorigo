@@ -57,11 +57,21 @@ extern "C" {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getCacheID();
     }
 
+    const char* Config_getCacheIDWithContext(Config *p, Context *c) {
+        OCIO::ConstContextRcPtr context = *(static_cast<OCIO::ConstContextRcPtr*>(c));
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getCacheID(context);
+    }
+
     const char* Config_getDescription(Config *p) {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getDescription();
     }
 
     // Config Resources
+    Context* Config_getCurrentContext(Config *p) {
+        OCIO::ConstContextRcPtr ptr = static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getCurrentContext();
+        return (Context*) new OCIO::ConstContextRcPtr(ptr);
+    }
+
     const char* Config_getSearchPath(Config *p) {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getSearchPath();
     }

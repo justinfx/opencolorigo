@@ -29,6 +29,7 @@ typedef enum BitDepth {
 
 typedef void Config;
 typedef void ColorSpace;
+typedef void Context;
 
 // Global
 void ClearAllCaches();
@@ -49,9 +50,11 @@ void Config_sanityCheck(Config *p);
 
 const char* Config_serialize(Config *p);
 const char* Config_getCacheID(Config *p);
+const char* Config_getCacheIDWithContext(Config *p, Context *c);
 const char* Config_getDescription(Config *p);
 
 // Config Resources
+Context* Config_getCurrentContext(Config *p);
 const char* Config_getSearchPath(Config *p);
 const char* Config_getWorkingDir(Config *p);
 
@@ -82,6 +85,20 @@ const char* ColorSpace_getDescription(ColorSpace *p);
 void ColorSpace_setDescription(ColorSpace *p, const char* description);
 BitDepth ColorSpace_getBitDepth(ColorSpace *p);
 void ColorSpace_setBitDepth(ColorSpace *p, BitDepth bitDepth);
+
+// Context 
+Context* Context_Create();
+Context* Context_createEditableCopy(Context *p);
+const char* Context_getCacheID(Context *p);
+void Context_setSearchPath(Context *p, const char* path);
+const char* Context_getSearchPath(Context *p);
+void Context_setWorkingDir(Context *p, const char* dirname);
+const char* Context_getWorkingDir(Context *p);
+void Context_setStringVar(Context *p, const char* name, const char* value);
+const char* Context_getStringVar(Context *p, const char* name);
+void Context_loadEnvironment(Context *p);
+const char* Context_resolveStringVar(Context *p, const char* val);
+const char* Context_resolveFileLocation(Context *p, const char* filename);
 
 #ifdef __cplusplus
 }
