@@ -255,6 +255,57 @@ func TestConfigIndexForColorSpace(t *testing.T) {
     }
 }
 
+func TestConfigAddColorSpace(t *testing.T) {
+    c := NewConfig()
+    names := []string{"Color1", "Color2", "Color3"}
+
+    var actual, expected int
+
+    for i, name := range names {
+        cs := NewColorSpace()
+        cs.SetName(name)
+        c.AddColorSpace(cs)
+        expected = i + 1
+        actual = c.NumColorSpaces()
+        if actual != expected {
+            t.Errorf("Expected number of colorspaces to be %d, got %d", expected, actual)
+        }
+    }
+
+    c.ClearColorSpaces()
+    actual = c.NumColorSpaces()
+    if actual != 0 {
+        t.Errorf("Expected number of colorspaces to be 0, got %d", actual)
+    }
+}
+
+func TestConfigParseColorSpace(t *testing.T) {
+    var (
+        actual     string
+        expected   string
+        fullString string
+        err        error
+    )
+
+    tests := map[string]string{
+        "linear":   `A bunch of text containing a linear colorspace name`,
+        "sRGB":     `A bunch of text containing an srgb colorspace name`,
+        "Gamma2.2": `A bunch of text containing both linear and sRGB and gamma2.2 colorspaces`,
+    }
+
+    for expected, fullString = range tests {
+        actual, err = CONFIG.ParseColorSpaceFromString(fullString)
+        if err != nil {
+            t.Error(err.Error())
+            continue
+        }
+
+        if actual != expected {
+            t.Errorf("Expected to parse %q from string, but got %q", expected, actual)
+        }
+    }
+}
+
 func TestConfigStrictParsingEnabled(t *testing.T) {
     c := CONFIG
     orig := c.IsStrictParsingEnabled()

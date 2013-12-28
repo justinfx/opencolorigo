@@ -7,7 +7,7 @@ So far only bits and pieces of the API have been exposed. It's a starting point 
 
 *TODO*
 
-* Error Handling
+* More fine-grained error Handling
 * Implement all of the API
 
 

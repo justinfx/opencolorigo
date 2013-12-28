@@ -65,6 +65,9 @@ const ColorSpace* Config_getColorSpace(Config *p, const char* name);
 int Config_getIndexForColorSpace(Config *p, const char* name);
 bool Config_isStrictParsingEnabled(Config *p);
 void Config_setStrictParsingEnabled(Config *p, bool enabled);
+void Config_addColorSpace(Config *p, ColorSpace *cs);
+void Config_clearColorSpaces(Config *p);
+const char* Config_parseColorSpaceFromString(Config *p, const char* str);
 
 // Config Roles
 void Config_setRole(Config *p, const char* role, const char* colorSpaceName);

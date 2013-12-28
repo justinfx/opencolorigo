@@ -241,6 +241,36 @@ func (c *Config) IndexForColorSpace(name string) (int, error) {
     return int(idx), err
 }
 
+// If another color space is already registered with the same name, this will overwrite it.
+// This stores a copy of the specified color space.
+func (c *Config) AddColorSpace(cs *ColorSpace) error {
+    _, err := C.Config_addColorSpace(c.ptr, cs.ptr)
+    return err
+}
+
+func (c *Config) ClearColorSpaces() error {
+    _, err := C.Config_clearColorSpaces(c.ptr)
+    return err
+}
+
+/*
+Given the specified string, get the longest, right-most, colorspace substring that appears.
+
+    If strict parsing is enabled, and no color space is found, return an empty string.
+    If strict parsing is disabled, return ROLE_DEFAULT (if defined).
+    If the default role is not defined, return an empty string.
+*/
+func (c *Config) ParseColorSpaceFromString(str string) (string, error) {
+    c_str := C.CString(str)
+    defer C.free(unsafe.Pointer(c_str))
+
+    name, err := C.Config_parseColorSpaceFromString(c.ptr, c_str)
+    if err != nil {
+        return "", err
+    }
+    return C.GoString(name), err
+}
+
 /*
 Config Roles
 

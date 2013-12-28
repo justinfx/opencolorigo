@@ -98,6 +98,19 @@ extern "C" {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getIndexForColorSpace(name);
     }
 
+    void Config_addColorSpace(Config *p, ColorSpace *cs) {
+        OCIO::ConstColorSpaceRcPtr colorspace = *(static_cast<OCIO::ConstColorSpaceRcPtr*>(cs));
+        static_cast<OCIO::ConfigRcPtr*>(p)->get()->addColorSpace(colorspace);
+    }
+
+    void Config_clearColorSpaces(Config *p) {
+        static_cast<OCIO::ConfigRcPtr*>(p)->get()->clearColorSpaces();
+    }
+
+    const char* Config_parseColorSpaceFromString(Config *p, const char* str) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->parseColorSpaceFromString(str);
+    }
+
     bool Config_isStrictParsingEnabled(Config *p) {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->isStrictParsingEnabled();
     }
