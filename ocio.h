@@ -7,6 +7,18 @@
 extern "C" {
 #endif
 
+// Constants
+extern const char* ROLE_DEFAULT;
+extern const char* ROLE_REFERENCE;
+extern const char* ROLE_DATA;
+extern const char* ROLE_COLOR_PICKING;
+extern const char* ROLE_SCENE_LINEAR;
+extern const char* ROLE_COMPOSITING_LOG;
+extern const char* ROLE_COLOR_TIMING;
+extern const char* ROLE_TEXTURE_PAINT;
+extern const char* ROLE_MATTE_PAINT;
+
+// Enum
 typedef enum LoggingLevel {
     LOGGING_LEVEL_NONE = 0,
     LOGGING_LEVEL_WARNING = 1,
@@ -26,6 +38,20 @@ typedef enum BitDepth {
     BIT_DEPTH_F16,
     BIT_DEPTH_F32
 } BitDepth;
+
+typedef enum Interpolation {
+    INTERP_UNKNOWN = 0,
+    INTERP_NEAREST = 1,     //! nearest neighbor in all dimensions
+    INTERP_LINEAR = 2,      //! linear interpolation in all dimensions
+    INTERP_TETRAHEDRAL = 3, //! tetrahedral interpolation in all directions
+    INTERP_BEST = 255       //! the 'best' suitable interpolation type
+} Interpolation;
+
+typedef enum EnvironmentMode {
+    ENV_ENVIRONMENT_UNKNOWN = 0,
+    ENV_ENVIRONMENT_LOAD_PREDEFINED,
+    ENV_ENVIRONMENT_LOAD_ALL
+} EnvironmentMode;
 
 typedef void Config;
 typedef void ColorSpace;

@@ -256,9 +256,10 @@ func (c *Config) ClearColorSpaces() error {
 /*
 Given the specified string, get the longest, right-most, colorspace substring that appears.
 
-    If strict parsing is enabled, and no color space is found, return an empty string.
-    If strict parsing is disabled, return ROLE_DEFAULT (if defined).
-    If the default role is not defined, return an empty string.
+* If strict parsing is enabled, and no color space is found, return an empty string.
+* If strict parsing is disabled, return ROLE_DEFAULT (if defined).
+* If the default role is not defined, return an empty string.
+
 */
 func (c *Config) ParseColorSpaceFromString(str string) (string, error) {
     c_str := C.CString(str)
