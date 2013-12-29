@@ -56,6 +56,10 @@ typedef enum EnvironmentMode {
 typedef void Config;
 typedef void ColorSpace;
 typedef void Context;
+typedef void Processor;
+typedef void ProcessorMetadata;
+typedef void ImageDesc;
+typedef void PackedImageDesc;
 
 // Global
 void ClearAllCaches();
@@ -83,6 +87,12 @@ const char* Config_getDescription(Config *p);
 Context* Config_getCurrentContext(Config *p);
 const char* Config_getSearchPath(Config *p);
 const char* Config_getWorkingDir(Config *p);
+
+// Config Processors
+Processor* Config_getProcessor_CT_CS_CS(Config *p, Context* ct, ColorSpace* srcCS, ColorSpace* dstCS);
+Processor* Config_getProcessor_CT_S_S(Config *p, Context* ct, const char* srcName, const char* dstName);
+Processor* Config_getProcessor_CS_CS(Config *p, ColorSpace* srcCS, ColorSpace* dstCS);
+Processor* Config_getProcessor_S_S(Config *p, const char* srcName, const char* dstName);
 
 // Config ColorSpaces
 int Config_getNumColorSpaces(Config *p);
@@ -128,6 +138,31 @@ const char* Context_getStringVar(Context *p, const char* name);
 void Context_loadEnvironment(Context *p);
 const char* Context_resolveStringVar(Context *p, const char* val);
 const char* Context_resolveFileLocation(Context *p, const char* filename);
+
+// Processor
+Processor* Processor_Create();
+bool Processor_isNoOp(Processor *p);
+bool Processor_hasChannelCrosstalk(Processor *p);
+ProcessorMetadata* Processor_getMetadata(Processor *p);
+
+// Processor CPU
+void Processor_apply(Processor *p, ImageDesc *i);
+const char* Processor_getCpuCacheID(Processor *p);
+
+ProcessorMetadata* ProcessorMetadata_Create();
+int ProcessorMetadata_getNumFiles(ProcessorMetadata *p);
+const char* ProcessorMetadata_getFile(ProcessorMetadata *p, int index);
+int ProcessorMetadata_getNumLooks(ProcessorMetadata *p);
+const char* ProcessorMetadata_getLook(ProcessorMetadata *p, int index);
+void ProcessorMetadata_addFile(ProcessorMetadata *p, const char* fname);
+void ProcessorMetadata_addLook(ProcessorMetadata *p, const char* look);
+
+// ImageDesc
+PackedImageDesc* PackedImageDesc_Create(float* data, long width, long height, long numChannels);
+float* PackedImageDesc_getData(PackedImageDesc *p);
+long PackedImageDesc_getWidth(PackedImageDesc *p);
+long PackedImageDesc_getHeight(PackedImageDesc *p);
+long PackedImageDesc_getNumChannels(PackedImageDesc *p);
 
 #ifdef __cplusplus
 }

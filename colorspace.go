@@ -1,4 +1,4 @@
-package opencolorigo
+package ocio
 
 // #include "stdlib.h"
 //

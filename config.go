@@ -1,4 +1,4 @@
-package opencolorigo
+package ocio
 
 // #include "stdlib.h"
 //
@@ -7,6 +7,9 @@ package opencolorigo
 import "C"
 
 import (
+    "errors"
+    "fmt"
+    "reflect"
     "runtime"
     "unsafe"
 )
@@ -193,6 +196,93 @@ func (c *Config) WorkingDir() (string, error) {
         return "", err
     }
     return C.GoString(dir), err
+}
+
+/*
+Config Processors
+*/
+
+/*
+Convert from inputColorSpace to outputColorSpace
+
+There are 4 ways this method may be called:
+
+    config.Processor(ctx *Context, src *ColorSpace, dst *ColorSpace)
+    config.Processor(ctx *Context, src string, dst string)
+    config.Processor(src *ColorSpace, dst *ColorSpace)
+    config.Processor(src string, dst string)
+
+String names can be colorspace name, role name, or a combination of both.
+
+This may provide higher fidelity than anticipated due to internal optimizations.
+For example, if the inputcolorspace and the outputColorSpace are members of the
+same family, no conversion will be applied, even though strictly speaking
+quantization should be added
+
+*Note:* A known issue is that a Config created from ConfigCreateFromData() will
+result in a SIGABRT when trying to access a Processor.
+
+*/
+func (c *Config) Processor(args ...interface{}) (*Processor, error) {
+    count := len(args)
+    if count != 2 && count != 3 {
+        return nil, fmt.Errorf("Requires either 2 or 3 parameters; Got %d", count)
+    }
+
+    var err error
+
+    if count == 3 {
+
+        ct, ok := args[0].(*Context)
+        if !ok {
+            return nil, errors.New("1st argument is not a Context*")
+        }
+
+        a1 := reflect.ValueOf(args[1])
+        a2 := reflect.ValueOf(args[2])
+
+        if a1.Kind() == reflect.String && a2.Kind() == reflect.String {
+            c_a1 := C.CString(a1.String())
+            c_a2 := C.CString(a2.String())
+            defer C.free(unsafe.Pointer(c_a1))
+            defer C.free(unsafe.Pointer(c_a2))
+
+            return newProcessor(C.Config_getProcessor_CT_S_S(c.ptr, ct.ptr, c_a1, c_a2)), err
+        }
+
+        if a1.Kind() == reflect.Ptr && a2.Kind() == reflect.Ptr {
+            if aPtr1, ok := args[1].(*ColorSpace); ok {
+                if aPtr2, ok := args[2].(*ColorSpace); ok {
+                    return newProcessor(C.Config_getProcessor_CT_CS_CS(c.ptr, ct.ptr, aPtr1.ptr, aPtr2.ptr)), err
+                }
+            }
+        }
+
+    } else if count == 2 {
+
+        a1 := reflect.ValueOf(args[0])
+        a2 := reflect.ValueOf(args[1])
+
+        if a1.Kind() == reflect.String && a2.Kind() == reflect.String {
+            c_a1 := C.CString(a1.String())
+            c_a2 := C.CString(a2.String())
+            defer C.free(unsafe.Pointer(c_a1))
+            defer C.free(unsafe.Pointer(c_a2))
+
+            ptr := C.Config_getProcessor_S_S(c.ptr, c_a1, c_a2)
+            return newProcessor(ptr), err
+        }
+
+        if a1.Kind() == reflect.Ptr && a2.Kind() == reflect.Ptr {
+            if aPtr1, ok := args[0].(*ColorSpace); ok {
+                if aPtr2, ok := args[1].(*ColorSpace); ok {
+                    return newProcessor(C.Config_getProcessor_CS_CS(c.ptr, aPtr1.ptr, aPtr2.ptr)), err
+                }
+            }
+        }
+    }
+
+    return nil, fmt.Errorf("Wrong argument types: %v", args)
 }
 
 /*

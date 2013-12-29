@@ -1,6 +1,7 @@
-package opencolorigo
+package ocio
 
 import (
+    "fmt"
     "io/ioutil"
     "os"
     "testing"
@@ -14,6 +15,49 @@ func init() {
     if err != nil {
         panic(err)
     }
+}
+
+// Usage Example: Compositing plugin that converts from “log” to “lin”
+func Example() {
+
+    // Arbitrary source of image data
+    //
+    // ColorData is a []float32 containing the pixel values.
+    // Could be in various formats:
+    //     R,G,B,R,G,B,...     // 3 Channels
+    //     R,G,B,A,R,G,B,A,... // 4 Channels
+    //
+    var imageData ColorData = getExampleImage()
+
+    // Get the global OpenColorIO config
+    // This will auto-initialize (using $OCIO) on first use
+    cfg, err := CurrentConfig()
+    if err != nil {
+        fmt.Errorf("Error getting the current config: %s\n", err.Error())
+        return
+    }
+
+    // Get the processor corresponding to this transform.
+    processor, err := cfg.Processor("linear", "Cineon")
+    if err != nil {
+        fmt.Errorf("Error building the processor with given values: %s\n", err.Error())
+        return
+    }
+
+    // Wrap the image in a light-weight ImageDesc,
+    // providing the width, height, and number of color channels
+    // that imageData represents.
+    imgDesc := NewPackedImageDesc(imageData, 512, 256, 3)
+
+    // Apply the color transformation (in place)
+    err = processor.Apply(imgDesc)
+    if err != nil {
+        fmt.Errorf("Error applying the color transformation to image: %s\n", err.Error())
+    }
+}
+
+func getExampleImage() ColorData {
+    return getImageData(512, 256, 3)
 }
 
 // Global
@@ -129,7 +173,7 @@ func TestConfigSanityCheck(t *testing.T) {
 }
 
 func TestConfigCacheID(t *testing.T) {
-    c, _ := CurrentConfig()
+    c, err := ConfigCreateFromEnv()
 
     id, err := c.CacheID()
     if err != nil {
@@ -139,11 +183,6 @@ func TestConfigCacheID(t *testing.T) {
     }
 
     id, err = c.CacheIDWithContext(nil)
-    if err != nil {
-        t.Error(err.Error())
-    } else {
-        t.Log(id)
-    }
 
     context, _ := c.CurrentContext()
     id, err = c.CacheIDWithContext(context)
@@ -406,6 +445,52 @@ func TestColorSpace(t *testing.T) {
     t.Logf("ColorSpace: %+v", cs)
 }
 
+func TestConfigProcessor(t *testing.T) {
+    cfg, _ := CurrentConfig()
+    ct, err := cfg.CurrentContext()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    proc, err := cfg.Processor(ct, "linear", "sRGB")
+    if err != nil {
+        t.Error("Error getting a Processor with current context, and 'linear', 'sRGB'")
+        return
+    }
+
+    t.Logf("Processor.IsNoOp: %v", proc.IsNoOp())
+    t.Logf("Processor.HasChannelCrosstalk: %v", proc.HasChannelCrosstalk())
+
+    _, err = cfg.Processor("linear", "sRGB")
+    if err != nil {
+        t.Error("Error getting a Processor with 'linear', 'sRGB'")
+        return
+    }
+
+    _, err = cfg.Processor(ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
+    if err != nil {
+        t.Error("Error getting a Processor with constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
+        return
+    }
+
+    _, err = cfg.Processor(ct, ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
+    if err != nil {
+        t.Error("Error getting a Processor with current context and constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
+        return
+    }
+
+    // TODO:
+    // Debug SIGABRT when using a Processor from a Config created from a data stream
+    //
+    // ct = NewContext()
+    // proc, err = CONFIG.Processor(ct, "linear", "sRGB")
+    // if err != nil {
+    //     t.Error("Error getting a Processor with nil context, and 'linear', 'sRGB'")
+    //     return
+    // }
+}
+
 /*
 
 ColorSpaces
@@ -581,6 +666,51 @@ func TestContextLoadEnvironment(t *testing.T) {
 
 /*
 
+ImageDesc
+
+*/
+
+func TestPackedImageDesc(t *testing.T) {
+    width, height, channels := 128, 64, 3
+    imgDesc, imageData := getGradImageDesc(width, height, channels)
+
+    if fmt.Sprintf("%v", imageData) != fmt.Sprintf("%v", imgDesc.Data()) {
+        t.Error("Original RGB data is not equal to PackedImageDesc.Data()")
+    }
+
+    if imgDesc.Width() != width {
+        t.Errorf("expected width %d, but got %d", width, imgDesc.Width())
+    }
+
+    if imgDesc.Height() != height {
+        t.Errorf("expected height %d, but got %d", height, imgDesc.Height())
+    }
+
+    if imgDesc.NumChannels() != channels {
+        t.Errorf("expected channels %d, but got %d", channels, imgDesc.NumChannels())
+    }
+}
+
+func TestProcessorApply(t *testing.T) {
+    width, height, channels := 512, 256, 3
+    imgDesc, imageData := getGradImageDesc(width, height, channels)
+
+    imageDataCopy := make(ColorData, len(imageData))
+    copy(imageDataCopy, imageData)
+
+    cfg, _ := CurrentConfig()
+    ct, _ := cfg.CurrentContext()
+    processor, _ := cfg.Processor(ct, "linear", "Cineon")
+
+    processor.Apply(imgDesc)
+
+    if fmt.Sprintf("%v", imageDataCopy) == fmt.Sprintf("%v", imgDesc.Data()) {
+        t.Error("Original RGB data remained unchanged after Apply()")
+    }
+}
+
+/*
+
 Utility
 
 */
@@ -597,6 +727,37 @@ func getConfigFromFile() (*Config, string, error) {
 
     c, err := ConfigCreateFromFile(name)
     return c, name, err
+}
+
+func getImageData(width, height, channels int) ColorData {
+    var (
+        pix   int
+        color float32
+    )
+
+    imageData := make(ColorData, width*height*channels)
+
+    for row := 0; row < height; row++ {
+        color = float32(row) / float32(height)
+        for col := 0; col < width; col++ {
+            imageData[pix] = color
+            imageData[pix+1] = color
+            imageData[pix+2] = color
+
+            if channels == 4 {
+                imageData[pix+3] = 1.0
+            }
+
+            pix += channels
+        }
+    }
+
+    return imageData
+}
+
+func getGradImageDesc(width, height, channels int) (*PackedImageDesc, ColorData) {
+    imageData := getImageData(width, height, channels)
+    return NewPackedImageDesc(imageData, width, height, channels), imageData
 }
 
 const OCIO_CONFIG = `

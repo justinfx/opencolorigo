@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include "ocio.h"
 
@@ -35,6 +36,7 @@ extern "C" {
     const Config* Config_CreateFromData(const char* data) {
         std::stringstream s;
         s << data;
+        s.seekp(0);
         return (Config*) new OCIO::ConstConfigRcPtr(OCIO::Config::CreateFromStream(s));
     }
 
@@ -78,6 +80,35 @@ extern "C" {
 
     const char* Config_getWorkingDir(Config *p) {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getWorkingDir();
+    }
+
+    // Config Processors 
+    Processor* Config_getProcessor_CT_CS_CS(Config *p, Context* ct, ColorSpace* srcCS, ColorSpace* dstCS) {
+        OCIO::ConstContextRcPtr ct_ptr       = * static_cast<OCIO::ConstContextRcPtr*>(ct);
+        OCIO::ConstColorSpaceRcPtr srcCS_ptr = * static_cast<OCIO::ConstColorSpaceRcPtr*>(srcCS);
+        OCIO::ConstColorSpaceRcPtr dstCS_ptr = * static_cast<OCIO::ConstColorSpaceRcPtr*>(dstCS);
+
+        return (Processor*) new OCIO::ConstProcessorRcPtr(
+            static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getProcessor(ct_ptr, srcCS_ptr, dstCS_ptr));
+    }
+
+    Processor* Config_getProcessor_CS_CS(Config *p, ColorSpace* srcCS, ColorSpace* dstCS) {
+        OCIO::ConstColorSpaceRcPtr srcCS_ptr = * static_cast<OCIO::ConstColorSpaceRcPtr*>(srcCS);
+        OCIO::ConstColorSpaceRcPtr dstCS_ptr = * static_cast<OCIO::ConstColorSpaceRcPtr*>(dstCS);
+        
+        return (Processor*) new OCIO::ConstProcessorRcPtr(
+            static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getProcessor(srcCS_ptr, dstCS_ptr));
+    }
+
+    Processor* Config_getProcessor_S_S(Config *p, const char* srcName, const char* dstName) {
+        return (Processor*) new OCIO::ConstProcessorRcPtr(
+            static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getProcessor(srcName, dstName));
+    }
+
+    Processor* Config_getProcessor_CT_S_S(Config *p, Context* ct, const char* srcName, const char* dstName) {
+        OCIO::ConstContextRcPtr ct_ptr = * static_cast<OCIO::ConstContextRcPtr*>(ct);
+        return (Processor*) new OCIO::ConstProcessorRcPtr(
+            static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getProcessor(ct_ptr, srcName, dstName));
     }
 
     // Config ColorSpaces

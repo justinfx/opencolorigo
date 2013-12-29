@@ -1,4 +1,9 @@
-package opencolorigo
+/*
+
+OpenColorIO bindings - http://opencolorio.org/developers/api/OpenColorIO.html
+
+*/
+package ocio
 
 /*
 #cgo LDFLAGS: -lstdc++
