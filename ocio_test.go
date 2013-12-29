@@ -38,7 +38,7 @@ func Example() {
     }
 
     // Get the processor corresponding to this transform.
-    processor, err := cfg.Processor("linear", "Cineon")
+    processor, err := cfg.Processor(ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
     if err != nil {
         fmt.Errorf("Error building the processor with given values: %s\n", err.Error())
         return
