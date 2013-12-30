@@ -17,37 +17,37 @@ package ocio
 import "C"
 
 const (
-    LOGGING_LEVEL_NONE    = C.LOGGING_LEVEL_NONE
-    LOGGING_LEVEL_WARNING = C.LOGGING_LEVEL_WARNING
-    LOGGING_LEVEL_INFO    = C.LOGGING_LEVEL_INFO
-    LOGGING_LEVEL_DEBUG   = C.LOGGING_LEVEL_DEBUG
-    LOGGING_LEVEL_UNKNOWN = C.LOGGING_LEVEL_UNKNOWN
+	LOGGING_LEVEL_NONE    = C.LOGGING_LEVEL_NONE
+	LOGGING_LEVEL_WARNING = C.LOGGING_LEVEL_WARNING
+	LOGGING_LEVEL_INFO    = C.LOGGING_LEVEL_INFO
+	LOGGING_LEVEL_DEBUG   = C.LOGGING_LEVEL_DEBUG
+	LOGGING_LEVEL_UNKNOWN = C.LOGGING_LEVEL_UNKNOWN
 )
 
 const (
-    ENVIRONMENT_UNKNOWN         = C.ENV_ENVIRONMENT_UNKNOWN
-    ENVIRONMENT_LOAD_PREDEFINED = C.ENV_ENVIRONMENT_LOAD_PREDEFINED
-    ENVIRONMENT_LOAD_ALL        = C.ENV_ENVIRONMENT_LOAD_ALL
+	ENVIRONMENT_UNKNOWN         = C.ENV_ENVIRONMENT_UNKNOWN
+	ENVIRONMENT_LOAD_PREDEFINED = C.ENV_ENVIRONMENT_LOAD_PREDEFINED
+	ENVIRONMENT_LOAD_ALL        = C.ENV_ENVIRONMENT_LOAD_ALL
 )
 
 const (
-    INTERP_UNKNOWN     = C.INTERP_UNKNOWN
-    INTERP_NEAREST     = C.INTERP_NEAREST
-    INTERP_LINEAR      = C.INTERP_LINEAR
-    INTERP_TETRAHEDRAL = C.INTERP_TETRAHEDRAL
-    INTERP_BEST        = C.INTERP_BEST
+	INTERP_UNKNOWN     = C.INTERP_UNKNOWN
+	INTERP_NEAREST     = C.INTERP_NEAREST
+	INTERP_LINEAR      = C.INTERP_LINEAR
+	INTERP_TETRAHEDRAL = C.INTERP_TETRAHEDRAL
+	INTERP_BEST        = C.INTERP_BEST
 )
 
 var (
-    ROLE_DEFAULT         = C.GoString(C.ROLE_DEFAULT)
-    ROLE_REFERENCE       = C.GoString(C.ROLE_REFERENCE)
-    ROLE_DATA            = C.GoString(C.ROLE_DATA)
-    ROLE_COLOR_PICKING   = C.GoString(C.ROLE_COLOR_PICKING)
-    ROLE_SCENE_LINEAR    = C.GoString(C.ROLE_SCENE_LINEAR)
-    ROLE_COMPOSITING_LOG = C.GoString(C.ROLE_COMPOSITING_LOG)
-    ROLE_COLOR_TIMING    = C.GoString(C.ROLE_COLOR_TIMING)
-    ROLE_TEXTURE_PAINT   = C.GoString(C.ROLE_TEXTURE_PAINT)
-    ROLE_MATTE_PAINT     = C.GoString(C.ROLE_MATTE_PAINT)
+	ROLE_DEFAULT         = C.GoString(C.ROLE_DEFAULT)
+	ROLE_REFERENCE       = C.GoString(C.ROLE_REFERENCE)
+	ROLE_DATA            = C.GoString(C.ROLE_DATA)
+	ROLE_COLOR_PICKING   = C.GoString(C.ROLE_COLOR_PICKING)
+	ROLE_SCENE_LINEAR    = C.GoString(C.ROLE_SCENE_LINEAR)
+	ROLE_COMPOSITING_LOG = C.GoString(C.ROLE_COMPOSITING_LOG)
+	ROLE_COLOR_TIMING    = C.GoString(C.ROLE_COLOR_TIMING)
+	ROLE_TEXTURE_PAINT   = C.GoString(C.ROLE_TEXTURE_PAINT)
+	ROLE_MATTE_PAINT     = C.GoString(C.ROLE_MATTE_PAINT)
 )
 
 /*
@@ -76,20 +76,20 @@ particular instances, such as designing OCIO profiles, and wanting
 to re-read luts without restarting.
 */
 func ClearAllCaches() {
-    C.ClearAllCaches()
+	C.ClearAllCaches()
 }
 
 // Get the version number for the library, as a dot-delimited string (e.g., “1.0.0”).
 // This is also available at compile time as OCIO_VERSION.
 func Version() string {
-    return C.GoString(C.GetVersion())
+	return C.GoString(C.GetVersion())
 }
 
 // Get the version number for the library, as a single 4-byte hex number
 // (e.g., 0x01050200 for “1.5.2”), to be used for numeric comparisons.
 // This is also available at compile time as OCIO_VERSION_HEX.
 func VersionHex() int {
-    return int(C.GetVersionHex())
+	return int(C.GetVersionHex())
 }
 
 // Get the global logging level. You can override this at runtime using the
@@ -99,10 +99,10 @@ func VersionHex() int {
 //
 // Returns on of the LOGGING_LEVEL_* const values
 func LoggingLevel() int {
-    return int(C.GetLoggingLevel())
+	return int(C.GetLoggingLevel())
 }
 
 // Set the global logging level.
 func SetLoggingLevel(level int) {
-    C.SetLoggingLevel(C.LoggingLevel(level))
+	C.SetLoggingLevel(C.LoggingLevel(level))
 }
