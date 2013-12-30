@@ -79,7 +79,7 @@ func TestLoggingLevel(t *testing.T) {
 
 	t.Logf("Current logging level: %v", original)
 
-	levels := []int{
+	levels := []LoggingLevelType{
 		LOGGING_LEVEL_NONE,
 		LOGGING_LEVEL_DEBUG,
 		LOGGING_LEVEL_INFO,
@@ -572,7 +572,7 @@ func TestColorSpaceBitDepth(t *testing.T) {
 	depth := cs.BitDepth()
 	defer cs.SetBitDepth(depth)
 
-	depths := []int{
+	depths := []BitDepth{
 		BIT_DEPTH_UNKNOWN,
 		BIT_DEPTH_UINT8,
 		BIT_DEPTH_UINT10,

@@ -16,26 +16,32 @@ package ocio
 */
 import "C"
 
-const (
-	LOGGING_LEVEL_NONE    = C.LOGGING_LEVEL_NONE
-	LOGGING_LEVEL_WARNING = C.LOGGING_LEVEL_WARNING
-	LOGGING_LEVEL_INFO    = C.LOGGING_LEVEL_INFO
-	LOGGING_LEVEL_DEBUG   = C.LOGGING_LEVEL_DEBUG
-	LOGGING_LEVEL_UNKNOWN = C.LOGGING_LEVEL_UNKNOWN
+type (
+	LoggingLevelType int
+	EnvironmentMode  int
+	InterpType       int
 )
 
 const (
-	ENVIRONMENT_UNKNOWN         = C.ENV_ENVIRONMENT_UNKNOWN
-	ENVIRONMENT_LOAD_PREDEFINED = C.ENV_ENVIRONMENT_LOAD_PREDEFINED
-	ENVIRONMENT_LOAD_ALL        = C.ENV_ENVIRONMENT_LOAD_ALL
+	LOGGING_LEVEL_NONE    LoggingLevelType = C.LOGGING_LEVEL_NONE
+	LOGGING_LEVEL_WARNING LoggingLevelType = C.LOGGING_LEVEL_WARNING
+	LOGGING_LEVEL_INFO    LoggingLevelType = C.LOGGING_LEVEL_INFO
+	LOGGING_LEVEL_DEBUG   LoggingLevelType = C.LOGGING_LEVEL_DEBUG
+	LOGGING_LEVEL_UNKNOWN LoggingLevelType = C.LOGGING_LEVEL_UNKNOWN
 )
 
 const (
-	INTERP_UNKNOWN     = C.INTERP_UNKNOWN
-	INTERP_NEAREST     = C.INTERP_NEAREST
-	INTERP_LINEAR      = C.INTERP_LINEAR
-	INTERP_TETRAHEDRAL = C.INTERP_TETRAHEDRAL
-	INTERP_BEST        = C.INTERP_BEST
+	ENVIRONMENT_UNKNOWN         EnvironmentMode = C.ENV_ENVIRONMENT_UNKNOWN
+	ENVIRONMENT_LOAD_PREDEFINED EnvironmentMode = C.ENV_ENVIRONMENT_LOAD_PREDEFINED
+	ENVIRONMENT_LOAD_ALL        EnvironmentMode = C.ENV_ENVIRONMENT_LOAD_ALL
+)
+
+const (
+	INTERP_UNKNOWN     InterpType = C.INTERP_UNKNOWN
+	INTERP_NEAREST     InterpType = C.INTERP_NEAREST
+	INTERP_LINEAR      InterpType = C.INTERP_LINEAR
+	INTERP_TETRAHEDRAL InterpType = C.INTERP_TETRAHEDRAL
+	INTERP_BEST        InterpType = C.INTERP_BEST
 )
 
 var (
@@ -98,11 +104,11 @@ func VersionHex() int {
 // The default value is INFO.
 //
 // Returns on of the LOGGING_LEVEL_* const values
-func LoggingLevel() int {
-	return int(C.GetLoggingLevel())
+func LoggingLevel() LoggingLevelType {
+	return LoggingLevelType(C.GetLoggingLevel())
 }
 
 // Set the global logging level.
-func SetLoggingLevel(level int) {
+func SetLoggingLevel(level LoggingLevelType) {
 	C.SetLoggingLevel(C.LoggingLevel(level))
 }
