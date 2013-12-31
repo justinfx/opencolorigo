@@ -1,14 +1,21 @@
 # OpenColorIO bindings for Go
 
-This package is a work-in-progress
-----------------------------------
-
-So far only bits and pieces of the API have been exposed. It's a starting point for anyone else that wants to jump in and contribute.
+So far only parts of the API have been exposed. Most of the Config API is done, along with the ColorSpace, Context, and color processing via CPU Path. 
 
 *TODO*
 
 * More fine-grained error Handling
 * Implement all of the API
+  * [Config/Luma](http://opencolorio.org/developers/api/OpenColorIO.html#luma)
+  * [Config/Look](http://opencolorio.org/developers/api/OpenColorIO.html#look)
+  * [ColorSpace/Data](http://opencolorio.org/developers/api/OpenColorIO.html#data)
+  * [ColorSpace/Allocation](http://opencolorio.org/developers/api/OpenColorIO.html#allocation)
+  * [ColorSpace/Transform](http://opencolorio.org/developers/api/OpenColorIO.html#transform)
+  * [Look](http://opencolorio.org/developers/api/OpenColorIO.html#look-section)
+  * [Processor/GPU Path](http://opencolorio.org/developers/api/OpenColorIO.html#gpu-path) (CPU Path done)
+  * [Baker](http://opencolorio.org/developers/api/OpenColorIO.html#baker)
+  * [PlanarImageDesc](http://opencolorio.org/developers/api/OpenColorIO.html#planarimagedesc)
+  * [GpuShaderDesc](http://opencolorio.org/developers/api/OpenColorIO.html#gpushaderdesc)
 
 
 Requirements
