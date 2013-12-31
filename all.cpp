@@ -1,0 +1,5 @@
+#include "cpp/ocio.cpp"
+#include "cpp/colorspace.cpp"
+#include "cpp/config.cpp"
+#include "cpp/context.cpp"
+#include "cpp/processor.cpp"

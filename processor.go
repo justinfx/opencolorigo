@@ -2,7 +2,7 @@ package ocio
 
 // #include "stdlib.h"
 //
-// #include "ocio.h"
+// #include "cpp/ocio.h"
 //
 import "C"
 

@@ -6,12 +6,13 @@ OpenColorIO bindings - http://opencolorio.org/developers/api/OpenColorIO.html
 package ocio
 
 /*
+#cgo CPPFLAGS: -I./cpp
 #cgo LDFLAGS: -lstdc++
 #cgo pkg-config: OpenColorIO
 
 #include "stdlib.h"
 
-#include "ocio.h"
+#include "cpp/ocio.h"
 
 */
 import "C"
