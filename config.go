@@ -413,3 +413,104 @@ func (c *Config) RoleName(index int) (string, error) {
 	}
 	return C.GoString(name), err
 }
+
+/*
+
+Config Display/View Registration
+
+*/
+
+// Looks is a potentially comma (or colon) delimited list of lookNames,
+// Where +/- prefixes are optionally allowed to denote forward/inverse
+// look specification. (And forward is assumed in the absense of either)
+func (c *Config) DisplayLooks(display, view string) string {
+	c_disp := C.CString(display)
+	c_view := C.CString(view)
+	defer C.free(unsafe.Pointer(c_disp))
+	defer C.free(unsafe.Pointer(c_view))
+
+	return C.GoString(C.Config_getDisplayLooks(c.ptr, c_disp, c_view))
+}
+
+func (c *Config) DefaultDisplay() string {
+	return C.GoString(C.Config_getDefaultDisplay(c.ptr))
+}
+
+func (c *Config) NumDisplays() int {
+	return int(C.Config_getNumDisplays(c.ptr))
+}
+
+func (c *Config) Display(index int) string {
+	return C.GoString(C.Config_getDisplay(c.ptr, C.int(index)))
+}
+
+func (c *Config) DefaultView(display string) string {
+	c_disp := C.CString(display)
+	defer C.free(unsafe.Pointer(c_disp))
+	return C.GoString(C.Config_getDefaultView(c.ptr, c_disp))
+}
+
+func (c *Config) NumViews(display string) int {
+	c_disp := C.CString(display)
+	defer C.free(unsafe.Pointer(c_disp))
+	return int(C.Config_getNumViews(c.ptr, c_disp))
+}
+
+func (c *Config) View(display string, index int) string {
+	c_disp := C.CString(display)
+	defer C.free(unsafe.Pointer(c_disp))
+	return C.GoString(C.Config_getView(c.ptr, c_disp, C.int(index)))
+}
+
+func (c *Config) DisplayColorSpaceName(display, view string) string {
+	c_disp := C.CString(display)
+	c_view := C.CString(view)
+	defer C.free(unsafe.Pointer(c_disp))
+	defer C.free(unsafe.Pointer(c_view))
+
+	return C.GoString(C.Config_getDisplayColorSpaceName(c.ptr, c_disp, c_view))
+}
+
+// For the (display,view) combination, specify which colorSpace and look to use.
+// If a look is not desired, then just pass an empty string
+func (c *Config) AddDisplay(display, view, colorSpace, looks string) error {
+	c_disp := C.CString(display)
+	c_view := C.CString(view)
+	c_cs := C.CString(colorSpace)
+	c_looks := C.CString(looks)
+	defer C.free(unsafe.Pointer(c_disp))
+	defer C.free(unsafe.Pointer(c_view))
+	defer C.free(unsafe.Pointer(c_cs))
+	defer C.free(unsafe.Pointer(c_looks))
+
+	_, err := C.Config_addDisplay(c.ptr, c_disp, c_view, c_cs, c_looks)
+	return err
+}
+
+func (c *Config) ClearDisplays() {
+	C.Config_clearDisplays(c.ptr)
+}
+
+// Comma-delimited list of display names.
+func (c *Config) SetActiveDisplays(displays string) error {
+	c_disp := C.CString(displays)
+	defer C.free(unsafe.Pointer(c_disp))
+	_, err := C.Config_setActiveDisplays(c.ptr, c_disp)
+	return err
+}
+
+func (c *Config) ActiveDisplays() string {
+	return C.GoString(C.Config_getActiveDisplays(c.ptr))
+}
+
+// Comma-delimited list of view names.
+func (c *Config) SetActiveViews(views string) error {
+	c_view := C.CString(views)
+	defer C.free(unsafe.Pointer(c_view))
+	_, err := C.Config_setActiveViews(c.ptr, c_view)
+	return err
+}
+
+func (c *Config) ActiveViews() string {
+	return C.GoString(C.Config_getActiveViews(c.ptr))
+}

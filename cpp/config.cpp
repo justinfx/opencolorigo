@@ -167,4 +167,61 @@ extern "C" {
         return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getRoleName(index);
     }
 
+    // Config Display/View Registration 
+    const char* Config_getDefaultDisplay(Config *p) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getDefaultDisplay();
+    }
+    
+    int Config_getNumDisplays(Config *p) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getNumDisplays();
+    }
+    
+    const char* Config_getDisplay(Config *p, int index) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getDisplay(index);
+    }
+    
+    const char* Config_getDefaultView(Config *p, const char* display) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getDefaultView(display);
+    }
+    
+    int Config_getNumViews(Config *p, const char* display) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getNumViews(display);
+    }
+    
+    const char* Config_getView(Config *p, const char* display, int index) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getView(display, index);
+    }
+    
+    const char* Config_getDisplayColorSpaceName(Config *p, const char* display, const char* view) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getDisplayColorSpaceName(display, view);
+    }
+    
+    const char* Config_getDisplayLooks(Config *p, const char* display, const char* view) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getDisplayLooks(display, view);
+    }
+    
+    void Config_addDisplay(Config *p, const char* display, const char* view, const char* colorSpaceName, const char* looks) {
+        static_cast<OCIO::ConfigRcPtr*>(p)->get()->addDisplay(display, view, colorSpaceName, looks);
+    }
+    
+    void Config_clearDisplays(Config *p) {
+        static_cast<OCIO::ConfigRcPtr*>(p)->get()->clearDisplays();
+    }
+    
+    void Config_setActiveDisplays(Config *p, const char* displays) {
+        static_cast<OCIO::ConfigRcPtr*>(p)->get()->setActiveDisplays(displays);
+    }
+    
+    const char* Config_getActiveDisplays(Config *p) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getActiveDisplays();
+    }
+    
+    void Config_setActiveViews(Config *p, const char* views) {
+        static_cast<OCIO::ConfigRcPtr*>(p)->get()->setActiveViews(views);
+    }
+
+    const char* Config_getActiveViews(Config *p) {
+        return static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->getActiveViews();
+    }
+
 }

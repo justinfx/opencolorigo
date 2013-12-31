@@ -110,22 +110,20 @@ func TestCurrentConfig(t *testing.T) {
 	defer SetCurrentConfig(c)
 
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	t.Logf("Config: %+v", c)
 
 	err = SetCurrentConfig(CONFIG)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	}
 }
 
 func TestConfigFromEnv(t *testing.T) {
 	c, err := ConfigCreateFromEnv()
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	t.Logf("Config: %+v", c)
 }
@@ -135,7 +133,7 @@ func TestConfigFromFile(t *testing.T) {
 	defer os.Remove(fname)
 
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	t.Logf("Config read from temp file %s (%v)", fname, c)
@@ -144,8 +142,7 @@ func TestConfigFromFile(t *testing.T) {
 func TestConfigFromData(t *testing.T) {
 	c, err := ConfigCreateFromData(OCIO_CONFIG)
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	t.Logf("Config: %+v", c)
 }
@@ -153,11 +150,10 @@ func TestConfigFromData(t *testing.T) {
 func TestConfigSerialize(t *testing.T) {
 	ser, err := CONFIG.Serialize()
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	if ser == "" {
-		t.Error("Serialized config string is empty")
+		t.Fatal("Serialized config string is empty")
 	}
 }
 
@@ -168,7 +164,7 @@ func TestConfigEditableCopy(t *testing.T) {
 
 func TestConfigSanityCheck(t *testing.T) {
 	if err := CONFIG.SanityCheck(); err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	}
 }
 
@@ -177,7 +173,7 @@ func TestConfigCacheID(t *testing.T) {
 
 	id, err := c.CacheID()
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	} else {
 		t.Log(id)
 	}
@@ -187,7 +183,7 @@ func TestConfigCacheID(t *testing.T) {
 	context, _ := c.CurrentContext()
 	id, err = c.CacheIDWithContext(context)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	} else {
 		t.Log(id)
 	}
@@ -196,8 +192,7 @@ func TestConfigCacheID(t *testing.T) {
 func TestConfigDescription(t *testing.T) {
 	d, err := CONFIG.Description()
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	t.Log(d)
 }
@@ -206,8 +201,7 @@ func TestConfigCurrentContext(t *testing.T) {
 	c, _ := CurrentConfig()
 	p, err := c.CurrentContext()
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	t.Logf("Current Context: %+v", p)
 }
@@ -215,8 +209,7 @@ func TestConfigCurrentContext(t *testing.T) {
 func TestConfigSearchPath(t *testing.T) {
 	p, err := CONFIG.SearchPath()
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	t.Log(p)
 }
@@ -224,8 +217,7 @@ func TestConfigSearchPath(t *testing.T) {
 func TestConfigWorkingDir(t *testing.T) {
 	p, err := CONFIG.WorkingDir()
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	t.Log(p)
 }
@@ -233,8 +225,7 @@ func TestConfigWorkingDir(t *testing.T) {
 func TestConfigNumColorSpaces(t *testing.T) {
 	n := CONFIG.NumColorSpaces()
 	if n <= 0 {
-		t.Error("Expected number of colorspaces to be greater than 0")
-		return
+		t.Fatal("Expected number of colorspaces to be greater than 0")
 	}
 	t.Log(n)
 }
@@ -249,8 +240,7 @@ func TestConfigColorSpaceNameByIndex(t *testing.T) {
 		for i := 0; i < num; i++ {
 			s, err := c.ColorSpaceNameByIndex(i)
 			if err != nil {
-				t.Error(err.Error())
-				return
+				t.Fatal(err.Error())
 			}
 			names = append(names, s)
 		}
@@ -263,8 +253,7 @@ func TestConfigIndexForColorSpace(t *testing.T) {
 
 	num := c.NumColorSpaces()
 	if num <= 0 {
-		t.Error("Expected number of colorspaces to be greater than 0")
-		return
+		t.Fatal("Expected number of colorspaces to be greater than 0")
 	}
 
 	var (
@@ -276,19 +265,16 @@ func TestConfigIndexForColorSpace(t *testing.T) {
 		for i := 0; i < num; i++ {
 			name, err = c.ColorSpaceNameByIndex(i)
 			if err != nil {
-				t.Error(err.Error())
-				return
+				t.Fatal(err.Error())
 			}
 
 			idx, err = c.IndexForColorSpace(name)
 			if err != nil {
-				t.Error(err.Error())
-				return
+				t.Fatal(err.Error())
 			}
 
 			if idx != i {
-				t.Errorf("Expected %d for colorspace %s, got %d", i, name, idx)
-				return
+				t.Fatalf("Expected %d for colorspace %s, got %d", i, name, idx)
 			}
 		}
 	}
@@ -314,7 +300,7 @@ func TestConfigAddColorSpace(t *testing.T) {
 	c.ClearColorSpaces()
 	actual = c.NumColorSpaces()
 	if actual != 0 {
-		t.Errorf("Expected number of colorspaces to be 0, got %d", actual)
+		t.Fatalf("Expected number of colorspaces to be 0, got %d", actual)
 	}
 }
 
@@ -351,23 +337,20 @@ func TestConfigStrictParsingEnabled(t *testing.T) {
 
 	err := c.SetStrictParsingEnabled(!orig)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	if c.IsStrictParsingEnabled() == orig {
-		t.Errorf("Expected %v, got %v", !orig, orig)
-		return
+		t.Fatalf("Expected %v, got %v", !orig, orig)
 	}
 
 	err = c.SetStrictParsingEnabled(orig)
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 
 	if c.IsStrictParsingEnabled() != orig {
-		t.Errorf("Expected %v, got %v", orig, !orig)
-		return
+		t.Fatalf("Expected %v, got %v", orig, !orig)
 	}
 }
 
@@ -376,32 +359,27 @@ func TestRoles(t *testing.T) {
 
 	origCount := c.NumRoles()
 	if origCount <= 0 {
-		t.Error("Expected number of roles to be greater than 0")
-		return
+		t.Fatal("Expected number of roles to be greater than 0")
 	}
 
 	role := `__unittest_role__`
 
 	space, err := c.ColorSpaceNameByIndex(0)
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 
 	err = c.SetRole(role, space)
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 
 	if count := c.NumRoles(); count != (origCount + 1) {
-		t.Errorf("Expected number of roles to be %d, but got %d", origCount+1, count)
-		return
+		t.Fatalf("Expected number of roles to be %d, but got %d", origCount+1, count)
 	}
 
 	if !c.HasRole(role) {
-		t.Errorf("Expected config to have the role %v", role)
-		return
+		t.Fatalf("Expected config to have the role %v", role)
 	}
 
 	found := false
@@ -413,50 +391,32 @@ func TestRoles(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Errorf("Expected to find role name %v in list of roles", role)
-		return
+		t.Fatalf("Expected to find role name %v in list of roles", role)
 	}
 
 	err = c.SetRole(role, "")
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	if count := c.NumRoles(); count != origCount {
-		t.Errorf("Expected number of roles to be %d, but got %d", origCount, count)
-		return
+		t.Fatalf("Expected number of roles to be %d, but got %d", origCount, count)
 	}
 
 	if c.HasRole(role) {
-		t.Errorf("Expected config to not have the role %v", role)
-		return
+		t.Fatalf("Expected config to not have the role %v", role)
 	}
-}
-
-func TestColorSpace(t *testing.T) {
-	c := CONFIG
-
-	name, _ := c.ColorSpaceNameByIndex(0)
-	cs, err := c.ColorSpace(name)
-	if err != nil {
-		t.Errorf("Error getting a ColorSpace from name %s: %s", name, err.Error())
-		return
-	}
-	t.Logf("ColorSpace: %+v", cs)
 }
 
 func TestConfigProcessor(t *testing.T) {
 	cfg, _ := CurrentConfig()
 	ct, err := cfg.CurrentContext()
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 
 	proc, err := cfg.Processor(ct, "linear", "sRGB")
 	if err != nil {
-		t.Error("Error getting a Processor with current context, and 'linear', 'sRGB'")
-		return
+		t.Fatal("Error getting a Processor with current context, and 'linear', 'sRGB'")
 	}
 
 	t.Logf("Processor.IsNoOp: %v", proc.IsNoOp())
@@ -464,20 +424,17 @@ func TestConfigProcessor(t *testing.T) {
 
 	_, err = cfg.Processor("linear", "sRGB")
 	if err != nil {
-		t.Error("Error getting a Processor with 'linear', 'sRGB'")
-		return
+		t.Fatal("Error getting a Processor with 'linear', 'sRGB'")
 	}
 
 	_, err = cfg.Processor(ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
 	if err != nil {
-		t.Error("Error getting a Processor with constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
-		return
+		t.Fatal("Error getting a Processor with constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
 	}
 
 	_, err = cfg.Processor(ct, ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
 	if err != nil {
-		t.Error("Error getting a Processor with current context and constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
-		return
+		t.Fatal("Error getting a Processor with current context and constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
 	}
 
 	// TODO:
@@ -486,9 +443,85 @@ func TestConfigProcessor(t *testing.T) {
 	// ct = NewContext()
 	// proc, err = CONFIG.Processor(ct, "linear", "sRGB")
 	// if err != nil {
-	//     t.Error("Error getting a Processor with nil context, and 'linear', 'sRGB'")
-	//     return
+	//     t.Fatal("Error getting a Processor with nil context, and 'linear', 'sRGB'")
 	// }
+}
+
+func TestConfigDisplaysViews(t *testing.T) {
+	var (
+		str string
+		i   int
+		err error
+	)
+
+	str = CONFIG.DefaultDisplay()
+	if str != "sRGB" {
+		t.Errorf("expected DefaultDisplay to be 'sRGB', but got %q", str)
+	}
+
+	i = CONFIG.NumDisplays()
+	if i != 2 {
+		t.Errorf("expected NumDisplays to be 2. but got %d", i)
+	}
+
+	str = CONFIG.Display(0)
+	if str != "DCIP3" {
+		t.Errorf("expected Display at index 0 to be 'DCIP3', but got %q", str)
+	}
+
+	str = CONFIG.DefaultView("sRGB")
+	if str != "Film" {
+		t.Errorf("expected DefaultView for 'sRGB' to be 'Film', but got %q", str)
+	}
+
+	if i = CONFIG.NumViews("sRGB"); i != 4 {
+		t.Errorf("expected NumViews to be 4. but got %d", i)
+	}
+
+	if str = CONFIG.View("sRGB", 2); str != "Raw" {
+		t.Errorf("expected View at index 2 to be 'Raw', but got %q", str)
+	}
+
+	if str = CONFIG.ActiveDisplays(); str != "sRGB, DCIP3" {
+		t.Errorf("expected ActiveDisplays to be 'sRGB, DCIP3', but got %q", str)
+	}
+
+	if str = CONFIG.ActiveViews(); str != "Film, Log, Raw" {
+		t.Errorf("expected ActiveViews to be 'Film, Log, Raw', but got %q", str)
+	}
+
+	if str = CONFIG.DisplayLooks("sRGB", "Film DI"); str != "di" {
+		t.Errorf("expected DisplayLooks for 'sRGB' / 'Film DI' to be 'di', but got %q", str)
+	}
+
+	if str = CONFIG.DisplayColorSpaceName("sRGB", "Raw"); str != "nc10" {
+		t.Errorf("expected DisplayColorSpaceName for 'sRGB' / 'Raw' to be 'nc10', but got %q", str)
+	}
+
+	prev := CONFIG.NumViews("sRGB")
+	if err = CONFIG.AddDisplay("sRGB", "TEST_VIEW", "vd8", "di"); err != nil {
+		t.Error(err.Error())
+	}
+	if i = CONFIG.NumViews("sRGB"); i != (prev + 1) {
+		t.Errorf("expected NumViews for 'sRGB' to be %d, but got %d", prev+1, i)
+	}
+	if str = CONFIG.DisplayLooks("sRGB", "TEST_VIEW"); str != "di" {
+		t.Errorf("expected DisplayLooks for 'sRGB' / 'TEST_VIEW' to be 'di', but got %q", str)
+	}
+
+	if err = CONFIG.SetActiveDisplays("DCIP3"); err != nil {
+		t.Error(err.Error())
+	}
+	if str = CONFIG.ActiveDisplays(); str != "DCIP3" {
+		t.Errorf("expected ActiveDisplays to be 'DCIP3', but got %q", str)
+	}
+
+	if err = CONFIG.SetActiveViews("Log, Raw"); err != nil {
+		t.Error(err.Error())
+	}
+	if str = CONFIG.ActiveViews(); str != "Log, Raw" {
+		t.Errorf("expected ActiveViews to be 'Log, Raw', but got %q", str)
+	}
 }
 
 /*
@@ -496,6 +529,17 @@ func TestConfigProcessor(t *testing.T) {
 ColorSpaces
 
 */
+func TestColorSpace(t *testing.T) {
+	c := CONFIG
+
+	name, _ := c.ColorSpaceNameByIndex(0)
+	cs, err := c.ColorSpace(name)
+	if err != nil {
+		t.Fatalf("Error getting a ColorSpace from name %s: %s", name, err.Error())
+	}
+	t.Logf("ColorSpace: %+v", cs)
+}
+
 func TestColorSpaceCreate(t *testing.T) {
 	cs := NewColorSpace()
 	t.Log(cs)
@@ -507,7 +551,7 @@ func TestColorSpaceEditableCopy(t *testing.T) {
 	t.Logf("%s is a copy of %s", cs_copy, cs)
 
 	if cs.Name() != cs_copy.Name() {
-		t.Errorf("Copy colorspace name is %s, but expected %s", cs_copy.Name(), cs.Name())
+		t.Fatalf("Copy colorspace name is %s, but expected %s", cs_copy.Name(), cs.Name())
 	}
 }
 
@@ -517,8 +561,7 @@ func TestColorSpaceName(t *testing.T) {
 	defer cs.SetName("linear")
 
 	if cs.Name() != "FOO" {
-		t.Errorf("Expected ColorSpace name to be FOO, got %s", cs.Name())
-		return
+		t.Fatalf("Expected ColorSpace name to be FOO, got %s", cs.Name())
 	}
 }
 
@@ -529,8 +572,7 @@ func TestColorSpaceFamily(t *testing.T) {
 	defer cs.SetFamily(family)
 
 	if cs.Family() != "FOO" {
-		t.Errorf("Expected ColorSpace family to be FOO, got %s", cs.Family())
-		return
+		t.Fatalf("Expected ColorSpace family to be FOO, got %s", cs.Family())
 	}
 }
 
@@ -541,32 +583,28 @@ func TestColorSpaceEqualityGroup(t *testing.T) {
 	defer cs.SetEqualityGroup(group)
 
 	if cs.EqualityGroup() != "FOO" {
-		t.Errorf("Expected ColorSpace EqualityGroup to be FOO, got %s", cs.EqualityGroup())
-		return
+		t.Fatalf("Expected ColorSpace EqualityGroup to be FOO, got %s", cs.EqualityGroup())
 	}
 }
 
 func TestColorSpaceDescription(t *testing.T) {
 	cs, err := CONFIG.ColorSpace("linear")
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	desc := cs.Description()
 	cs.SetDescription("FOO")
 	defer cs.SetDescription(desc)
 
 	if cs.Description() != "FOO" {
-		t.Errorf("Expected ColorSpace Description to be FOO, got %s", cs.Description())
-		return
+		t.Fatalf("Expected ColorSpace Description to be FOO, got %s", cs.Description())
 	}
 }
 
 func TestColorSpaceBitDepth(t *testing.T) {
 	cs, err := CONFIG.ColorSpace("linear")
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 
 	depth := cs.BitDepth()
@@ -587,8 +625,7 @@ func TestColorSpaceBitDepth(t *testing.T) {
 	for _, d := range depths {
 		cs.SetBitDepth(d)
 		if cs.BitDepth() != d {
-			t.Errorf("Expected ColorSpace BitDepth to be %v, got %v", d, cs.BitDepth())
-			return
+			t.Fatalf("Expected ColorSpace BitDepth to be %v, got %v", d, cs.BitDepth())
 		}
 	}
 }
@@ -610,7 +647,7 @@ func TestContextEditableCopy(t *testing.T) {
 	c_copy := c.EditableCopy()
 
 	if c_copy.StringVar("FOO") != "BAR" {
-		t.Errorf("Expected FOO=BAR, got %s", c_copy.StringVar("FOO"))
+		t.Fatalf("Expected FOO=BAR, got %s", c_copy.StringVar("FOO"))
 	}
 
 }
@@ -621,8 +658,7 @@ func TestContextCacheID(t *testing.T) {
 
 	id, err := context.CacheID()
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 	t.Log(id)
 }
@@ -639,7 +675,7 @@ func TestContextSearchPath(t *testing.T) {
 	actual := context.SearchPath()
 
 	if actual != expected {
-		t.Errorf("Expected search path to be %q, got %q", expected, actual)
+		t.Fatalf("Expected search path to be %q, got %q", expected, actual)
 	}
 }
 
@@ -655,7 +691,7 @@ func TestContextWorkingDir(t *testing.T) {
 	actual := context.WorkingDir()
 
 	if actual != expected {
-		t.Errorf("Expected working dir to be %q, got %q", expected, actual)
+		t.Fatalf("Expected working dir to be %q, got %q", expected, actual)
 	}
 }
 
@@ -705,7 +741,7 @@ func TestProcessorApply(t *testing.T) {
 	processor.Apply(imgDesc)
 
 	if fmt.Sprintf("%v", imageDataCopy) == fmt.Sprintf("%v", imgDesc.Data()) {
-		t.Error("Original RGB data remained unchanged after Apply()")
+		t.Fatal("Original RGB data remained unchanged after Apply()")
 	}
 }
 
@@ -768,188 +804,278 @@ strictparsing: true
 luma: [0.2126, 0.7152, 0.0722]
 
 roles:
-  color_picking: sRGB
-  color_timing: Cineon
-  compositing_log: Cineon
-  data: raw
-  default: raw
-  matte_paint: sRGB
-  reference: linear
-  scene_linear: linear
-  texture_paint: sRGB
+  color_picking: cpf
+  color_timing: lg10
+  compositing_log: lgf
+  data: ncf
+  default: ncf
+  matte_paint: vd8
+  reference: lnf
+  scene_linear: lnf
+  texture_paint: dt16
 
 displays:
-  default:
-    - !<View> {name: None, colorspace: raw}
-    - !<View> {name: sRGB, colorspace: sRGB}
-    - !<View> {name: rec709, colorspace: rec709}
+  DCIP3:
+    - !<View> {name: Film, colorspace: p3dci8}
+    - !<View> {name: Log, colorspace: lg10}
+    - !<View> {name: Raw, colorspace: nc10}
+    - !<View> {name: Film DI, colorspace: p3dci8, looks: di}
+  sRGB:
+    - !<View> {name: Film, colorspace: srgb8}
+    - !<View> {name: Log, colorspace: lg10}
+    - !<View> {name: Raw, colorspace: nc10}
+    - !<View> {name: Film DI, colorspace: srgb8, looks: di}
 
-active_displays: [default]
-active_views: [sRGB]
+active_displays: [sRGB, DCIP3]
+active_views: [Film, Log, Raw]
 
 colorspaces:
   - !<ColorSpace>
-    name: linear
-    family: ""
-    equalitygroup: ""
+    name: lnf
+    family: ln
+    equalitygroup: 
     bitdepth: 32f
     description: |
-      Scene-linear, high dynamic range. Used for rendering and compositing.
+      lnf :  linear show space
     isdata: false
     allocation: lg2
     allocationvars: [-15, 6]
 
   - !<ColorSpace>
-    name: sRGB
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: lnh
+    family: ln
+    equalitygroup: 
+    bitdepth: 16f
     description: |
-      Standard RGB Display Space
+      lnh :  linear show space
     isdata: false
-    allocation: uniform
-    allocationvars: [-0.125, 1.125]
-    to_reference: !<FileTransform> {src: srgb.spi1d, interpolation: linear}
+    allocation: lg2
+    allocationvars: [-15, 6]
 
   - !<ColorSpace>
-    name: sRGBf
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: ln16
+    family: ln
+    equalitygroup: 
+    bitdepth: 16ui
     description: |
-      Standard RGB Display Space, but with additional range to preserve float highlights.
+      ln16 : linear show space
     isdata: false
-    allocation: uniform
-    allocationvars: [-0.125, 4.875]
-    to_reference: !<FileTransform> {src: srgbf.spi1d, interpolation: linear}
+    allocation: lg2
+    allocationvars: [-15, 0]
 
   - !<ColorSpace>
-    name: rec709
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: lg16
+    family: lg
+    equalitygroup: 
+    bitdepth: 16ui
     description: |
-      Rec. 709 (Full Range) Display Space
+      lg16 : conversion from film log 
     isdata: false
     allocation: uniform
-    allocationvars: [-0.125, 1.125]
-    to_reference: !<FileTransform> {src: rec709.spi1d, interpolation: linear}
+    to_reference: !<FileTransform> {src: lg16.spi1d, interpolation: nearest}
 
   - !<ColorSpace>
-    name: Cineon
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: lg10
+    family: lg
+    equalitygroup: 
+    bitdepth: 10ui
     description: |
-      Cineon (Log Film Scan)
+      lg10 : conversion from film log
     isdata: false
     allocation: uniform
-    allocationvars: [-0.125, 1.125]
-    to_reference: !<FileTransform> {src: cineon.spi1d, interpolation: linear}
+    to_reference: !<FileTransform> {src: lg10.spi1d, interpolation: nearest}
 
   - !<ColorSpace>
-    name: Gamma1.8
-    family: ""
-    equalitygroup: ""
+    name: lgf
+    family: lg
+    equalitygroup: 
     bitdepth: 32f
     description: |
-      Emulates a idealized Gamma 1.8 display device.
+      lgf : conversion from film log
     isdata: false
     allocation: uniform
-    allocationvars: [0, 1]
-    to_reference: !<ExponentTransform> {value: [1.8, 1.8, 1.8, 1]}
+    allocationvars: [-0.25, 1.5]
+    to_reference: !<FileTransform> {src: lgf.spi1d, interpolation: linear}
 
   - !<ColorSpace>
-    name: Gamma2.2
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: gn10
+    family: gn
+    equalitygroup: 
+    bitdepth: 10ui
     description: |
-      Emulates a idealized Gamma 2.2 display device.
+      gn10 :conversion from Panalog
     isdata: false
     allocation: uniform
-    allocationvars: [0, 1]
-    to_reference: !<ExponentTransform> {value: [2.2, 2.2, 2.2, 1]}
+    to_reference: !<FileTransform> {src: gn10.spi1d, interpolation: nearest}
 
   - !<ColorSpace>
-    name: Panalog
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: vd16
+    family: vd
+    equalitygroup: 
+    bitdepth: 16ui
     description: |
-      Sony/Panavision Genesis Log Space
+      vd16 :conversion from a gamma 2.2 
     isdata: false
     allocation: uniform
-    allocationvars: [-0.125, 1.125]
-    to_reference: !<FileTransform> {src: panalog.spi1d, interpolation: linear}
+    to_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: version_8_whitebalanced.spimtx, interpolation: unknown, direction: inverse}
+        - !<FileTransform> {src: vd16.spi1d, interpolation: nearest}
 
   - !<ColorSpace>
-    name: REDLog
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: vd10
+    family: vd
+    equalitygroup: 
+    bitdepth: 10ui
     description: |
-      RED Log Space
+      vd10 :conversion from a gamma 2.2 
     isdata: false
     allocation: uniform
-    allocationvars: [-0.125, 1.125]
-    to_reference: !<FileTransform> {src: redlog.spi1d, interpolation: linear}
+    to_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: version_8_whitebalanced.spimtx, interpolation: unknown, direction: inverse}
+        - !<FileTransform> {src: vd10.spi1d, interpolation: nearest}
 
   - !<ColorSpace>
-    name: ViperLog
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: vd8
+    family: vd
+    equalitygroup: 
+    bitdepth: 8ui
     description: |
-      Viper Log Space
+      vd8 :conversion from a gamma 2.2
     isdata: false
     allocation: uniform
-    allocationvars: [-0.125, 1.125]
-    to_reference: !<FileTransform> {src: viperlog.spi1d, interpolation: linear}
+    to_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: version_8_whitebalanced.spimtx, interpolation: unknown, direction: inverse}
+        - !<FileTransform> {src: vd8.spi1d, interpolation: nearest}
 
   - !<ColorSpace>
-    name: AlexaV3LogC
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: hd10
+    family: hd
+    equalitygroup: 
+    bitdepth: 10ui
     description: |
-      Alexa Log C
+      hd10 : conversion from REC709
     isdata: false
     allocation: uniform
-    allocationvars: [-0.125, 1.125]
-    to_reference: !<FileTransform> {src: alexalogc.spi1d, interpolation: linear}
+    to_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: hdOffset.spimtx, interpolation: nearest, direction: inverse}
+        - !<ColorSpaceTransform> {src: vd16, dst: lnf}
 
   - !<ColorSpace>
-    name: PLogLin
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: dt16
+    family: dt
+    equalitygroup: 
+    bitdepth: 16ui
     description: |
-      Josh Pines style pivoted log/lin conversion. 445->0.18
+      dt16 :conversion for diffuse texture
     isdata: false
     allocation: uniform
-    allocationvars: [-0.125, 1.125]
-    to_reference: !<FileTransform> {src: ploglin.spi1d, interpolation: linear}
+    to_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: diffuseTextureMultiplier.spimtx, interpolation: nearest}
+        - !<ColorSpaceTransform> {src: vd16, dst: lnf}
 
   - !<ColorSpace>
-    name: SLog
-    family: ""
-    equalitygroup: ""
+    name: cpf
+    family: cp
+    equalitygroup: 
     bitdepth: 32f
     description: |
-      Sony SLog
+      cpf :video like conversion used for color picking 
     isdata: false
     allocation: uniform
-    allocationvars: [-0.125, 1.125]
-    to_reference: !<FileTransform> {src: slog.spi1d, interpolation: linear}
+    to_reference: !<FileTransform> {src: cpf.spi1d, interpolation: linear}
 
   - !<ColorSpace>
-    name: raw
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
+    name: nc8
+    family: nc
+    equalitygroup: 
+    bitdepth: 8ui
     description: |
-      Raw Data. Used for normals, points, etc.
+      nc8 :nc,Non-color used to store non-color data such as depth or surface normals
     isdata: true
     allocation: uniform
+
+  - !<ColorSpace>
+    name: nc10
+    family: nc
+    equalitygroup: 
+    bitdepth: 10ui
+    description: |
+      nc10 :nc,Non-color used to store non-color data such as depth or surface normals
+    isdata: true
+    allocation: uniform
+
+  - !<ColorSpace>
+    name: nc16
+    family: nc
+    equalitygroup: 
+    bitdepth: 16ui
+    description: |
+      nc16 :nc,Non-color used to store non-color data such as depth or surface normals
+    isdata: true
+    allocation: uniform
+
+  - !<ColorSpace>
+    name: ncf
+    family: nc
+    equalitygroup: 
+    bitdepth: 32f
+    description: |
+      ncf :nc,Non-color used to store non-color data such as depth or surface normals
+    isdata: true
+    allocation: uniform
+
+  - !<ColorSpace>
+    name: srgb8
+    family: srgb
+    equalitygroup: 
+    bitdepth: 8ui
+    description: |
+      srgb8 :rgb display space for the srgb standard.
+    isdata: false
+    allocation: uniform
+    from_reference: !<GroupTransform>
+      children:
+        - !<ColorSpaceTransform> {src: lnf, dst: lg10}
+        - !<FileTransform> {src: spi_ocio_srgb_test.spi3d, interpolation: linear}
+
+  - !<ColorSpace>
+    name: p3dci8
+    family: p3dci
+    equalitygroup: 
+    bitdepth: 8ui
+    description: |
+      p3dci8 :rgb display space for gamma 2.6 P3 projection.
+    isdata: false
+    allocation: uniform
+    from_reference: !<GroupTransform>
+      children:
+        - !<ColorSpaceTransform> {src: lnf, dst: lg10}
+        - !<FileTransform> {src: colorworks_filmlg_to_p3.3dl, interpolation: linear}
+
+  - !<ColorSpace>
+    name: xyz16
+    family: xyz
+    equalitygroup: 
+    bitdepth: 16ui
+    description: |
+      xyz16 :Conversion for  DCP creation.
+    isdata: false
+    allocation: uniform
+    from_reference: !<GroupTransform>
+      children:
+        - !<ColorSpaceTransform> {src: lnf, dst: p3dci8}
+        - !<ExponentTransform> {value: [2.6, 2.6, 2.6, 1]}
+        - !<FileTransform> {src: p3_to_xyz16_corrected_wp.spimtx, interpolation: unknown}
+        - !<ExponentTransform> {value: [2.6, 2.6, 2.6, 1], direction: inverse}
+
+looks:
+- !<Look>
+  name: di
+  process_space: p3dci8
+  transform: !<FileTransform> {src: look_di.cc, interpolation: linear}
 `

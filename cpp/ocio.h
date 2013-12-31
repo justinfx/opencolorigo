@@ -111,6 +111,22 @@ int Config_getNumRoles(Config *p);
 bool Config_hasRole(Config *p, const char* role);
 const char* Config_getRoleName(Config *p, int index);
 
+// Config Display/View Registration 
+const char* Config_getDefaultDisplay(Config *p);
+int Config_getNumDisplays(Config *p);
+const char* Config_getDisplay(Config *p, int index);
+const char* Config_getDefaultView(Config *p, const char* display);
+int Config_getNumViews(Config *p, const char* display);
+const char* Config_getView(Config *p, const char* display, int index);
+const char* Config_getDisplayColorSpaceName(Config *p, const char* display, const char* view);
+const char* Config_getDisplayLooks(Config *p, const char* display, const char* view);
+void Config_addDisplay(Config *p, const char* display, const char* view, const char* colorSpaceName, const char* looks);
+void Config_clearDisplays(Config *p);
+void Config_setActiveDisplays(Config *p, const char* displays);
+const char* Config_getActiveDisplays(Config *p);
+void Config_setActiveViews(Config *p, const char* views);
+const char* Config_getActiveViews(Config *p);
+
 // ColorSpaces
 ColorSpace* ColorSpace_Create();
 ColorSpace* ColorSpace_createEditableCopy(ColorSpace *p);
