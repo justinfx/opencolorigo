@@ -313,9 +313,9 @@ func TestConfigParseColorSpace(t *testing.T) {
 	)
 
 	tests := map[string]string{
-		"linear":   `A bunch of text containing a linear colorspace name`,
-		"sRGB":     `A bunch of text containing an srgb colorspace name`,
-		"Gamma2.2": `A bunch of text containing both linear and sRGB and gamma2.2 colorspaces`,
+		"lg10": `A bunch of text containing a lg10 colorspace name`,
+		"vd10": `A bunch of text containing an VD10 colorspace name`,
+		"nc10": `A bunch of text containing both linear and vd10 and nc10 colorspaces`,
 	}
 
 	for expected, fullString = range tests {
@@ -414,17 +414,17 @@ func TestConfigProcessor(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	proc, err := cfg.Processor(ct, "linear", "sRGB")
+	proc, err := cfg.Processor(ct, "scene_linear", "color_timing")
 	if err != nil {
-		t.Fatal("Error getting a Processor with current context, and 'linear', 'sRGB'")
+		t.Fatal(err.Error())
 	}
 
 	t.Logf("Processor.IsNoOp: %v", proc.IsNoOp())
 	t.Logf("Processor.HasChannelCrosstalk: %v", proc.HasChannelCrosstalk())
 
-	_, err = cfg.Processor("linear", "sRGB")
+	_, err = cfg.Processor("scene_linear", "color_timing")
 	if err != nil {
-		t.Fatal("Error getting a Processor with 'linear', 'sRGB'")
+		t.Fatal("Error getting a Processor with 'scene_linear', 'color_timing'")
 	}
 
 	_, err = cfg.Processor(ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
@@ -546,7 +546,10 @@ func TestColorSpaceCreate(t *testing.T) {
 }
 
 func TestColorSpaceEditableCopy(t *testing.T) {
-	cs, _ := CONFIG.ColorSpace("linear")
+	cs, err := CONFIG.ColorSpace("lnf")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 	cs_copy := cs.EditableCopy()
 	t.Logf("%s is a copy of %s", cs_copy, cs)
 
@@ -556,9 +559,12 @@ func TestColorSpaceEditableCopy(t *testing.T) {
 }
 
 func TestColorSpaceName(t *testing.T) {
-	cs, _ := CONFIG.ColorSpace("linear")
+	cs, err := CONFIG.ColorSpace("lnf")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 	cs.SetName("FOO")
-	defer cs.SetName("linear")
+	defer cs.SetName("lnf")
 
 	if cs.Name() != "FOO" {
 		t.Fatalf("Expected ColorSpace name to be FOO, got %s", cs.Name())
@@ -566,7 +572,10 @@ func TestColorSpaceName(t *testing.T) {
 }
 
 func TestColorSpaceFamily(t *testing.T) {
-	cs, _ := CONFIG.ColorSpace("linear")
+	cs, err := CONFIG.ColorSpace("lnf")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 	family := cs.Family()
 	cs.SetFamily("FOO")
 	defer cs.SetFamily(family)
@@ -577,7 +586,10 @@ func TestColorSpaceFamily(t *testing.T) {
 }
 
 func TestColorSpaceEqualityGroup(t *testing.T) {
-	cs, _ := CONFIG.ColorSpace("linear")
+	cs, err := CONFIG.ColorSpace("lnf")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 	group := cs.EqualityGroup()
 	cs.SetEqualityGroup("FOO")
 	defer cs.SetEqualityGroup(group)
@@ -588,7 +600,7 @@ func TestColorSpaceEqualityGroup(t *testing.T) {
 }
 
 func TestColorSpaceDescription(t *testing.T) {
-	cs, err := CONFIG.ColorSpace("linear")
+	cs, err := CONFIG.ColorSpace("lnf")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -602,7 +614,7 @@ func TestColorSpaceDescription(t *testing.T) {
 }
 
 func TestColorSpaceBitDepth(t *testing.T) {
-	cs, err := CONFIG.ColorSpace("linear")
+	cs, err := CONFIG.ColorSpace("lnf")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -734,9 +746,20 @@ func TestProcessorApply(t *testing.T) {
 	imageDataCopy := make(ColorData, len(imageData))
 	copy(imageDataCopy, imageData)
 
-	cfg, _ := CurrentConfig()
-	ct, _ := cfg.CurrentContext()
-	processor, _ := cfg.Processor(ct, "linear", "Cineon")
+	cfg, err := CurrentConfig()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	ct, err := cfg.CurrentContext()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	processor, err := cfg.Processor(ct, "scene_linear", "color_timing")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
 	processor.Apply(imgDesc)
 

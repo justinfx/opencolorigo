@@ -2,6 +2,7 @@
 #define _OCIO_OCIO_H_
 
 #include <stdbool.h>
+#include <errno.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +20,11 @@ extern const char* ROLE_TEXTURE_PAINT;
 extern const char* ROLE_MATTE_PAINT;
 
 // Enum
+enum ErrnNo {
+    ERR_GENERAL     = -1,
+    ERR_BAD_ARGS    = -2,
+};
+
 typedef enum LoggingLevel {
     LOGGING_LEVEL_NONE = 0,
     LOGGING_LEVEL_WARNING = 1,

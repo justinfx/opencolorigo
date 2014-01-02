@@ -229,7 +229,12 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 		return nil, fmt.Errorf("Requires either 2 or 3 parameters; Got %d", count)
 	}
 
-	var err error
+	var (
+		err  error
+		proc unsafe.Pointer
+	)
+
+	bad_str := "Error creating processor with %v / %v"
 
 	if count == 3 {
 
@@ -247,13 +252,21 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 			defer C.free(unsafe.Pointer(c_a1))
 			defer C.free(unsafe.Pointer(c_a2))
 
-			return newProcessor(C.Config_getProcessor_CT_S_S(c.ptr, ct.ptr, c_a1, c_a2)), err
+			proc, err = C.Config_getProcessor_CT_S_S(c.ptr, ct.ptr, c_a1, c_a2)
+			if err != nil {
+				err = fmt.Errorf(bad_str, a1, a2)
+			}
+			return newProcessor(proc), err
 		}
 
 		if a1.Kind() == reflect.Ptr && a2.Kind() == reflect.Ptr {
 			if aPtr1, ok := args[1].(*ColorSpace); ok {
 				if aPtr2, ok := args[2].(*ColorSpace); ok {
-					return newProcessor(C.Config_getProcessor_CT_CS_CS(c.ptr, ct.ptr, aPtr1.ptr, aPtr2.ptr)), err
+					proc, err = C.Config_getProcessor_CT_CS_CS(c.ptr, ct.ptr, aPtr1.ptr, aPtr2.ptr)
+					if err != nil {
+						err = fmt.Errorf(bad_str, a1, a2)
+					}
+					return newProcessor(proc), err
 				}
 			}
 		}
@@ -269,14 +282,21 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 			defer C.free(unsafe.Pointer(c_a1))
 			defer C.free(unsafe.Pointer(c_a2))
 
-			ptr := C.Config_getProcessor_S_S(c.ptr, c_a1, c_a2)
-			return newProcessor(ptr), err
+			proc, err = C.Config_getProcessor_S_S(c.ptr, c_a1, c_a2)
+			if err != nil {
+				err = fmt.Errorf(bad_str, a1, a2)
+			}
+			return newProcessor(proc), err
 		}
 
 		if a1.Kind() == reflect.Ptr && a2.Kind() == reflect.Ptr {
 			if aPtr1, ok := args[0].(*ColorSpace); ok {
 				if aPtr2, ok := args[1].(*ColorSpace); ok {
-					return newProcessor(C.Config_getProcessor_CS_CS(c.ptr, aPtr1.ptr, aPtr2.ptr)), err
+					proc, err = C.Config_getProcessor_CS_CS(c.ptr, aPtr1.ptr, aPtr2.ptr)
+					if err != nil {
+						err = fmt.Errorf(bad_str, a1, a2)
+					}
+					return newProcessor(proc), err
 				}
 			}
 		}
@@ -296,8 +316,8 @@ func (c *Config) ColorSpace(name string) (*ColorSpace, error) {
 	defer C.free(unsafe.Pointer(c_str))
 
 	cs, err := C.Config_getColorSpace(c.ptr, c_str)
-	if err != nil {
-		return nil, err
+	if err != nil || cs == nil {
+		return nil, fmt.Errorf("%q is not a valid ColorSpace", name)
 	}
 	return newColorSpace(cs), err
 }

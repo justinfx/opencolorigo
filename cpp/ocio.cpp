@@ -1,6 +1,20 @@
 #include <OpenColorIO/OpenColorIO.h>
 
+#include <iostream>
+
 #include "ocio.h"
+
+
+#define BEGIN_CATCH_ERR                      \
+    errno = 0;                               \
+    try {                               
+
+#define END_CATCH_ERR                        \
+    }                                        \
+    catch (const OCIO::Exception& ex) {      \
+        std::cerr << ex.what() << std::endl; \
+        errno = ERR_GENERAL;                 \
+    }   
 
 
 extern "C" {
@@ -17,25 +31,34 @@ extern "C" {
     const char* ROLE_TEXTURE_PAINT      = OCIO::ROLE_TEXTURE_PAINT;
     const char* ROLE_MATTE_PAINT        = OCIO::ROLE_MATTE_PAINT;
 
-    // Global
     void ClearAllCaches() { 
+        BEGIN_CATCH_ERR
         OCIO::ClearAllCaches(); 
+        END_CATCH_ERR
     }
 
     const char* GetVersion() { 
+        BEGIN_CATCH_ERR
         return OCIO::GetVersion(); 
+        END_CATCH_ERR
     }
 
     int GetVersionHex() { 
+        BEGIN_CATCH_ERR
         return OCIO::GetVersionHex(); 
+        END_CATCH_ERR
     }
 
     LoggingLevel GetLoggingLevel() { 
+        BEGIN_CATCH_ERR
         return (LoggingLevel)OCIO::GetLoggingLevel(); 
+        END_CATCH_ERR
     }
 
     void SetLoggingLevel(LoggingLevel level) { 
+        BEGIN_CATCH_ERR
         OCIO::SetLoggingLevel((OCIO::LoggingLevel)level); 
+        END_CATCH_ERR
     };
 
 }
