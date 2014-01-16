@@ -84,7 +84,7 @@ const Config* Config_CreateFromData(const char* data);
 Config* Config_createEditableCopy(Config *p);
 void Config_sanityCheck(Config *p);
 
-const char* Config_serialize(Config *p);
+char* Config_serialize(Config *p);
 const char* Config_getCacheID(Config *p);
 const char* Config_getCacheIDWithContext(Config *p, Context *c);
 const char* Config_getDescription(Config *p);

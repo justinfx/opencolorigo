@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cstring>
 #include <string>
 
 #include "ocio.h"
@@ -77,12 +78,16 @@ extern "C" {
         END_CATCH_ERR
     }
 
-    const char* Config_serialize(Config *p) {
+    char* Config_serialize(Config *p) {
         std::stringstream s;
         BEGIN_CATCH_ERR
         static_cast<OCIO::ConstConfigRcPtr*>(p)->get()->serialize(s);
         END_CATCH_ERR
-        return s.str().c_str();
+
+        char* cstr = new char[s.str().length()+1];
+        std::strcpy(cstr, s.str().c_str());
+
+        return cstr;
     }
 
     const char* Config_getCacheID(Config *p) {

@@ -105,6 +105,7 @@ func (c *Config) Serialize() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer C.free(unsafe.Pointer(c_str))
 	return C.GoString(c_str), err
 }
 
