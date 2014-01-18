@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -11,9 +12,22 @@ var CONFIG *Config
 
 func init() {
 	var err error
+
+	// Init in-memory config
 	CONFIG, err = ConfigCreateFromData(OCIO_CONFIG)
 	if err != nil {
 		panic(err)
+	}
+
+	// Set the environment to file-based test data config
+	pwd, _ := os.Getwd()
+	pwd, _ = filepath.Abs(pwd)
+
+	cfg := filepath.Join(pwd, "testdata/spi-vfx/config.ocio")
+	if _, err = os.Stat(cfg); os.IsNotExist(err) {
+		fmt.Printf("Warning: %s not found\n", cfg)
+	} else {
+		os.Setenv("OCIO", cfg)
 	}
 }
 
@@ -107,11 +121,11 @@ func TestCreateConfig(t *testing.T) {
 
 func TestCurrentConfig(t *testing.T) {
 	c, err := CurrentConfig()
-	defer SetCurrentConfig(c)
-
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+	defer SetCurrentConfig(c)
+
 	t.Logf("Config: %+v", c)
 
 	err = SetCurrentConfig(CONFIG)
@@ -168,35 +182,33 @@ func TestConfigSanityCheck(t *testing.T) {
 	}
 }
 
-// TODO: Determine why temporary ocio configs wil
-// produce a "No Such file or directory" error when
-// trying to get a cache id
-//
-// func TestConfigCacheID(t *testing.T) {
-// 	c, fname, err := getConfigFromFile()
-// 	defer os.Remove(fname)
+func TestConfigCacheID(t *testing.T) {
+	c, err := ConfigCreateFromEnv()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-// 	id, err := c.CacheID()
-// 	if err != nil {
-// 		t.Fatal(err.Error())
-// 	} else if id == "" {
-// 		t.Fatal("CacheID is empty")
-// 	} else {
-// 		t.Log(id)
-// 	}
+	id, err := c.CacheID()
+	if err != nil {
+		t.Fatal(err.Error())
+	} else if id == "" {
+		t.Fatal("CacheID is empty")
+	} else {
+		t.Log(id)
+	}
 
-// 	id, err = c.CacheIDWithContext(nil)
+	id, err = c.CacheIDWithContext(nil)
 
-// 	context, _ := c.CurrentContext()
-// 	id, err = c.CacheIDWithContext(context)
-// 	if err != nil {
-// 		t.Fatal(err.Error())
-// 	} else if id == "" {
-// 		t.Fatal("CacheID is empty")
-// 	} else {
-// 		t.Log(id)
-// 	}
-// }
+	context, _ := c.CurrentContext()
+	id, err = c.CacheIDWithContext(context)
+	if err != nil {
+		t.Fatal(err.Error())
+	} else if id == "" {
+		t.Fatal("CacheID is empty")
+	} else {
+		t.Log(id)
+	}
+}
 
 func TestConfigDescription(t *testing.T) {
 	d, err := CONFIG.Description()
@@ -446,14 +458,6 @@ func TestConfigProcessor(t *testing.T) {
 		t.Fatal("Error getting a Processor with current context and constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
 	}
 
-	// TODO:
-	// Debug SIGABRT when using a Processor from a Config created from a data stream
-	//
-	// ct = NewContext()
-	// proc, err = CONFIG.Processor(ct, "linear", "sRGB")
-	// if err != nil {
-	//     t.Fatal("Error getting a Processor with nil context, and 'linear', 'sRGB'")
-	// }
 }
 
 func TestConfigDisplaysViews(t *testing.T) {
@@ -755,7 +759,7 @@ func TestProcessorApply(t *testing.T) {
 	imageDataCopy := make(ColorData, len(imageData))
 	copy(imageDataCopy, imageData)
 
-	cfg, err := CurrentConfig()
+	cfg, err := ConfigCreateFromEnv()
 	if err != nil {
 		t.Fatal(err.Error())
 	}

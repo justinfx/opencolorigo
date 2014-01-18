@@ -16,21 +16,21 @@ import (
 
 // A Config defines all the colorspaces available at runtime.
 type Config struct {
-	ptr unsafe.Pointer
+	ptr *C.Config
 }
 
 /*
 Config Initialization
 */
 
-func newConfig(p unsafe.Pointer) *Config {
+func newConfig(p *C.Config) *Config {
 	cfg := &Config{p}
 	runtime.SetFinalizer(cfg, deleteConfig)
 	return cfg
 }
 
 func deleteConfig(c *Config) {
-	C.free(c.ptr)
+	C.freeContext((*C._Context)(c.ptr))
 }
 
 // Create a new empty Config
@@ -44,7 +44,7 @@ func NewConfig() *Config {
 func CurrentConfig() (*Config, error) {
 	c, err := C.GetCurrentConfig()
 	if err != nil {
-		return nil, err
+		return nil, getLastError((*C._Context)(c))
 	}
 	return newConfig(c), err
 }
@@ -59,7 +59,7 @@ func SetCurrentConfig(config *Config) error {
 func ConfigCreateFromEnv() (*Config, error) {
 	c, err := C.Config_CreateFromEnv()
 	if err != nil {
-		return nil, err
+		return nil, getLastError((*C._Context)(c))
 	}
 	return newConfig(c), err
 }
@@ -71,7 +71,7 @@ func ConfigCreateFromFile(filename string) (*Config, error) {
 
 	c, err := C.Config_CreateFromFile(c_str)
 	if err != nil {
-		return nil, err
+		return nil, getLastError((*C._Context)(c))
 	}
 	return newConfig(c), err
 }
@@ -83,9 +83,13 @@ func ConfigCreateFromData(data string) (*Config, error) {
 
 	c, err := C.Config_CreateFromData(c_str)
 	if err != nil {
-		return nil, err
+		return nil, getLastError((*C._Context)(c))
 	}
 	return newConfig(c), err
+}
+
+func (c *Config) lastError() error {
+	return errors.New(C.GoString(c.ptr.last_error))
 }
 
 // Create a new editable copy of this Config
@@ -97,13 +101,16 @@ func (c *Config) EditableCopy() *Config {
 // The most common error occurs when references are made to colorspaces that do not exist.
 func (c *Config) SanityCheck() error {
 	_, err := C.Config_sanityCheck(c.ptr)
-	return err
+	if err != nil {
+		return c.lastError()
+	}
+	return nil
 }
 
 func (c *Config) Serialize() (string, error) {
 	c_str, err := C.Config_serialize(c.ptr)
 	if err != nil {
-		return "", err
+		return "", c.lastError()
 	}
 	defer C.free(unsafe.Pointer(c_str))
 	return C.GoString(c_str), err
@@ -121,7 +128,7 @@ The current Context will be used.
 func (c *Config) CacheID() (string, error) {
 	id, err := C.Config_getCacheID(c.ptr)
 	if err != nil {
-		return "", err
+		return "", c.lastError()
 	}
 	return C.GoString(id), err
 }
@@ -143,7 +150,7 @@ func (c *Config) CacheIDWithContext(context *Context) (string, error) {
 
 	id, err := C.Config_getCacheIDWithContext(c.ptr, context.ptr)
 	if err != nil {
-		return "", err
+		return "", c.lastError()
 	}
 	return C.GoString(id), err
 }
@@ -151,7 +158,7 @@ func (c *Config) CacheIDWithContext(context *Context) (string, error) {
 func (c *Config) Description() (string, error) {
 	d, err := C.Config_getDescription(c.ptr)
 	if err != nil {
-		return "", err
+		return "", c.lastError()
 	}
 	return C.GoString(d), err
 }
@@ -166,6 +173,9 @@ func (c *Config) IsStrictParsingEnabled() bool {
 
 func (c *Config) SetStrictParsingEnabled(enabled bool) error {
 	_, err := C.Config_setStrictParsingEnabled(c.ptr, C.bool(enabled))
+	if err != nil {
+		return c.lastError()
+	}
 	return err
 }
 
@@ -176,7 +186,7 @@ Config Resources
 func (c *Config) CurrentContext() (*Context, error) {
 	ptr, err := C.Config_getCurrentContext(c.ptr)
 	if err != nil {
-		return nil, err
+		return nil, c.lastError()
 	}
 	return newContext(ptr), err
 }
@@ -185,7 +195,7 @@ func (c *Config) CurrentContext() (*Context, error) {
 func (c *Config) SearchPath() (string, error) {
 	path, err := C.Config_getSearchPath(c.ptr)
 	if err != nil {
-		return "", err
+		return "", c.lastError()
 	}
 	return C.GoString(path), err
 }
@@ -194,7 +204,7 @@ func (c *Config) SearchPath() (string, error) {
 func (c *Config) WorkingDir() (string, error) {
 	dir, err := C.Config_getWorkingDir(c.ptr)
 	if err != nil {
-		return "", err
+		return "", c.lastError()
 	}
 	return C.GoString(dir), err
 }
@@ -235,7 +245,7 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 		proc unsafe.Pointer
 	)
 
-	bad_str := "Error creating processor with %v / %v"
+	bad_str := "Error creating processor with src colorspace %v / dst colorspace %v"
 
 	if count == 3 {
 
@@ -255,7 +265,7 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 
 			proc, err = C.Config_getProcessor_CT_S_S(c.ptr, ct.ptr, c_a1, c_a2)
 			if err != nil {
-				err = fmt.Errorf(bad_str, a1, a2)
+				err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), c.lastError())
 			}
 			return newProcessor(proc), err
 		}
@@ -265,7 +275,7 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 				if aPtr2, ok := args[2].(*ColorSpace); ok {
 					proc, err = C.Config_getProcessor_CT_CS_CS(c.ptr, ct.ptr, aPtr1.ptr, aPtr2.ptr)
 					if err != nil {
-						err = fmt.Errorf(bad_str, a1, a2)
+						err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), c.lastError())
 					}
 					return newProcessor(proc), err
 				}
@@ -285,7 +295,7 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 
 			proc, err = C.Config_getProcessor_S_S(c.ptr, c_a1, c_a2)
 			if err != nil {
-				err = fmt.Errorf(bad_str, a1, a2)
+				err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), c.lastError())
 			}
 			return newProcessor(proc), err
 		}
@@ -295,7 +305,7 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 				if aPtr2, ok := args[1].(*ColorSpace); ok {
 					proc, err = C.Config_getProcessor_CS_CS(c.ptr, aPtr1.ptr, aPtr2.ptr)
 					if err != nil {
-						err = fmt.Errorf(bad_str, a1, a2)
+						err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), c.lastError())
 					}
 					return newProcessor(proc), err
 				}
@@ -318,7 +328,8 @@ func (c *Config) ColorSpace(name string) (*ColorSpace, error) {
 
 	cs, err := C.Config_getColorSpace(c.ptr, c_str)
 	if err != nil || cs == nil {
-		return nil, fmt.Errorf("%q is not a valid ColorSpace", name)
+		err = fmt.Errorf("%q is not a valid ColorSpace: %q", name, c.lastError())
+		return nil, err
 	}
 	return newColorSpace(cs), err
 }
@@ -335,7 +346,7 @@ func (c *Config) NumColorSpaces() int {
 func (c *Config) ColorSpaceNameByIndex(index int) (string, error) {
 	name, err := C.Config_getColorSpaceNameByIndex(c.ptr, C.int(index))
 	if err != nil {
-		return "", err
+		return "", c.lastError()
 	}
 	return C.GoString(name), err
 }
@@ -347,7 +358,7 @@ func (c *Config) IndexForColorSpace(name string) (int, error) {
 
 	idx, err := C.Config_getIndexForColorSpace(c.ptr, c_str)
 	if err != nil {
-		return -1, err
+		return -1, c.lastError()
 	}
 	return int(idx), err
 }

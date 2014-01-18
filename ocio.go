@@ -17,6 +17,10 @@ package ocio
 */
 import "C"
 
+import (
+	"errors"
+)
+
 type (
 	LoggingLevelType int
 	EnvironmentMode  int
@@ -60,6 +64,10 @@ var (
 /*
 Errors
 */
+
+func getLastError(ptr *C._Context) error {
+	return errors.New(C.GoString(ptr.last_error))
+}
 
 // An exception class for errors detected at runtime,
 // thrown when OCIO cannot find a file that is expected to exist.

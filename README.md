@@ -4,7 +4,6 @@ So far only parts of the API have been exposed. Most of the Config API is done, 
 
 *TODO*
 
-* More fine-grained error Handling
 * Implement all of the API
   * [Config/Luma](http://opencolorio.org/developers/api/OpenColorIO.html#luma)
   * [Config/Look](http://opencolorio.org/developers/api/OpenColorIO.html#look)

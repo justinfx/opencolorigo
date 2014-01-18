@@ -1,5 +1,5 @@
-#ifndef _OCIO_OCIO_H_
-#define _OCIO_OCIO_H_
+#ifndef _OPENCOLORIGO_OCIO_H_
+#define _OPENCOLORIGO_OCIO_H_
 
 #include <stdbool.h>
 #include <errno.h>
@@ -59,13 +59,22 @@ typedef enum EnvironmentMode {
     ENV_ENVIRONMENT_LOAD_ALL
 } EnvironmentMode;
 
-typedef void Config;
+typedef struct _Context {
+    void* handle;
+    char* last_error;
+} _Context;
+
+// typedef void Config;
+typedef _Context Config;
 typedef void ColorSpace;
 typedef void Context;
 typedef void Processor;
 typedef void ProcessorMetadata;
 typedef void ImageDesc;
 typedef void PackedImageDesc;
+
+void freeContext(_Context* ctx);
+char* getLastError(_Context* ctx);
 
 // Global
 void ClearAllCaches();
