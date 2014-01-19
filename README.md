@@ -1,8 +1,23 @@
 # OpenColorIO bindings for Go
 
-So far only parts of the API have been exposed. Most of the Config API is done, along with the ColorSpace, Context, and color processing via CPU Path. 
+OpenColorIO (OCIO) is a complete color management solution geared towards motion picture production with an emphasis on visual effects and computer animation. OCIO provides a straightforward and consistent user experience across all supporting applications while allowing for sophisticated back-end configuration options suitable for high-end production usage. OCIO is compatible with the Academy Color Encoding Specification (ACES) and is LUT-format agnostic, supporting many popular formats.
 
-*TODO*
+OpenColorIO is released as version 1.0 and has been in development since 2003. OCIO represents the culmination of years of production experience earned on such films as SpiderMan 2 (2004), Surf’s Up (2007), Cloudy with a Chance of Meatballs (2009), Alice in Wonderland (2010), and many more. OpenColorIO is natively supported in commercial applications like Katana, Mari, Silhouette FX, and others coming soon.
+
+OpenColorIO is free and is one of several open source projects actively sponsored by Sony Imageworks.
+
+http://opencolorio.org
+
+Requirements
+----------------------
+
+* [OpenColorIO](http://opencolorio.org/)
+
+
+Status
+---------
+
+So far only parts of the API have been exposed. Most of the Config API is done, along with the ColorSpace, Context, and color processing via CPU Path. 
 
 * Implement all of the API
   * [Config/Luma](http://opencolorio.org/developers/api/OpenColorIO.html#luma)
@@ -15,12 +30,6 @@ So far only parts of the API have been exposed. Most of the Config API is done, 
   * [Baker](http://opencolorio.org/developers/api/OpenColorIO.html#baker)
   * [PlanarImageDesc](http://opencolorio.org/developers/api/OpenColorIO.html#planarimagedesc)
   * [GpuShaderDesc](http://opencolorio.org/developers/api/OpenColorIO.html#gpushaderdesc)
-
-
-Requirements
-----------------------
-
-* [OpenColorIO](http://opencolorio.org/)
 
 
 Installation
