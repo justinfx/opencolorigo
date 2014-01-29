@@ -47,15 +47,13 @@ func Example() {
 	// This will auto-initialize (using $OCIO) on first use
 	cfg, err := CurrentConfig()
 	if err != nil {
-		fmt.Errorf("Error getting the current config: %s\n", err.Error())
-		return
+		panic(err.Error())
 	}
 
 	// Get the processor corresponding to this transform.
 	processor, err := cfg.Processor(ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
 	if err != nil {
-		fmt.Errorf("Error building the processor with given values: %s\n", err.Error())
-		return
+		panic(err.Error())
 	}
 
 	// Wrap the image in a light-weight ImageDesc,
@@ -66,7 +64,7 @@ func Example() {
 	// Apply the color transformation (in place)
 	err = processor.Apply(imgDesc)
 	if err != nil {
-		fmt.Errorf("Error applying the color transformation to image: %s\n", err.Error())
+		panic(err.Error())
 	}
 }
 
@@ -440,8 +438,8 @@ func TestConfigProcessor(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	t.Logf("Processor.IsNoOp: %v", proc.IsNoOp())
-	t.Logf("Processor.HasChannelCrosstalk: %v", proc.HasChannelCrosstalk())
+	proc.IsNoOp()
+	proc.HasChannelCrosstalk()
 
 	_, err = cfg.Processor("scene_linear", "color_timing")
 	if err != nil {
@@ -456,6 +454,15 @@ func TestConfigProcessor(t *testing.T) {
 	_, err = cfg.Processor(ct, ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
 	if err != nil {
 		t.Fatal("Error getting a Processor with current context and constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
+	}
+
+	// From data
+	cfg, _ = ConfigCreateFromData(OCIO_CONFIG)
+	ct, _ = cfg.CurrentContext()
+
+	proc, err = cfg.Processor(ct, "lnh", "lnf")
+	if err != nil {
+		t.Fatal(err.Error())
 	}
 
 }

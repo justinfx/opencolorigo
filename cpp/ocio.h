@@ -1,6 +1,7 @@
 #ifndef _OPENCOLORIGO_OCIO_H_
 #define _OPENCOLORIGO_OCIO_H_
 
+#include <stdlib.h>
 #include <stdbool.h>
 #include <errno.h>
 

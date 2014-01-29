@@ -230,9 +230,6 @@ For example, if the inputcolorspace and the outputColorSpace are members of the
 same family, no conversion will be applied, even though strictly speaking
 quantization should be added
 
-*Note:* A known issue is that a Config created from ConfigCreateFromData() will
-result in a SIGABRT when trying to access a Processor.
-
 */
 func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 	count := len(args)

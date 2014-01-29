@@ -62,15 +62,13 @@ func Example() {
     // This will auto-initialize (using $OCIO) on first use
     cfg, err := ocio.CurrentConfig()
     if err != nil {
-        fmt.Errorf("Error getting the current config: %s\n", err.Error())
-        return
+        panic(err.Error()
     }
 
     // Get the processor corresponding to this transform.
     processor, err := cfg.Processor("linear", "Cineon")
     if err != nil {
-        fmt.Errorf("Error building the processor with given values: %s\n", err.Error())
-        return
+        panic(err.Error())
     }
 
     // Wrap the image in a light-weight ImageDesc,
@@ -81,7 +79,7 @@ func Example() {
     // Apply the color transformation (in place)
     err = processor.Apply(imgDesc)
     if err != nil {
-        fmt.Errorf("Error applying the color transformation to image: %s\n", err.Error())
+        panic(err.Error())
     }
 }
 ```
