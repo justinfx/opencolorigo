@@ -6,7 +6,7 @@ OpenColorIO bindings - http://opencolorio.org/developers/api/OpenColorIO.html
 package ocio
 
 /*
-#cgo CPPFLAGS: -I./cpp
+#cgo CPPFLAGS: -I./cpp -Wno-return-type
 #cgo LDFLAGS: -lstdc++
 #cgo pkg-config: OpenColorIO
 
