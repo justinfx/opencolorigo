@@ -23,7 +23,10 @@ func newProcessor(p unsafe.Pointer) *Processor {
 	return cfg
 }
 
-func deleteProcessor(c *Processor) { C.free(c.ptr) }
+func deleteProcessor(p *Processor) {
+	C.free(p.ptr)
+	runtime.KeepAlive(p)
+}
 
 // Create a new empty Processor
 func NewProcessor() *Processor {
@@ -31,13 +34,17 @@ func NewProcessor() *Processor {
 }
 
 func (p *Processor) IsNoOp() bool {
-	return bool(C.Processor_isNoOp(p.ptr))
+	ret := bool(C.Processor_isNoOp(p.ptr))
+	runtime.KeepAlive(p)
+	return ret
 }
 
 // does the processor represent an image transformation that
 // introduces crosstalk between the image channels
 func (p *Processor) HasChannelCrosstalk() bool {
-	return bool(C.Processor_hasChannelCrosstalk(p.ptr))
+	ret := bool(C.Processor_hasChannelCrosstalk(p.ptr))
+	runtime.KeepAlive(p)
+	return ret
 }
 
 func (p *Processor) Metadata() *ProcessorMetadata {
@@ -49,6 +56,8 @@ func (p *Processor) Metadata() *ProcessorMetadata {
 // Apply to an image.
 func (p *Processor) Apply(i ImageDescriptor) error {
 	_, err := C.Processor_apply(p.ptr, unsafe.Pointer(i.imageDescPtr()))
+	runtime.KeepAlive(p)
+	runtime.KeepAlive(i)
 	return err
 }
 
@@ -57,6 +66,7 @@ func (p *Processor) CpuCacheID() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	runtime.KeepAlive(p)
 	return C.GoString(id), err
 }
 
@@ -80,19 +90,27 @@ func NewProcessorMetadata() *ProcessorMetadata {
 }
 
 func (p *ProcessorMetadata) NumFiles() int {
-	return int(C.ProcessorMetadata_getNumFiles(p.ptr))
+	ret := int(C.ProcessorMetadata_getNumFiles(p.ptr))
+	runtime.KeepAlive(p)
+	return ret
 }
 
 func (p *ProcessorMetadata) File(index int) string {
-	return C.GoString(C.ProcessorMetadata_getFile(p.ptr, C.int(index)))
+	ret := C.GoString(C.ProcessorMetadata_getFile(p.ptr, C.int(index)))
+	runtime.KeepAlive(p)
+	return ret
 }
 
 func (p *ProcessorMetadata) NumLooks() int {
-	return int(C.ProcessorMetadata_getNumLooks(p.ptr))
+	ret := int(C.ProcessorMetadata_getNumLooks(p.ptr))
+	runtime.KeepAlive(p)
+	return ret
 }
 
 func (p *ProcessorMetadata) Look(index int) string {
-	return C.GoString(C.ProcessorMetadata_getLook(p.ptr, C.int(index)))
+	ret := C.GoString(C.ProcessorMetadata_getLook(p.ptr, C.int(index)))
+	runtime.KeepAlive(p)
+	return ret
 }
 
 func (p *ProcessorMetadata) AddFile(fileName string) {
@@ -100,6 +118,7 @@ func (p *ProcessorMetadata) AddFile(fileName string) {
 	defer C.free(unsafe.Pointer(c_str))
 
 	C.ProcessorMetadata_addFile(p.ptr, c_str)
+	runtime.KeepAlive(p)
 }
 
 func (p *ProcessorMetadata) AddLook(lookName string) {
@@ -107,6 +126,7 @@ func (p *ProcessorMetadata) AddLook(lookName string) {
 	defer C.free(unsafe.Pointer(c_str))
 
 	C.ProcessorMetadata_addLook(p.ptr, c_str)
+	runtime.KeepAlive(p)
 }
 
 /* ImageDesc */
@@ -128,7 +148,10 @@ type PackedImageDesc struct {
 
 func newPackedImageDesc(p unsafe.Pointer, data ColorData) *PackedImageDesc {
 	i := &PackedImageDesc{p, data}
-	runtime.SetFinalizer(i, func(c *PackedImageDesc) { C.free(c.ptr) })
+	runtime.SetFinalizer(i, func(c *PackedImageDesc) {
+		C.free(c.ptr)
+		runtime.KeepAlive(c)
+	})
 	return i
 }
 
@@ -150,17 +173,23 @@ func (p *PackedImageDesc) Data() ColorData {
 
 // Pixel width of the image
 func (p *PackedImageDesc) Width() int {
-	return int(C.PackedImageDesc_getWidth(p.ptr))
+	ret := int(C.PackedImageDesc_getWidth(p.ptr))
+	runtime.KeepAlive(p)
+	return ret
 }
 
 // Pixel height of the image
 func (p *PackedImageDesc) Height() int {
-	return int(C.PackedImageDesc_getHeight(p.ptr))
+	ret := int(C.PackedImageDesc_getHeight(p.ptr))
+	runtime.KeepAlive(p)
+	return ret
 }
 
 // Number of color channels in the image
 func (p *PackedImageDesc) NumChannels() int {
-	return int(C.PackedImageDesc_getNumChannels(p.ptr))
+	ret := int(C.PackedImageDesc_getNumChannels(p.ptr))
+	runtime.KeepAlive(p)
+	return ret
 }
 
 func (p *PackedImageDesc) imageDescPtr() unsafe.Pointer {

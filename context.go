@@ -21,7 +21,10 @@ func newContext(p unsafe.Pointer) *Context {
 	return cfg
 }
 
-func deleteContext(c *Context) { C.free(c.ptr) }
+func deleteContext(c *Context) {
+	C.free(c.ptr)
+	runtime.KeepAlive(c)
+}
 
 // Create a new empty Context
 func NewContext() *Context {
@@ -30,7 +33,9 @@ func NewContext() *Context {
 
 // Create a new editable copy of this Context
 func (c *Context) EditableCopy() *Context {
-	return newContext(C.Context_createEditableCopy(c.ptr))
+	ret := newContext(C.Context_createEditableCopy(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Context) CacheID() (string, error) {
@@ -38,6 +43,7 @@ func (c *Context) CacheID() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	runtime.KeepAlive(c)
 	return C.GoString(id), err
 }
 
@@ -45,20 +51,26 @@ func (c *Context) SetSearchPath(path string) {
 	c_str := C.CString(path)
 	defer C.free(unsafe.Pointer(c_str))
 	C.Context_setSearchPath(c.ptr, c_str)
+	runtime.KeepAlive(c)
 }
 
 func (c *Context) SearchPath() string {
-	return C.GoString(C.Context_getSearchPath(c.ptr))
+	ret := C.GoString(C.Context_getSearchPath(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Context) SetWorkingDir(dirname string) {
 	c_str := C.CString(dirname)
 	defer C.free(unsafe.Pointer(c_str))
 	C.Context_setWorkingDir(c.ptr, c_str)
+	runtime.KeepAlive(c)
 }
 
 func (c *Context) WorkingDir() string {
-	return C.GoString(C.Context_getWorkingDir(c.ptr))
+	ret := C.GoString(C.Context_getWorkingDir(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Context) SetStringVar(name, value string) {
@@ -68,17 +80,21 @@ func (c *Context) SetStringVar(name, value string) {
 	defer C.free(unsafe.Pointer(c_val))
 
 	C.Context_setStringVar(c.ptr, c_name, c_val)
+	runtime.KeepAlive(c)
 }
 
 func (c *Context) StringVar(name string) string {
 	c_name := C.CString(name)
 	defer C.free(unsafe.Pointer(c_name))
-	return C.GoString(C.Context_getStringVar(c.ptr, c_name))
+	ret := C.GoString(C.Context_getStringVar(c.ptr, c_name))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 // Seed all string vars with the current environment.
 func (c *Context) LoadEnvironment() {
 	C.Context_loadEnvironment(c.ptr)
+	runtime.KeepAlive(c)
 }
 
 // Do a file lookup.
@@ -86,7 +102,9 @@ func (c *Context) LoadEnvironment() {
 func (c *Context) ResolveStringVar(val string) string {
 	c_name := C.CString(val)
 	defer C.free(unsafe.Pointer(c_name))
-	return C.GoString(C.Context_resolveStringVar(c.ptr, c_name))
+	ret := C.GoString(C.Context_resolveStringVar(c.ptr, c_name))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 // Do a file lookup.
@@ -100,5 +118,6 @@ func (c *Context) ResolveFileLocation(filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	runtime.KeepAlive(c)
 	return C.GoString(val), err
 }

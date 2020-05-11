@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -559,9 +561,11 @@ func TestConfigDisplaysViews(t *testing.T) {
 		t.Errorf("expected NumDisplays to be 2. but got %d", i)
 	}
 
-	str = CONFIG.Display(0)
-	if str != "DCIP3" {
-		t.Errorf("expected Display at index 0 to be 'DCIP3', but got %q", str)
+	expectStrs := []string{"DCIP3", "sRGB"}
+	strs := []string{CONFIG.Display(0), CONFIG.Display(1)}
+	sort.Strings(strs)
+	if !reflect.DeepEqual(strs, expectStrs) {
+		t.Errorf("expected displays %#v, but got %#v", expectStrs, str)
 	}
 
 	str = CONFIG.DefaultView("sRGB")

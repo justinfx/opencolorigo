@@ -47,7 +47,10 @@ func newColorSpace(p unsafe.Pointer) *ColorSpace {
 	return cfg
 }
 
-func deleteColorspace(c *ColorSpace) { C.free(c.ptr) }
+func deleteColorspace(c *ColorSpace) {
+	C.free(c.ptr)
+	runtime.KeepAlive(c)
+}
 
 // Create a new empty ColorSpace
 func NewColorSpace() *ColorSpace {
@@ -64,27 +67,35 @@ func (c *ColorSpace) String() string {
 
 // Create a new editable copy of this ColorSpace
 func (c *ColorSpace) EditableCopy() *ColorSpace {
-	return newColorSpace(C.ColorSpace_createEditableCopy(c.ptr))
+	ret := newColorSpace(C.ColorSpace_createEditableCopy(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *ColorSpace) Name() string {
-	return C.GoString(C.ColorSpace_getName(c.ptr))
+	ret := C.GoString(C.ColorSpace_getName(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *ColorSpace) SetName(name string) {
 	c_str := C.CString(name)
 	defer C.free(unsafe.Pointer(c_str))
 	C.ColorSpace_setName(c.ptr, c_str)
+	runtime.KeepAlive(c)
 }
 
 func (c *ColorSpace) Family() string {
-	return C.GoString(C.ColorSpace_getFamily(c.ptr))
+	ret := C.GoString(C.ColorSpace_getFamily(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *ColorSpace) SetFamily(family string) {
 	c_str := C.CString(family)
 	defer C.free(unsafe.Pointer(c_str))
 	C.ColorSpace_setFamily(c.ptr, c_str)
+	runtime.KeepAlive(c)
 }
 
 // Get the ColorSpace group name (used for equality comparisons)
@@ -94,7 +105,9 @@ func (c *ColorSpace) SetFamily(family string) {
 // ColorSpaces with an empty equality group).
 // This is often, though not always, set to the same value as ‘family’.
 func (c *ColorSpace) EqualityGroup() string {
-	return C.GoString(C.ColorSpace_getEqualityGroup(c.ptr))
+	ret := C.GoString(C.ColorSpace_getEqualityGroup(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *ColorSpace) SetEqualityGroup(group string) {
@@ -111,12 +124,16 @@ func (c *ColorSpace) SetDescription(description string) {
 	c_str := C.CString(description)
 	defer C.free(unsafe.Pointer(c_str))
 	C.ColorSpace_setDescription(c.ptr, c_str)
+	runtime.KeepAlive(c)
 }
 
 func (c *ColorSpace) BitDepth() BitDepth {
-	return BitDepth(C.ColorSpace_getBitDepth(c.ptr))
+	ret := BitDepth(C.ColorSpace_getBitDepth(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *ColorSpace) SetBitDepth(bitDepth BitDepth) {
 	C.ColorSpace_setBitDepth(c.ptr, C.BitDepth(bitDepth))
+	runtime.KeepAlive(c)
 }

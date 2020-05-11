@@ -31,6 +31,7 @@ func newConfig(p *C.Config) *Config {
 
 func deleteConfig(c *Config) {
 	C.freeContext((*C._Context)(c.ptr))
+	runtime.KeepAlive(c)
 }
 
 // Create a new empty Config
@@ -52,6 +53,7 @@ func CurrentConfig() (*Config, error) {
 // Set the current configuration. This will then store a copy of the specified config.
 func SetCurrentConfig(config *Config) error {
 	_, err := C.SetCurrentConfig(config.ptr)
+	runtime.KeepAlive(config)
 	return err
 }
 
@@ -89,12 +91,16 @@ func ConfigCreateFromData(data string) (*Config, error) {
 }
 
 func (c *Config) lastError() error {
-	return errors.New(C.GoString(c.ptr.last_error))
+	ret := errors.New(C.GoString(c.ptr.last_error))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 // Create a new editable copy of this Config
 func (c *Config) EditableCopy() *Config {
-	return newConfig(C.Config_createEditableCopy(c.ptr))
+	ret := newConfig(C.Config_createEditableCopy(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 // This will return a non-nil error if the config is malformed.
@@ -104,6 +110,7 @@ func (c *Config) SanityCheck() error {
 	if err != nil {
 		return c.lastError()
 	}
+	runtime.KeepAlive(c)
 	return nil
 }
 
@@ -113,6 +120,7 @@ func (c *Config) Serialize() (string, error) {
 		return "", c.lastError()
 	}
 	defer C.free(unsafe.Pointer(c_str))
+	runtime.KeepAlive(c)
 	return C.GoString(c_str), err
 }
 
@@ -130,6 +138,7 @@ func (c *Config) CacheID() (string, error) {
 	if err != nil {
 		return "", c.lastError()
 	}
+	runtime.KeepAlive(c)
 	return C.GoString(id), err
 }
 
@@ -152,6 +161,8 @@ func (c *Config) CacheIDWithContext(context *Context) (string, error) {
 	if err != nil {
 		return "", c.lastError()
 	}
+	runtime.KeepAlive(c)
+	runtime.KeepAlive(context)
 	return C.GoString(id), err
 }
 
@@ -160,6 +171,7 @@ func (c *Config) Description() (string, error) {
 	if err != nil {
 		return "", c.lastError()
 	}
+	runtime.KeepAlive(c)
 	return C.GoString(d), err
 }
 
@@ -168,6 +180,7 @@ func (c *Config) IsStrictParsingEnabled() bool {
 	if err != nil {
 		return false
 	}
+	runtime.KeepAlive(c)
 	return bool(enabled)
 }
 
@@ -176,6 +189,7 @@ func (c *Config) SetStrictParsingEnabled(enabled bool) error {
 	if err != nil {
 		return c.lastError()
 	}
+	runtime.KeepAlive(c)
 	return err
 }
 
@@ -188,6 +202,7 @@ func (c *Config) CurrentContext() (*Context, error) {
 	if err != nil {
 		return nil, c.lastError()
 	}
+	runtime.KeepAlive(c)
 	return newContext(ptr), err
 }
 
@@ -197,6 +212,7 @@ func (c *Config) SearchPath() (string, error) {
 	if err != nil {
 		return "", c.lastError()
 	}
+	runtime.KeepAlive(c)
 	return C.GoString(path), err
 }
 
@@ -206,6 +222,7 @@ func (c *Config) WorkingDir() (string, error) {
 	if err != nil {
 		return "", c.lastError()
 	}
+	runtime.KeepAlive(c)
 	return C.GoString(dir), err
 }
 
@@ -310,6 +327,7 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 		}
 	}
 
+	runtime.KeepAlive(c)
 	return nil, fmt.Errorf("Wrong argument types: %v", args)
 }
 
@@ -387,6 +405,7 @@ func (c *Config) ColorSpace(name string) (*ColorSpace, error) {
 		err = fmt.Errorf("%q is not a valid ColorSpace: %q", name, c.lastError())
 		return nil, err
 	}
+	runtime.KeepAlive(c)
 	return newColorSpace(cs), err
 }
 
@@ -395,6 +414,7 @@ func (c *Config) NumColorSpaces() int {
 	if err != nil {
 		return 0
 	}
+	runtime.KeepAlive(c)
 	return int(num)
 }
 
@@ -404,6 +424,7 @@ func (c *Config) ColorSpaceNameByIndex(index int) (string, error) {
 	if err != nil {
 		return "", c.lastError()
 	}
+	runtime.KeepAlive(c)
 	return C.GoString(name), err
 }
 
@@ -416,6 +437,7 @@ func (c *Config) IndexForColorSpace(name string) (int, error) {
 	if err != nil {
 		return -1, c.lastError()
 	}
+	runtime.KeepAlive(c)
 	return int(idx), err
 }
 
@@ -423,11 +445,13 @@ func (c *Config) IndexForColorSpace(name string) (int, error) {
 // This stores a copy of the specified color space.
 func (c *Config) AddColorSpace(cs *ColorSpace) error {
 	_, err := C.Config_addColorSpace(c.ptr, cs.ptr)
+	runtime.KeepAlive(c)
 	return err
 }
 
 func (c *Config) ClearColorSpaces() error {
 	_, err := C.Config_clearColorSpaces(c.ptr)
+	runtime.KeepAlive(c)
 	return err
 }
 
@@ -447,6 +471,7 @@ func (c *Config) ParseColorSpaceFromString(str string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	runtime.KeepAlive(c)
 	return C.GoString(name), err
 }
 
@@ -469,6 +494,7 @@ func (c *Config) SetRole(role, colorSpaceName string) error {
 	}
 
 	_, err := C.Config_setRole(c.ptr, c_role, c_space)
+	runtime.KeepAlive(c)
 	return err
 }
 
@@ -477,6 +503,7 @@ func (c *Config) NumRoles() int {
 	if err != nil {
 		return 0
 	}
+	runtime.KeepAlive(c)
 	return int(num)
 }
 
@@ -489,6 +516,7 @@ func (c *Config) HasRole(role string) bool {
 	if err != nil {
 		return false
 	}
+	runtime.KeepAlive(c)
 	return bool(has)
 }
 
@@ -499,6 +527,7 @@ func (c *Config) RoleName(index int) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	runtime.KeepAlive(c)
 	return C.GoString(name), err
 }
 
@@ -517,37 +546,51 @@ func (c *Config) DisplayLooks(display, view string) string {
 	defer C.free(unsafe.Pointer(c_disp))
 	defer C.free(unsafe.Pointer(c_view))
 
-	return C.GoString(C.Config_getDisplayLooks(c.ptr, c_disp, c_view))
+	ret := C.GoString(C.Config_getDisplayLooks(c.ptr, c_disp, c_view))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Config) DefaultDisplay() string {
-	return C.GoString(C.Config_getDefaultDisplay(c.ptr))
+	ret := C.GoString(C.Config_getDefaultDisplay(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Config) NumDisplays() int {
-	return int(C.Config_getNumDisplays(c.ptr))
+	ret := int(C.Config_getNumDisplays(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Config) Display(index int) string {
-	return C.GoString(C.Config_getDisplay(c.ptr, C.int(index)))
+	ret := C.GoString(C.Config_getDisplay(c.ptr, C.int(index)))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Config) DefaultView(display string) string {
 	c_disp := C.CString(display)
 	defer C.free(unsafe.Pointer(c_disp))
-	return C.GoString(C.Config_getDefaultView(c.ptr, c_disp))
+	ret := C.GoString(C.Config_getDefaultView(c.ptr, c_disp))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Config) NumViews(display string) int {
 	c_disp := C.CString(display)
 	defer C.free(unsafe.Pointer(c_disp))
-	return int(C.Config_getNumViews(c.ptr, c_disp))
+	ret := int(C.Config_getNumViews(c.ptr, c_disp))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Config) View(display string, index int) string {
 	c_disp := C.CString(display)
 	defer C.free(unsafe.Pointer(c_disp))
-	return C.GoString(C.Config_getView(c.ptr, c_disp, C.int(index)))
+	ret := C.GoString(C.Config_getView(c.ptr, c_disp, C.int(index)))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 func (c *Config) DisplayColorSpaceName(display, view string) string {
@@ -556,7 +599,9 @@ func (c *Config) DisplayColorSpaceName(display, view string) string {
 	defer C.free(unsafe.Pointer(c_disp))
 	defer C.free(unsafe.Pointer(c_view))
 
-	return C.GoString(C.Config_getDisplayColorSpaceName(c.ptr, c_disp, c_view))
+	ret := C.GoString(C.Config_getDisplayColorSpaceName(c.ptr, c_disp, c_view))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 // For the (display,view) combination, specify which colorSpace and look to use.
@@ -572,11 +617,13 @@ func (c *Config) AddDisplay(display, view, colorSpace, looks string) error {
 	defer C.free(unsafe.Pointer(c_looks))
 
 	_, err := C.Config_addDisplay(c.ptr, c_disp, c_view, c_cs, c_looks)
+	runtime.KeepAlive(c)
 	return err
 }
 
 func (c *Config) ClearDisplays() {
 	C.Config_clearDisplays(c.ptr)
+	runtime.KeepAlive(c)
 }
 
 // Comma-delimited list of display names.
@@ -584,11 +631,14 @@ func (c *Config) SetActiveDisplays(displays string) error {
 	c_disp := C.CString(displays)
 	defer C.free(unsafe.Pointer(c_disp))
 	_, err := C.Config_setActiveDisplays(c.ptr, c_disp)
+	runtime.KeepAlive(c)
 	return err
 }
 
 func (c *Config) ActiveDisplays() string {
-	return C.GoString(C.Config_getActiveDisplays(c.ptr))
+	ret := C.GoString(C.Config_getActiveDisplays(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
 
 // Comma-delimited list of view names.
@@ -596,9 +646,12 @@ func (c *Config) SetActiveViews(views string) error {
 	c_view := C.CString(views)
 	defer C.free(unsafe.Pointer(c_view))
 	_, err := C.Config_setActiveViews(c.ptr, c_view)
+	runtime.KeepAlive(c)
 	return err
 }
 
 func (c *Config) ActiveViews() string {
-	return C.GoString(C.Config_getActiveViews(c.ptr))
+	ret := C.GoString(C.Config_getActiveViews(c.ptr))
+	runtime.KeepAlive(c)
+	return ret
 }
