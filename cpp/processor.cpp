@@ -94,7 +94,7 @@ extern "C" {
         END_CATCH_ERR
     }
 
-    // ImageDesc 
+    // ImageDesc
     PackedImageDesc* PackedImageDesc_Create(float* data, long width, long height, long numChannels) {
         BEGIN_CATCH_ERR
         return (PackedImageDesc*) new OCIO::PackedImageDesc(data, width, height, numChannels);

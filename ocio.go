@@ -8,12 +8,10 @@ package ocio
 /*
 #cgo CPPFLAGS: -I./cpp -Wno-return-type
 #cgo LDFLAGS: -lstdc++
-#cgo pkg-config: OpenColorIO
 
 #include "stdlib.h"
 
 #include "cpp/ocio.h"
-
 */
 import "C"
 

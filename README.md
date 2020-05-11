@@ -37,6 +37,20 @@ Installation
 
     go get github.com/justinfx/opencolorigo
 
+If you have installed OpenColorIO to a custom location, you will need to tell CGO where to find the 
+headers and libs, and use the `no_pkgconfig` tag to disable pkg-config:
+
+    export CGO_CPPFLAGS="-I/path/to/include"
+    export CGO_LDFLAGS="-L/path/to/lib"
+    go get -tags no_pkgconfig github.com/justinfx/opencolorigo
+
+Or just prefix the `install` command, and use the `no_pkgconfig` tag:
+
+    /usr/bin/env \
+      CGO_CPPFLAGS="-I/usr/local/include" \
+      CGO_LDFLAGS="-L/usr/local/lib -lopencolorio" \
+      go get -tags no_pkgconfig github.com/justinfx/openimageigo
+
 Documentation
 -------------
 

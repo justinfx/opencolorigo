@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -29,6 +30,9 @@ func init() {
 	} else {
 		os.Setenv("OCIO", cfg)
 	}
+
+	// Default value for ocio config search path variable
+	os.Setenv("OVERRIDE", "luts")
 }
 
 // Usage Example: Compositing plugin that converts from “log” to “lin”
@@ -441,6 +445,31 @@ func TestConfigProcessor(t *testing.T) {
 	proc.IsNoOp()
 	proc.HasChannelCrosstalk()
 
+	// Check file paths
+	if actual := proc.Metadata().NumFiles(); actual != 1 {
+		t.Fatalf("Expected 1 files; got %d", actual)
+	}
+	if path := proc.Metadata().File(0); !strings.HasSuffix(path, "/luts/lg10.spi1d") {
+		t.Fatalf("Expected path %q to end with /luts/lg10.spi1d", path)
+	}
+
+	ct2 := NewContext()
+	ct2.SetStringVar("OVERRIDE", "luts2")
+	ct2.SetSearchPath(ct.SearchPath())
+	ct2.SetWorkingDir(ct.WorkingDir())
+
+	proc, err = cfg.Processor(ct2, "scene_linear", "color_timing")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if actual := proc.Metadata().NumFiles(); actual != 1 {
+		t.Fatalf("Expected 1 files; got %d", actual)
+	}
+	if path := proc.Metadata().File(0); !strings.HasSuffix(path, "/luts2/lg10.spi1d") {
+		t.Fatalf("Expected path %q to end with /luts2/lg10.spi1d", path)
+	}
+
 	_, err = cfg.Processor("scene_linear", "color_timing")
 	if err != nil {
 		t.Fatal("Error getting a Processor with 'scene_linear', 'color_timing'")
@@ -464,7 +493,6 @@ func TestConfigProcessor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-
 }
 
 func TestConfigDisplaysViews(t *testing.T) {
