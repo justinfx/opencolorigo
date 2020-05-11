@@ -1,8 +1,15 @@
 # OpenColorIO bindings for Go
 
-OpenColorIO (OCIO) is a complete color management solution geared towards motion picture production with an emphasis on visual effects and computer animation. OCIO provides a straightforward and consistent user experience across all supporting applications while allowing for sophisticated back-end configuration options suitable for high-end production usage. OCIO is compatible with the Academy Color Encoding Specification (ACES) and is LUT-format agnostic, supporting many popular formats.
+OpenColorIO (OCIO) is a complete color management solution geared towards motion picture production with an emphasis on 
+visual effects and computer animation. OCIO provides a straightforward and consistent user experience across all 
+supporting applications while allowing for sophisticated back-end configuration options suitable for high-end production 
+usage. OCIO is compatible with the Academy Color Encoding Specification (ACES) and is LUT-format agnostic, supporting 
+many popular formats.
 
-OpenColorIO is released as version 1.0 and has been in development since 2003. OCIO represents the culmination of years of production experience earned on such films as SpiderMan 2 (2004), Surf’s Up (2007), Cloudy with a Chance of Meatballs (2009), Alice in Wonderland (2010), and many more. OpenColorIO is natively supported in commercial applications like Katana, Mari, Silhouette FX, and others coming soon.
+OpenColorIO is released as version 1.0 and has been in development since 2003. OCIO represents the culmination of years 
+of production experience earned on such films as SpiderMan 2 (2004), Surf’s Up (2007), Cloudy with a Chance of Meatballs 
+(2009), Alice in Wonderland (2010), and many more. OpenColorIO is natively supported in commercial applications like 
+Katana, Mari, Silhouette FX, and others coming soon.
 
 OpenColorIO is free and is one of several open source projects actively sponsored by Sony Imageworks.
 
@@ -17,14 +24,14 @@ Requirements
 Status
 ---------
 
-So far only parts of the API have been exposed. Most of the Config API is done, along with the ColorSpace, Context, and color processing via CPU Path. 
+So far only parts of the API have been exposed. Most of the Config API is done, along with the ColorSpace, Context, 
+Transform, and color processing via CPU Path. 
 
 * Implement all of the API
   * [Config/Luma](http://opencolorio.org/developers/api/OpenColorIO.html#luma)
   * [Config/Look](http://opencolorio.org/developers/api/OpenColorIO.html#look)
   * [ColorSpace/Data](http://opencolorio.org/developers/api/OpenColorIO.html#data)
   * [ColorSpace/Allocation](http://opencolorio.org/developers/api/OpenColorIO.html#allocation)
-  * [ColorSpace/Transform](http://opencolorio.org/developers/api/OpenColorIO.html#transform)
   * [Look](http://opencolorio.org/developers/api/OpenColorIO.html#look-section)
   * [Processor/GPU Path](http://opencolorio.org/developers/api/OpenColorIO.html#gpu-path) (CPU Path done)
   * [Baker](http://opencolorio.org/developers/api/OpenColorIO.html#baker)

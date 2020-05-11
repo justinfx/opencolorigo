@@ -179,6 +179,45 @@ extern "C" {
         return (Processor*) new OCIO::ConstProcessorRcPtr(ptr);
     }
 
+    Processor* Config_getProcessor_TX(Config *p, Transform* tx) {
+        OCIO::ConstProcessorRcPtr ptr;
+        OCIO::ConstTransformRcPtr tx_ptr = * static_cast<OCIO::ConstTransformRcPtr*>(tx);
+
+        BEGIN_CATCH_ERR
+        ptr = static_cast<OCIO::ConstConfigRcPtr*>(p->handle)->get()->getProcessor(tx_ptr);
+        END_CATCH_CTX_ERR(p)
+
+        if ( ptr == NULL) { return NULL; }
+        return (Processor*) new OCIO::ConstProcessorRcPtr(ptr);
+    }
+
+    Processor* Config_getProcessor_TX_D(Config *p, Transform* tx, TransformDirection direction) {
+        OCIO::ConstProcessorRcPtr ptr;
+        OCIO::ConstTransformRcPtr tx_ptr = * static_cast<OCIO::ConstTransformRcPtr*>(tx);
+
+        BEGIN_CATCH_ERR
+        ptr = static_cast<OCIO::ConstConfigRcPtr*>(p->handle)->get()->getProcessor(
+            tx_ptr, (OCIO::TransformDirection)direction);
+        END_CATCH_CTX_ERR(p)
+
+        if ( ptr == NULL) { return NULL; }
+        return (Processor*) new OCIO::ConstProcessorRcPtr(ptr);
+    }
+
+    Processor* Config_getProcessor_CT_TX_D(Config *p, Context* ct, Transform* tx, TransformDirection direction) {
+        OCIO::ConstProcessorRcPtr ptr;
+        OCIO::ConstContextRcPtr ct_ptr = * static_cast<OCIO::ConstContextRcPtr*>(ct);
+        OCIO::ConstTransformRcPtr tx_ptr = * static_cast<OCIO::ConstTransformRcPtr*>(tx);
+
+        BEGIN_CATCH_ERR
+        ptr = static_cast<OCIO::ConstConfigRcPtr*>(p->handle)->get()->getProcessor(
+            ct_ptr, tx_ptr, (OCIO::TransformDirection)direction);
+        END_CATCH_CTX_ERR(p)
+
+        if ( ptr == NULL) { return NULL; }
+        return (Processor*) new OCIO::ConstProcessorRcPtr(ptr);
+    }
+
     // Config ColorSpaces
     int Config_getNumColorSpaces(Config *p) {
         BEGIN_CATCH_ERR

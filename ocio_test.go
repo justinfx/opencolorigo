@@ -495,6 +495,53 @@ func TestConfigProcessor(t *testing.T) {
 	}
 }
 
+func TestConfigProcessorTransform(t *testing.T) {
+	cfg, _ := CurrentConfig()
+	ct, err := cfg.CurrentContext()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	tx := NewDisplayTransform()
+	tx.SetDisplay("sRGB")
+	tx.SetView("Film")
+	tx.SetInputColorSpace("scene_linear")
+	proc, err := cfg.ProcessorTransform(tx)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	proc, err = cfg.ProcessorTransformDir(tx, TRANSFORM_DIR_FORWARD)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Check file paths
+	if actual := proc.Metadata().NumFiles(); actual != 2 {
+		t.Fatalf("Expected 1 files; got %d", actual)
+	}
+	if path := proc.Metadata().File(0); !strings.HasSuffix(path, "/luts/lg10.spi1d") {
+		t.Fatalf("Expected path %q to end with /luts/lg10.spi1d", path)
+	}
+
+	ct2 := NewContext()
+	ct2.SetStringVar("OVERRIDE", "luts2")
+	ct2.SetSearchPath(ct.SearchPath())
+	ct2.SetWorkingDir(ct.WorkingDir())
+
+	proc, err = cfg.ProcessorCtxTransformDir(ct2, tx, TRANSFORM_DIR_FORWARD)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if actual := proc.Metadata().NumFiles(); actual != 2 {
+		t.Fatalf("Expected 1 files; got %d", actual)
+	}
+	if path := proc.Metadata().File(0); !strings.HasSuffix(path, "/luts2/lg10.spi1d") {
+		t.Fatalf("Expected path %q to end with /luts2/lg10.spi1d", path)
+	}
+}
+
 func TestConfigDisplaysViews(t *testing.T) {
 	var (
 		str string

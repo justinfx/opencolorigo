@@ -60,6 +60,12 @@ typedef enum EnvironmentMode {
     ENV_ENVIRONMENT_LOAD_ALL
 } EnvironmentMode;
 
+typedef enum TransformDirection {
+    TRANSFORM_DIR_UNKNOWN = 0,
+    TRANSFORM_DIR_FORWARD,
+    TRANSFORM_DIR_INVERSE
+} TransformDirection;
+
 typedef struct _Context {
     void* handle;
     char* last_error;
@@ -73,6 +79,8 @@ typedef void Processor;
 typedef void ProcessorMetadata;
 typedef void ImageDesc;
 typedef void PackedImageDesc;
+typedef void Transform;
+typedef void DisplayTransform;
 
 void freeContext(_Context* ctx);
 char* getLastError(_Context* ctx);
@@ -109,6 +117,9 @@ Processor* Config_getProcessor_CT_CS_CS(Config *p, Context* ct, ColorSpace* srcC
 Processor* Config_getProcessor_CT_S_S(Config *p, Context* ct, const char* srcName, const char* dstName);
 Processor* Config_getProcessor_CS_CS(Config *p, ColorSpace* srcCS, ColorSpace* dstCS);
 Processor* Config_getProcessor_S_S(Config *p, const char* srcName, const char* dstName);
+Processor* Config_getProcessor_TX(Config *p, Transform* tx);
+Processor* Config_getProcessor_TX_D(Config *p, Transform* tx, TransformDirection direction);
+Processor* Config_getProcessor_CT_TX_D(Config *p, Context* ct, Transform* tx, TransformDirection direction);
 
 // Config ColorSpaces
 int Config_getNumColorSpaces(Config *p);
@@ -195,6 +206,22 @@ float* PackedImageDesc_getData(PackedImageDesc *p);
 long PackedImageDesc_getWidth(PackedImageDesc *p);
 long PackedImageDesc_getHeight(PackedImageDesc *p);
 long PackedImageDesc_getNumChannels(PackedImageDesc *p);
+
+// DisplayTransform
+DisplayTransform* DisplayTransform_Create();
+DisplayTransform* DisplayTransform_createEditableCopy(DisplayTransform *p);
+TransformDirection DisplayTransform_getDirection(DisplayTransform *p);
+void DisplayTransform_setDirection(DisplayTransform *p, TransformDirection dir);
+const char* DisplayTransform_getInputColorSpaceName(DisplayTransform *p);
+void DisplayTransform_setInputColorSpaceName(DisplayTransform *p, const char* name);
+const char* DisplayTransform_getDisplay(DisplayTransform *p);
+void DisplayTransform_setDisplay(DisplayTransform *p, const char* name);
+const char* DisplayTransform_getView(DisplayTransform *p);
+void DisplayTransform_setView(DisplayTransform *p, const char* name);
+const char* DisplayTransform_getLooksOverride(DisplayTransform *p);
+void DisplayTransform_setLooksOverride(DisplayTransform *p, const char* looks);
+bool DisplayTransform_getLooksOverrideEnabled(DisplayTransform *p);
+void DisplayTransform_setLooksOverrideEnabled(DisplayTransform *p, bool enabled);
 
 #ifdef __cplusplus
 }

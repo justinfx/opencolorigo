@@ -314,6 +314,65 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 }
 
 /*
+Get the processor for the specified transform, using the current Config context.
+
+Not often needed, but will allow for the re-use of atomic OCIO functionality
+(such as to apply an individual LUT file).
+*/
+func (c *Config) ProcessorTransform(tx Transform) (*Processor, error) {
+	ptr, err := C.Config_getProcessor_TX(c.ptr, tx.transformHandle())
+	if err != nil {
+		return nil, c.lastError()
+	}
+	proc := newProcessor(ptr)
+	runtime.KeepAlive(c)
+	runtime.KeepAlive(tx)
+	return proc, nil
+}
+
+/*
+Get the processor for the specified transform, and a transform direction,
+using the current Config context.
+
+Not often needed, but will allow for the re-use of atomic OCIO functionality
+(such as to apply an individual LUT file).
+*/
+func (c *Config) ProcessorTransformDir(tx Transform, dir TransformDirection) (*Processor, error) {
+	ptr, err := C.Config_getProcessor_TX_D(c.ptr, tx.transformHandle(), C.TransformDirection(dir))
+	if err != nil {
+		return nil, c.lastError()
+	}
+	proc := newProcessor(ptr)
+	runtime.KeepAlive(c)
+	runtime.KeepAlive(tx)
+	return proc, nil
+}
+
+/*
+Get the processor for the specified transform, using a specific Context instead of
+the current Config context, and a transform direction.
+
+Not often needed, but will allow for the re-use of atomic OCIO functionality
+(such as to apply an individual LUT file).
+*/
+func (c *Config) ProcessorCtxTransformDir(
+	ctx *Context, tx Transform, dir TransformDirection) (*Processor, error) {
+
+	ptr, err := C.Config_getProcessor_CT_TX_D(
+		c.ptr, ctx.ptr, tx.transformHandle(), C.TransformDirection(dir))
+
+	if err != nil {
+		return nil, c.lastError()
+	}
+
+	proc := newProcessor(ptr)
+	runtime.KeepAlive(c)
+	runtime.KeepAlive(ctx)
+	runtime.KeepAlive(tx)
+	return proc, nil
+}
+
+/*
 Config ColorSpaces
 */
 
