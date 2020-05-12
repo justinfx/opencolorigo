@@ -280,9 +280,9 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 			defer C.free(unsafe.Pointer(c_a1))
 			defer C.free(unsafe.Pointer(c_a2))
 
-			proc, err = C.Config_getProcessor_CT_S_S(c.ptr, ct.ptr, c_a1, c_a2)
-			if err != nil {
-				err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), c.lastError())
+			proc = C.Config_getProcessor_CT_S_S(c.ptr, ct.ptr, c_a1, c_a2)
+			if err = c.lastError(); err != nil {
+				err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), err)
 			}
 			return newProcessor(proc), err
 		}
@@ -290,9 +290,9 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 		if a1.Kind() == reflect.Ptr && a2.Kind() == reflect.Ptr {
 			if aPtr1, ok := args[1].(*ColorSpace); ok {
 				if aPtr2, ok := args[2].(*ColorSpace); ok {
-					proc, err = C.Config_getProcessor_CT_CS_CS(c.ptr, ct.ptr, aPtr1.ptr, aPtr2.ptr)
-					if err != nil {
-						err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), c.lastError())
+					proc = C.Config_getProcessor_CT_CS_CS(c.ptr, ct.ptr, aPtr1.ptr, aPtr2.ptr)
+					if err = c.lastError(); err != nil {
+						err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), err)
 					}
 					return newProcessor(proc), err
 				}
@@ -310,9 +310,9 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 			defer C.free(unsafe.Pointer(c_a1))
 			defer C.free(unsafe.Pointer(c_a2))
 
-			proc, err = C.Config_getProcessor_S_S(c.ptr, c_a1, c_a2)
-			if err != nil {
-				err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), c.lastError())
+			proc = C.Config_getProcessor_S_S(c.ptr, c_a1, c_a2)
+			if err = c.lastError(); err != nil {
+				err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), err)
 			}
 			return newProcessor(proc), err
 		}
@@ -320,9 +320,9 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 		if a1.Kind() == reflect.Ptr && a2.Kind() == reflect.Ptr {
 			if aPtr1, ok := args[0].(*ColorSpace); ok {
 				if aPtr2, ok := args[1].(*ColorSpace); ok {
-					proc, err = C.Config_getProcessor_CS_CS(c.ptr, aPtr1.ptr, aPtr2.ptr)
-					if err != nil {
-						err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), c.lastError())
+					proc = C.Config_getProcessor_CS_CS(c.ptr, aPtr1.ptr, aPtr2.ptr)
+					if err = c.lastError(); err != nil {
+						err = fmt.Errorf("%s: %s", fmt.Sprintf(bad_str, a1, a2), err)
 					}
 					return newProcessor(proc), err
 				}
@@ -341,8 +341,8 @@ Not often needed, but will allow for the re-use of atomic OCIO functionality
 (such as to apply an individual LUT file).
 */
 func (c *Config) ProcessorTransform(tx Transform) (*Processor, error) {
-	ptr, err := C.Config_getProcessor_TX(c.ptr, tx.transformHandle())
-	if err != nil {
+	ptr := C.Config_getProcessor_TX(c.ptr, tx.transformHandle())
+	if err := c.lastError(); err != nil {
 		return nil, c.lastError()
 	}
 	proc := newProcessor(ptr)
@@ -359,8 +359,8 @@ Not often needed, but will allow for the re-use of atomic OCIO functionality
 (such as to apply an individual LUT file).
 */
 func (c *Config) ProcessorTransformDir(tx Transform, dir TransformDirection) (*Processor, error) {
-	ptr, err := C.Config_getProcessor_TX_D(c.ptr, tx.transformHandle(), C.TransformDirection(dir))
-	if err != nil {
+	ptr := C.Config_getProcessor_TX_D(c.ptr, tx.transformHandle(), C.TransformDirection(dir))
+	if err := c.lastError(); err != nil {
 		return nil, c.lastError()
 	}
 	proc := newProcessor(ptr)
@@ -379,10 +379,10 @@ Not often needed, but will allow for the re-use of atomic OCIO functionality
 func (c *Config) ProcessorCtxTransformDir(
 	ctx *Context, tx Transform, dir TransformDirection) (*Processor, error) {
 
-	ptr, err := C.Config_getProcessor_CT_TX_D(
+	ptr := C.Config_getProcessor_CT_TX_D(
 		c.ptr, ctx.ptr, tx.transformHandle(), C.TransformDirection(dir))
 
-	if err != nil {
+	if err := c.lastError(); err != nil {
 		return nil, c.lastError()
 	}
 
@@ -404,8 +404,15 @@ func (c *Config) ColorSpace(name string) (*ColorSpace, error) {
 	defer C.free(unsafe.Pointer(c_str))
 
 	cs, err := C.Config_getColorSpace(c.ptr, c_str)
-	if err != nil || cs == nil {
-		err = fmt.Errorf("%q is not a valid ColorSpace: %q", name, c.lastError())
+	if err != nil {
+		if err2 := c.lastError(); err2 != nil {
+			err = fmt.Errorf("%v: %v", err2, err)
+		}
+		err = fmt.Errorf("%q is not a valid ColorSpace: %v", name, err)
+		return nil, err
+	}
+	if cs == nil {
+		err = fmt.Errorf("%q is not a valid ColorSpace", name)
 		return nil, err
 	}
 	runtime.KeepAlive(c)
