@@ -808,7 +808,44 @@ func TestContextWorkingDir(t *testing.T) {
 
 func TestContextLoadEnvironment(t *testing.T) {
 	c := NewContext()
+	c.SetEnvironmentMode(ENVIRONMENT_UNKNOWN)
 	c.LoadEnvironment()
+
+	c = NewContext()
+	c.SetEnvironmentMode(ENVIRONMENT_LOAD_ALL)
+	c.LoadEnvironment()
+
+	c = NewContext()
+	c.SetEnvironmentMode(ENVIRONMENT_LOAD_PREDEFINED)
+	c.LoadEnvironment()
+}
+
+func TestContextResolveStringVar(t *testing.T) {
+	c := NewContext()
+	c.LoadEnvironment()
+	c.SetStringVar("FILM", "foo")
+	c.SetStringVar("SCENE", "bar")
+	c.SetStringVar("SHOT", "baz")
+
+	expect := "foo"
+	if actual := c.StringVar("FILM"); actual != expect {
+		t.Errorf("expected %q, got %q", expect, actual)
+	}
+	expect = "bar"
+	if actual := c.StringVar("SCENE"); actual != expect {
+		t.Errorf("expected %q, got %q", expect, actual)
+	}
+	expect = "baz"
+	if actual := c.StringVar("SHOT"); actual != expect {
+		t.Errorf("expected %q, got %q", expect, actual)
+	}
+
+	pattern := "start/$FILM/$SCENE/$SHOT/end"
+	expect = "start/foo/bar/baz/end"
+	actual := c.ResolveStringVar(pattern)
+	if actual != expect {
+		t.Fatalf("expected %q, got %q", expect, actual)
+	}
 }
 
 /*

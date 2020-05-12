@@ -179,6 +179,8 @@ const char* Context_getWorkingDir(Context *p);
 void Context_setStringVar(Context *p, const char* name, const char* value);
 const char* Context_getStringVar(Context *p, const char* name);
 void Context_loadEnvironment(Context *p);
+EnvironmentMode Context_getEnvironmentMode(Context *p);
+void Context_setEnvironmentMode(Context *p, EnvironmentMode mode);
 const char* Context_resolveStringVar(Context *p, const char* val);
 const char* Context_resolveFileLocation(Context *p, const char* filename);
 

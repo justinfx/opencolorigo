@@ -91,6 +91,17 @@ func (c *Context) StringVar(name string) string {
 	return ret
 }
 
+func (c *Context) EnvironmentMode() EnvironmentMode {
+	ret := C.Context_getEnvironmentMode(c.ptr)
+	runtime.KeepAlive(c)
+	return EnvironmentMode(ret)
+}
+
+func (c *Context) SetEnvironmentMode(mode EnvironmentMode) {
+	C.Context_setEnvironmentMode(c.ptr, C.EnvironmentMode(mode))
+	runtime.KeepAlive(c)
+}
+
 // Seed all string vars with the current environment.
 func (c *Context) LoadEnvironment() {
 	C.Context_loadEnvironment(c.ptr)

@@ -65,7 +65,19 @@ extern "C" {
         return static_cast<OCIO::ConstContextRcPtr*>(p)->get()->getStringVar(name);
         END_CATCH_ERR
     }
-    
+
+    EnvironmentMode Context_getEnvironmentMode(Context *p) {
+        BEGIN_CATCH_ERR
+        return (EnvironmentMode)(static_cast<OCIO::ContextRcPtr*>(p)->get()->getEnvironmentMode());
+        END_CATCH_ERR
+    }
+
+    void Context_setEnvironmentMode(Context *p, EnvironmentMode mode) {
+        BEGIN_CATCH_ERR
+        static_cast<OCIO::ContextRcPtr*>(p)->get()->setEnvironmentMode((OCIO::EnvironmentMode)mode);
+        END_CATCH_ERR
+    }
+
     void Context_loadEnvironment(Context *p) {
         BEGIN_CATCH_ERR
         static_cast<OCIO::ContextRcPtr*>(p)->get()->loadEnvironment();
