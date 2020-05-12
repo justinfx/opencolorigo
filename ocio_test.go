@@ -454,6 +454,9 @@ func TestConfigProcessor(t *testing.T) {
 	if path := proc.Metadata().File(0); !strings.HasSuffix(path, "/luts/lg10.spi1d") {
 		t.Fatalf("Expected path %q to end with /luts/lg10.spi1d", path)
 	}
+	if files := proc.Metadata().Files(); len(files) != 1 {
+		t.Fatalf("Expected slice of len 1, got %d", len(files))
+	}
 
 	ct2 := NewContext()
 	ct2.SetStringVar("OVERRIDE", "luts2")

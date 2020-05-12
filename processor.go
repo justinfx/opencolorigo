@@ -101,6 +101,17 @@ func (p *ProcessorMetadata) File(index int) string {
 	return ret
 }
 
+// Files is a helper to return a slice of the file paths,
+// using NumFiles and File(index)
+func (p *ProcessorMetadata) Files() []string {
+	num := p.NumFiles()
+	files := make([]string, 0, num)
+	for i := 0; i < num; i++ {
+		files = append(files, p.File(i))
+	}
+	return files
+}
+
 func (p *ProcessorMetadata) NumLooks() int {
 	ret := int(C.ProcessorMetadata_getNumLooks(p.ptr))
 	runtime.KeepAlive(p)
