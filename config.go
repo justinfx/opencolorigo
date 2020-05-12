@@ -91,9 +91,12 @@ func ConfigCreateFromData(data string) (*Config, error) {
 }
 
 func (c *Config) lastError() error {
-	ret := errors.New(C.GoString(c.ptr.last_error))
+	e := C.GoString(c.ptr.last_error)
+	if e == "" {
+		return nil
+	}
 	runtime.KeepAlive(c)
-	return ret
+	return errors.New(e)
 }
 
 // Create a new editable copy of this Config
