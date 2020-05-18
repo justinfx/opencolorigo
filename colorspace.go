@@ -48,13 +48,27 @@ func newColorSpace(p unsafe.Pointer) *ColorSpace {
 }
 
 func deleteColorspace(c *ColorSpace) {
-	C.free(c.ptr)
+	if c == nil {
+		return
+	}
+	if c.ptr != nil {
+		runtime.SetFinalizer(c, nil)
+		C.free(c.ptr)
+		c.ptr = nil
+	}
 	runtime.KeepAlive(c)
 }
 
 // Create a new empty ColorSpace
 func NewColorSpace() *ColorSpace {
 	return newColorSpace(C.ColorSpace_Create())
+}
+
+// Destroy immediately frees resources for this
+// instance instead of waiting for garbage collection
+// finalizer to run at some point later
+func (c *ColorSpace) Destroy() {
+	deleteColorspace(c)
 }
 
 func (c *ColorSpace) String() string {

@@ -71,4 +71,6 @@ func TestDisplayTransform(t *testing.T) {
 	if val := dt.View(); val != "view" {
 		t.Errorf("expected 'view'; got %q", val)
 	}
+	dt.Destroy()
+	cpy.Destroy()
 }

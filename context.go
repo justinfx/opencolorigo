@@ -22,13 +22,27 @@ func newContext(p unsafe.Pointer) *Context {
 }
 
 func deleteContext(c *Context) {
-	C.free(c.ptr)
+	if c == nil {
+		return
+	}
+	if c.ptr != nil {
+		runtime.SetFinalizer(c, nil)
+		C.free(c.ptr)
+		c.ptr = nil
+	}
 	runtime.KeepAlive(c)
 }
 
 // Create a new empty Context
 func NewContext() *Context {
 	return newContext(C.Context_Create())
+}
+
+// Destroy immediately frees resources for this
+// instance instead of waiting for garbage collection
+// finalizer to run at some point later
+func (c *Context) Destroy() {
+	deleteContext(c)
 }
 
 // Create a new editable copy of this Context

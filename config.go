@@ -30,7 +30,14 @@ func newConfig(p *C.Config) *Config {
 }
 
 func deleteConfig(c *Config) {
-	C.freeContext((*C._Context)(c.ptr))
+	if c == nil {
+		return
+	}
+	if c.ptr != nil {
+		runtime.SetFinalizer(c, nil)
+		C.freeContext((*C._Context)(c.ptr))
+		c.ptr = nil
+	}
 	runtime.KeepAlive(c)
 }
 
@@ -88,6 +95,13 @@ func ConfigCreateFromData(data string) (*Config, error) {
 		return nil, getLastError((*C._Context)(c))
 	}
 	return newConfig(c), err
+}
+
+// Destroy immediately frees resources for this
+// instance instead of waiting for garbage collection
+// finalizer to run at some point later
+func (c *Config) Destroy() {
+	deleteConfig(c)
 }
 
 func (c *Config) lastError() error {

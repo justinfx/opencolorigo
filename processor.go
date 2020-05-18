@@ -24,13 +24,27 @@ func newProcessor(p unsafe.Pointer) *Processor {
 }
 
 func deleteProcessor(p *Processor) {
-	C.free(p.ptr)
+	if p == nil {
+		return
+	}
+	if p.ptr != nil {
+		runtime.SetFinalizer(p, nil)
+		C.free(p.ptr)
+		p.ptr = nil
+	}
 	runtime.KeepAlive(p)
 }
 
 // Create a new empty Processor
 func NewProcessor() *Processor {
 	return newProcessor(C.Processor_Create())
+}
+
+// Destroy immediately frees resources for this
+// instance instead of waiting for garbage collection
+// finalizer to run at some point later
+func (p *Processor) Destroy() {
+	deleteProcessor(p)
 }
 
 func (p *Processor) IsNoOp() bool {
@@ -82,11 +96,28 @@ func newProcessorMetadata(p unsafe.Pointer) *ProcessorMetadata {
 	return cfg
 }
 
-func deleteProcessorMetadata(c *ProcessorMetadata) { C.free(c.ptr) }
+func deleteProcessorMetadata(c *ProcessorMetadata) {
+	if c == nil {
+		return
+	}
+	if c.ptr != nil {
+		runtime.SetFinalizer(c, nil)
+		C.free(c.ptr)
+		c.ptr = nil
+	}
+	runtime.KeepAlive(c)
+}
 
 // Create a new empty ProcessorMetadata
 func NewProcessorMetadata() *ProcessorMetadata {
 	return newProcessorMetadata(C.ProcessorMetadata_Create())
+}
+
+// Destroy immediately frees resources for this
+// instance instead of waiting for garbage collection
+// finalizer to run at some point later
+func (p *ProcessorMetadata) Destroy() {
+	deleteProcessorMetadata(p)
 }
 
 func (p *ProcessorMetadata) NumFiles() int {
@@ -159,11 +190,20 @@ type PackedImageDesc struct {
 
 func newPackedImageDesc(p unsafe.Pointer, data ColorData) *PackedImageDesc {
 	i := &PackedImageDesc{p, data}
-	runtime.SetFinalizer(i, func(c *PackedImageDesc) {
-		C.free(c.ptr)
-		runtime.KeepAlive(c)
-	})
+	runtime.SetFinalizer(i, deletePackedImageDesc)
 	return i
+}
+
+func deletePackedImageDesc(p *PackedImageDesc) {
+	if p == nil {
+		return
+	}
+	if p.ptr != nil {
+		runtime.SetFinalizer(p, nil)
+		C.free(p.ptr)
+		p.ptr = nil
+	}
+	runtime.KeepAlive(p)
 }
 
 // Create a PackedImageDesc wrapper for some raw rgb data
@@ -173,6 +213,13 @@ func newPackedImageDesc(p unsafe.Pointer, data ColorData) *PackedImageDesc {
 func NewPackedImageDesc(rgb ColorData, width, height, numChannels int) *PackedImageDesc {
 	ptr := C.PackedImageDesc_Create((*C.float)(&rgb[0]), C.long(width), C.long(height), C.long(numChannels))
 	return newPackedImageDesc(ptr, rgb)
+}
+
+// Destroy immediately frees resources for this
+// instance instead of waiting for garbage collection
+// finalizer to run at some point later
+func (p *PackedImageDesc) Destroy() {
+	deletePackedImageDesc(p)
 }
 
 // Return the current state of the image data,

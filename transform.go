@@ -36,11 +36,28 @@ func newDisplayTransform(p unsafe.Pointer) *DisplayTransform {
 	return tx
 }
 
-func deleteDisplayTransform(tx *DisplayTransform) { C.free(tx.ptr) }
+func deleteDisplayTransform(tx *DisplayTransform) {
+	if tx == nil {
+		return
+	}
+	if tx.ptr != nil {
+		runtime.SetFinalizer(tx, nil)
+		C.free(tx.ptr)
+		tx.ptr = nil
+	}
+	runtime.KeepAlive(tx)
+}
 
 // Create a new empty DisplayTransform
 func NewDisplayTransform() *DisplayTransform {
 	return newDisplayTransform(C.DisplayTransform_Create())
+}
+
+// Destroy immediately frees resources for this
+// instance instead of waiting for garbage collection
+// finalizer to run at some point later
+func (tx *DisplayTransform) Destroy() {
+	deleteDisplayTransform(tx)
 }
 
 func (tx *DisplayTransform) transformHandle() unsafe.Pointer {

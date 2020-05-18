@@ -116,6 +116,7 @@ func TestLoggingLevel(t *testing.T) {
 // Config
 func TestCreateConfig(t *testing.T) {
 	c := NewConfig()
+	defer c.Destroy()
 
 	num := c.NumColorSpaces()
 	if num != 0 {
@@ -144,6 +145,7 @@ func TestConfigFromEnv(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 	t.Logf("Config: %+v", c)
+	c.Destroy()
 }
 
 func TestConfigFromFile(t *testing.T) {
@@ -155,6 +157,7 @@ func TestConfigFromFile(t *testing.T) {
 	}
 
 	t.Logf("Config read from temp file %s (%v)", fname, c)
+	c.Destroy()
 }
 
 func TestConfigFromData(t *testing.T) {
@@ -177,6 +180,7 @@ func TestConfigSerialize(t *testing.T) {
 
 func TestConfigEditableCopy(t *testing.T) {
 	c_copy := CONFIG.EditableCopy()
+	c_copy.Destroy()
 	t.Logf("Config: %+v is a copy of Config: %+v", c_copy, CONFIG)
 }
 
@@ -191,6 +195,7 @@ func TestConfigCacheID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+	defer c.Destroy()
 
 	id, err := c.CacheID()
 	if err != nil {
@@ -223,12 +228,16 @@ func TestConfigDescription(t *testing.T) {
 }
 
 func TestConfigCurrentContext(t *testing.T) {
-	c, _ := CurrentConfig()
-	p, err := c.CurrentContext()
-	if err != nil {
-		t.Fatal(err.Error())
+	for i := 0; i < 2; i++ {
+		c, _ := CurrentConfig()
+		p, err := c.CurrentContext()
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		t.Logf("Current Context: %+v", p)
+		p.Destroy()
+		c.Destroy()
 	}
-	t.Logf("Current Context: %+v", p)
 }
 
 func TestConfigSearchPath(t *testing.T) {
@@ -317,6 +326,7 @@ func TestConfigAddColorSpace(t *testing.T) {
 		c.AddColorSpace(cs)
 		expected = i + 1
 		actual = c.NumColorSpaces()
+		cs.Destroy()
 		if actual != expected {
 			t.Errorf("Expected number of colorspaces to be %d, got %d", expected, actual)
 		}
@@ -457,6 +467,7 @@ func TestConfigProcessor(t *testing.T) {
 	if files := proc.Metadata().Files(); len(files) != 1 {
 		t.Fatalf("Expected slice of len 1, got %d", len(files))
 	}
+	proc.Destroy()
 
 	ct2 := NewContext()
 	ct2.SetStringVar("OVERRIDE", "luts2")
@@ -474,6 +485,8 @@ func TestConfigProcessor(t *testing.T) {
 	if path := proc.Metadata().File(0); !strings.HasSuffix(path, "/luts2/lg10.spi1d") {
 		t.Fatalf("Expected path %q to end with /luts2/lg10.spi1d", path)
 	}
+	proc.Destroy()
+	ct2.Destroy()
 
 	_, err = cfg.Processor("scene_linear", "color_timing")
 	if err != nil {
@@ -498,6 +511,9 @@ func TestConfigProcessor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+	cfg.Destroy()
+	ct.Destroy()
+	proc.Destroy()
 }
 
 func TestConfigProcessorTransform(t *testing.T) {
@@ -515,6 +531,7 @@ func TestConfigProcessorTransform(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+	proc.Destroy()
 
 	proc, err = cfg.ProcessorTransformDir(tx, TRANSFORM_DIR_FORWARD)
 	if err != nil {
@@ -528,6 +545,7 @@ func TestConfigProcessorTransform(t *testing.T) {
 	if path := proc.Metadata().File(0); !strings.HasSuffix(path, "/luts/lg10.spi1d") {
 		t.Fatalf("Expected path %q to end with /luts/lg10.spi1d", path)
 	}
+	proc.Destroy()
 
 	ct2 := NewContext()
 	ct2.SetStringVar("OVERRIDE", "luts2")
@@ -545,6 +563,9 @@ func TestConfigProcessorTransform(t *testing.T) {
 	if path := proc.Metadata().File(0); !strings.HasSuffix(path, "/luts2/lg10.spi1d") {
 		t.Fatalf("Expected path %q to end with /luts2/lg10.spi1d", path)
 	}
+	ct2.Destroy()
+	proc.Destroy()
+	tx.Destroy()
 }
 
 func TestConfigDisplaysViews(t *testing.T) {
@@ -645,10 +666,13 @@ func TestColorSpace(t *testing.T) {
 func TestColorSpaceCreate(t *testing.T) {
 	cs := NewColorSpace()
 	t.Log(cs)
+	cs.Destroy()
 }
 
 func TestColorSpaceEditableCopy(t *testing.T) {
-	cs, err := CONFIG.ColorSpace("lnf")
+	cfg := CONFIG.EditableCopy()
+	defer cfg.Destroy()
+	cs, err := cfg.ColorSpace("lnf")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -658,71 +682,74 @@ func TestColorSpaceEditableCopy(t *testing.T) {
 	if cs.Name() != cs_copy.Name() {
 		t.Fatalf("Copy colorspace name is %s, but expected %s", cs_copy.Name(), cs.Name())
 	}
+	cs.Destroy()
+	cs_copy.Destroy()
 }
 
 func TestColorSpaceName(t *testing.T) {
-	cs, err := CONFIG.ColorSpace("lnf")
+	cfg := CONFIG.EditableCopy()
+	defer cfg.Destroy()
+	cs, err := cfg.ColorSpace("lnf")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 	cs.SetName("FOO")
-	defer cs.SetName("lnf")
-
 	if cs.Name() != "FOO" {
 		t.Fatalf("Expected ColorSpace name to be FOO, got %s", cs.Name())
 	}
+	cs.Destroy()
 }
 
 func TestColorSpaceFamily(t *testing.T) {
-	cs, err := CONFIG.ColorSpace("lnf")
+	cfg := CONFIG.EditableCopy()
+	defer cfg.Destroy()
+	cs, err := cfg.ColorSpace("lnf")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	family := cs.Family()
 	cs.SetFamily("FOO")
-	defer cs.SetFamily(family)
-
 	if cs.Family() != "FOO" {
 		t.Fatalf("Expected ColorSpace family to be FOO, got %s", cs.Family())
 	}
+	cs.Destroy()
 }
 
 func TestColorSpaceEqualityGroup(t *testing.T) {
-	cs, err := CONFIG.ColorSpace("lnf")
+	cfg := CONFIG.EditableCopy()
+	defer cfg.Destroy()
+	cs, err := cfg.ColorSpace("lnf")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	group := cs.EqualityGroup()
 	cs.SetEqualityGroup("FOO")
-	defer cs.SetEqualityGroup(group)
-
 	if cs.EqualityGroup() != "FOO" {
 		t.Fatalf("Expected ColorSpace EqualityGroup to be FOO, got %s", cs.EqualityGroup())
 	}
+	cs.Destroy()
 }
 
 func TestColorSpaceDescription(t *testing.T) {
-	cs, err := CONFIG.ColorSpace("lnf")
+	cfg := CONFIG.EditableCopy()
+	defer cfg.Destroy()
+	cs, err := cfg.ColorSpace("lnf")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	desc := cs.Description()
 	cs.SetDescription("FOO")
-	defer cs.SetDescription(desc)
 
 	if cs.Description() != "FOO" {
 		t.Fatalf("Expected ColorSpace Description to be FOO, got %s", cs.Description())
 	}
+	cs.Destroy()
 }
 
 func TestColorSpaceBitDepth(t *testing.T) {
-	cs, err := CONFIG.ColorSpace("lnf")
+	cfg := CONFIG.EditableCopy()
+	defer cfg.Destroy()
+	cs, err := cfg.ColorSpace("lnf")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-
-	depth := cs.BitDepth()
-	defer cs.SetBitDepth(depth)
 
 	depths := []BitDepth{
 		BIT_DEPTH_UNKNOWN,
@@ -742,6 +769,7 @@ func TestColorSpaceBitDepth(t *testing.T) {
 			t.Fatalf("Expected ColorSpace BitDepth to be %v, got %v", d, cs.BitDepth())
 		}
 	}
+	cs.Destroy()
 }
 
 /*
@@ -753,6 +781,7 @@ Context
 func TestContextCreate(t *testing.T) {
 	c := NewContext()
 	t.Logf("New Context: %+v", c)
+	c.Destroy()
 }
 
 func TestContextEditableCopy(t *testing.T) {
@@ -763,7 +792,8 @@ func TestContextEditableCopy(t *testing.T) {
 	if c_copy.StringVar("FOO") != "BAR" {
 		t.Fatalf("Expected FOO=BAR, got %s", c_copy.StringVar("FOO"))
 	}
-
+	c.Destroy()
+	c_copy.Destroy()
 }
 
 func TestContextCacheID(t *testing.T) {
@@ -813,14 +843,17 @@ func TestContextLoadEnvironment(t *testing.T) {
 	c := NewContext()
 	c.SetEnvironmentMode(ENVIRONMENT_UNKNOWN)
 	c.LoadEnvironment()
+	c.Destroy()
 
 	c = NewContext()
 	c.SetEnvironmentMode(ENVIRONMENT_LOAD_ALL)
 	c.LoadEnvironment()
+	c.Destroy()
 
 	c = NewContext()
 	c.SetEnvironmentMode(ENVIRONMENT_LOAD_PREDEFINED)
 	c.LoadEnvironment()
+	c.Destroy()
 }
 
 func TestContextResolveStringVar(t *testing.T) {
@@ -876,6 +909,7 @@ func TestPackedImageDesc(t *testing.T) {
 	if imgDesc.NumChannels() != channels {
 		t.Errorf("expected channels %d, but got %d", channels, imgDesc.NumChannels())
 	}
+	imgDesc.Destroy()
 }
 
 func TestProcessorApply(t *testing.T) {
@@ -905,6 +939,8 @@ func TestProcessorApply(t *testing.T) {
 	if fmt.Sprintf("%v", imageDataCopy) == fmt.Sprintf("%v", imgDesc.Data()) {
 		t.Fatal("Original RGB data remained unchanged after Apply()")
 	}
+	imgDesc.Destroy()
+	processor.Destroy()
 }
 
 /*
