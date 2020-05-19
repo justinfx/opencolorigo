@@ -64,7 +64,11 @@ Errors
 */
 
 func getLastError(ptr *C._HandleContext) error {
-	return errors.New(C.GoString(ptr.last_error))
+	e := C.GoString(ptr.last_error)
+	if e == "" {
+		return nil
+	}
+	return errors.New(e)
 }
 
 // An exception class for errors detected at runtime,
