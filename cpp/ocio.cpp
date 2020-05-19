@@ -33,8 +33,8 @@
 static char* NO_ERROR = (char*)"";
 
 
-_Context* NEW_CONTEXT(void* handle=NULL) {
-    _Context *ctx = new _Context;
+_HandleContext* NEW_HANDLE_CONTEXT(void* handle=NULL) {
+    _HandleContext *ctx = new _HandleContext;
     ctx->handle = handle;
     ctx->last_error = NULL;
     return ctx;
@@ -55,19 +55,24 @@ extern "C" {
     const char* ROLE_TEXTURE_PAINT      = OCIO::ROLE_TEXTURE_PAINT;
     const char* ROLE_MATTE_PAINT        = OCIO::ROLE_MATTE_PAINT;
 
-    void freeContext(_Context* ctx) {
+    void freeHandleContext(_HandleContext* ctx) {
         if (ctx != NULL) {
+            // Specific handle type may have already
+            // deleted this for us
             if (ctx->handle != NULL) {
                 free(ctx->handle);
-            }  
+                ctx->handle = NULL;
+            }
             if (ctx->last_error != NULL && ctx->last_error != NO_ERROR) {
+                // from strdup()
                 free(ctx->last_error);
+                ctx->last_error = NULL;
             }  
-            free(ctx);      
+            delete ctx;
         }
     }
 
-    char* getLastError(_Context* ctx) {
+    char* getLastError(_HandleContext* ctx) {
         return ctx->last_error;
     }
 

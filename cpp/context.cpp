@@ -7,6 +7,12 @@ extern "C" {
 
     namespace OCIO = OCIO_NAMESPACE;
 
+    void deleteContext(Context *p) {
+        if (p != NULL) {
+            delete (OCIO::ContextRcPtr*)p;
+        }
+    }
+
     Context* Context_Create() {
         OCIO::ContextRcPtr ptr;
         BEGIN_CATCH_ERR

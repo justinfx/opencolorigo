@@ -42,7 +42,7 @@ func deleteDisplayTransform(tx *DisplayTransform) {
 	}
 	if tx.ptr != nil {
 		runtime.SetFinalizer(tx, nil)
-		C.free(tx.ptr)
+		C.deleteDisplayTransform(tx.ptr)
 		tx.ptr = nil
 	}
 	runtime.KeepAlive(tx)

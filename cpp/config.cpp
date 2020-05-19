@@ -12,13 +12,24 @@ extern "C" {
 
     namespace OCIO = OCIO_NAMESPACE;
 
+    void deleteConfig(Config *p) {
+        if (p != NULL) {
+            _HandleContext* ctx = (_HandleContext*)p;
+            if (ctx->handle != NULL) {
+                delete (OCIO::ConfigRcPtr*)(ctx->handle);
+                ctx->handle = NULL;
+            }
+            freeHandleContext(ctx);
+        }
+    }
+
     // Config Init
     Config* Config_Create() {
-        return (Config*) NEW_CONTEXT(new OCIO::ConfigRcPtr(OCIO::Config::Create()));
+        return (Config*) NEW_HANDLE_CONTEXT(new OCIO::ConfigRcPtr(OCIO::Config::Create()));
     }
 
     const Config* GetCurrentConfig() {
-        Config* c = NEW_CONTEXT();
+        Config* c = NEW_HANDLE_CONTEXT();
         BEGIN_CATCH_ERR
         c->handle = new OCIO::ConstConfigRcPtr(OCIO::GetCurrentConfig());
         END_CATCH_CTX_ERR(c)
@@ -32,7 +43,7 @@ extern "C" {
     } 
 
     const Config* Config_CreateFromEnv() {
-        Config* c = NEW_CONTEXT();
+        Config* c = NEW_HANDLE_CONTEXT();
         BEGIN_CATCH_ERR
         c->handle = new OCIO::ConstConfigRcPtr(OCIO::Config::CreateFromEnv());
         END_CATCH_CTX_ERR(c)
@@ -40,7 +51,7 @@ extern "C" {
     }
 
     const Config* Config_CreateFromFile(const char* filename) {
-        Config* c = NEW_CONTEXT();
+        Config* c = NEW_HANDLE_CONTEXT();
         BEGIN_CATCH_ERR
         c->handle = new OCIO::ConstConfigRcPtr(OCIO::Config::CreateFromFile(filename));
         END_CATCH_CTX_ERR(c)
@@ -52,7 +63,7 @@ extern "C" {
         s << data;
         s.seekp(0);
 
-        Config* c = NEW_CONTEXT();
+        Config* c = NEW_HANDLE_CONTEXT();
 
         BEGIN_CATCH_ERR
         c->handle = new OCIO::ConstConfigRcPtr(OCIO::Config::CreateFromStream(s));
@@ -62,7 +73,7 @@ extern "C" {
     }
 
     Config* Config_createEditableCopy(Config *p) {
-        Config* cpy = NEW_CONTEXT();
+        Config* cpy = NEW_HANDLE_CONTEXT();
         BEGIN_CATCH_ERR
         cpy->handle = new OCIO::ConfigRcPtr(static_cast<OCIO::ConstConfigRcPtr*>(p->handle)->get()->createEditableCopy());
         END_CATCH_CTX_ERR(p)
@@ -140,7 +151,7 @@ extern "C" {
         ptr = static_cast<OCIO::ConstConfigRcPtr*>(p->handle)->get()->getProcessor(ct_ptr, srcCS_ptr, dstCS_ptr);
         END_CATCH_CTX_ERR(p)
 
-        return (Processor*) NEW_CONTEXT(new OCIO::ConstProcessorRcPtr(ptr));
+        return (Processor*) new OCIO::ConstProcessorRcPtr(ptr);
     }
 
     Processor* Config_getProcessor_CS_CS(Config *p, ColorSpace* srcCS, ColorSpace* dstCS) {

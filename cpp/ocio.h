@@ -66,13 +66,13 @@ typedef enum TransformDirection {
     TRANSFORM_DIR_INVERSE
 } TransformDirection;
 
-typedef struct _Context {
+typedef struct _HandleContext {
     void* handle;
     char* last_error;
-} _Context;
+} _HandleContext;
 
 // typedef void Config;
-typedef _Context Config;
+typedef _HandleContext Config;
 typedef void ColorSpace;
 typedef void Context;
 typedef void Processor;
@@ -82,8 +82,8 @@ typedef void PackedImageDesc;
 typedef void Transform;
 typedef void DisplayTransform;
 
-void freeContext(_Context* ctx);
-char* getLastError(_Context* ctx);
+void freeHandleContext(_HandleContext* ctx);
+char* getLastError(_HandleContext* ctx);
 
 // Global
 void ClearAllCaches();
@@ -93,6 +93,7 @@ LoggingLevel GetLoggingLevel();
 void SetLoggingLevel(LoggingLevel level);
 
 // Config Init
+void deleteConfig(Config *p);
 Config* Config_Create();
 const Config* GetCurrentConfig();
 void SetCurrentConfig(Config *p);
@@ -122,6 +123,7 @@ Processor* Config_getProcessor_TX_D(Config *p, Transform* tx, TransformDirection
 Processor* Config_getProcessor_CT_TX_D(Config *p, Context* ct, Transform* tx, TransformDirection direction);
 
 // Config ColorSpaces
+void deleteColorSpace(ColorSpace *p);
 int Config_getNumColorSpaces(Config *p);
 const char* Config_getColorSpaceNameByIndex(Config *p, int index);
 const ColorSpace* Config_getColorSpace(Config *p, const char* name);
@@ -168,7 +170,8 @@ void ColorSpace_setDescription(ColorSpace *p, const char* description);
 BitDepth ColorSpace_getBitDepth(ColorSpace *p);
 void ColorSpace_setBitDepth(ColorSpace *p, BitDepth bitDepth);
 
-// Context 
+// Context
+void deleteContext(Context *p);
 Context* Context_Create();
 Context* Context_createEditableCopy(Context *p);
 const char* Context_getCacheID(Context *p);
@@ -185,6 +188,7 @@ const char* Context_resolveStringVar(Context *p, const char* val);
 const char* Context_resolveFileLocation(Context *p, const char* filename);
 
 // Processor
+void deleteProcessor(Processor* p);
 Processor* Processor_Create();
 bool Processor_isNoOp(Processor *p);
 bool Processor_hasChannelCrosstalk(Processor *p);
@@ -194,6 +198,7 @@ ProcessorMetadata* Processor_getMetadata(Processor *p);
 void Processor_apply(Processor *p, ImageDesc *i);
 const char* Processor_getCpuCacheID(Processor *p);
 
+void deleteProcessorMetadata(ProcessorMetadata* p);
 ProcessorMetadata* ProcessorMetadata_Create();
 int ProcessorMetadata_getNumFiles(ProcessorMetadata *p);
 const char* ProcessorMetadata_getFile(ProcessorMetadata *p, int index);
@@ -203,6 +208,7 @@ void ProcessorMetadata_addFile(ProcessorMetadata *p, const char* fname);
 void ProcessorMetadata_addLook(ProcessorMetadata *p, const char* look);
 
 // ImageDesc
+void deletePackedImageDesc(PackedImageDesc* p);
 PackedImageDesc* PackedImageDesc_Create(float* data, long width, long height, long numChannels);
 float* PackedImageDesc_getData(PackedImageDesc *p);
 long PackedImageDesc_getWidth(PackedImageDesc *p);
@@ -210,6 +216,7 @@ long PackedImageDesc_getHeight(PackedImageDesc *p);
 long PackedImageDesc_getNumChannels(PackedImageDesc *p);
 
 // DisplayTransform
+void deleteDisplayTransform(DisplayTransform* d);
 DisplayTransform* DisplayTransform_Create();
 DisplayTransform* DisplayTransform_createEditableCopy(DisplayTransform *p);
 TransformDirection DisplayTransform_getDirection(DisplayTransform *p);

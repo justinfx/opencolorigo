@@ -35,7 +35,7 @@ func deleteConfig(c *Config) {
 	}
 	if c.ptr != nil {
 		runtime.SetFinalizer(c, nil)
-		C.freeContext((*C._Context)(c.ptr))
+		C.deleteConfig(c.ptr)
 		c.ptr = nil
 	}
 	runtime.KeepAlive(c)
@@ -52,7 +52,7 @@ func NewConfig() *Config {
 func CurrentConfig() (*Config, error) {
 	c, err := C.GetCurrentConfig()
 	if err != nil {
-		return nil, getLastError((*C._Context)(c))
+		return nil, getLastError((*C._HandleContext)(c))
 	}
 	return newConfig(c), err
 }
@@ -68,7 +68,7 @@ func SetCurrentConfig(config *Config) error {
 func ConfigCreateFromEnv() (*Config, error) {
 	c, err := C.Config_CreateFromEnv()
 	if err != nil {
-		return nil, getLastError((*C._Context)(c))
+		return nil, getLastError((*C._HandleContext)(c))
 	}
 	return newConfig(c), err
 }
@@ -80,7 +80,7 @@ func ConfigCreateFromFile(filename string) (*Config, error) {
 
 	c, err := C.Config_CreateFromFile(c_str)
 	if err != nil {
-		return nil, getLastError((*C._Context)(c))
+		return nil, getLastError((*C._HandleContext)(c))
 	}
 	return newConfig(c), err
 }
@@ -92,7 +92,7 @@ func ConfigCreateFromData(data string) (*Config, error) {
 
 	c, err := C.Config_CreateFromData(c_str)
 	if err != nil {
-		return nil, getLastError((*C._Context)(c))
+		return nil, getLastError((*C._HandleContext)(c))
 	}
 	return newConfig(c), err
 }

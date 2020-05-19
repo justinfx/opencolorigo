@@ -27,7 +27,7 @@ func deleteContext(c *Context) {
 	}
 	if c.ptr != nil {
 		runtime.SetFinalizer(c, nil)
-		C.free(c.ptr)
+		C.deleteContext(c.ptr)
 		c.ptr = nil
 	}
 	runtime.KeepAlive(c)

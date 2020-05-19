@@ -63,7 +63,7 @@ var (
 Errors
 */
 
-func getLastError(ptr *C._Context) error {
+func getLastError(ptr *C._HandleContext) error {
 	return errors.New(C.GoString(ptr.last_error))
 }
 

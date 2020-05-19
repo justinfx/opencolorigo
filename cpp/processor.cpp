@@ -7,6 +7,12 @@ extern "C" {
 
     namespace OCIO = OCIO_NAMESPACE;
 
+    void deleteProcessor(Processor* p) {
+        if (p != NULL) {
+            delete (OCIO::ProcessorRcPtr*)p;
+        }
+    }
+
     Processor* Processor_Create() {
         OCIO::ProcessorRcPtr ptr;
         BEGIN_CATCH_ERR
@@ -42,6 +48,12 @@ extern "C" {
     }
 
     // ProcessorMetadata
+    void deleteProcessorMetadata(ProcessorMetadata* p) {
+        if (p != NULL) {
+            delete (OCIO::ProcessorMetadataRcPtr*)p;
+        }
+    }
+
     ProcessorMetadata* Processor_getMetadata(Processor *p) {
         OCIO::ConstProcessorMetadataRcPtr ptr;
         BEGIN_CATCH_ERR
@@ -95,6 +107,12 @@ extern "C" {
     }
 
     // ImageDesc
+    void deletePackedImageDesc(PackedImageDesc* p) {
+        if (p != NULL) {
+            delete (OCIO::PackedImageDesc*)p;
+        }
+    }
+
     PackedImageDesc* PackedImageDesc_Create(float* data, long width, long height, long numChannels) {
         BEGIN_CATCH_ERR
         return (PackedImageDesc*) new OCIO::PackedImageDesc(data, width, height, numChannels);

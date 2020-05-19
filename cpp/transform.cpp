@@ -7,6 +7,12 @@ extern "C" {
 
     namespace OCIO = OCIO_NAMESPACE;
 
+    void deleteDisplayTransform(DisplayTransform* d) {
+        if (d != NULL) {
+            delete (OCIO::DisplayTransformRcPtr*)d;
+        }
+    }
+
     DisplayTransform* DisplayTransform_Create() {
         OCIO::DisplayTransformRcPtr ptr;
         BEGIN_CATCH_ERR

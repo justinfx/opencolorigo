@@ -9,6 +9,12 @@ extern "C" {
 
     namespace OCIO = OCIO_NAMESPACE;
 
+    void deleteColorSpace(ColorSpace *p) {
+        if (p != NULL) {
+            delete static_cast<OCIO::ColorSpaceRcPtr*>(p);
+        }
+    }
+
     ColorSpace* ColorSpace_Create() {
         OCIO::ColorSpaceRcPtr ptr;
         BEGIN_CATCH_ERR

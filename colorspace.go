@@ -53,7 +53,7 @@ func deleteColorspace(c *ColorSpace) {
 	}
 	if c.ptr != nil {
 		runtime.SetFinalizer(c, nil)
-		C.free(c.ptr)
+		C.deleteColorSpace(c.ptr)
 		c.ptr = nil
 	}
 	runtime.KeepAlive(c)

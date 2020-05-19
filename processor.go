@@ -29,7 +29,7 @@ func deleteProcessor(p *Processor) {
 	}
 	if p.ptr != nil {
 		runtime.SetFinalizer(p, nil)
-		C.free(p.ptr)
+		C.deleteProcessor(p.ptr)
 		p.ptr = nil
 	}
 	runtime.KeepAlive(p)
@@ -102,7 +102,7 @@ func deleteProcessorMetadata(c *ProcessorMetadata) {
 	}
 	if c.ptr != nil {
 		runtime.SetFinalizer(c, nil)
-		C.free(c.ptr)
+		C.deleteProcessorMetadata(c.ptr)
 		c.ptr = nil
 	}
 	runtime.KeepAlive(c)
@@ -200,7 +200,7 @@ func deletePackedImageDesc(p *PackedImageDesc) {
 	}
 	if p.ptr != nil {
 		runtime.SetFinalizer(p, nil)
-		C.free(p.ptr)
+		C.deletePackedImageDesc(p.ptr)
 		p.ptr = nil
 	}
 	runtime.KeepAlive(p)
