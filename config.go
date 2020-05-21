@@ -105,6 +105,9 @@ func (c *Config) Destroy() {
 }
 
 func (c *Config) lastError() error {
+	if c.ptr.last_error == nil {
+		return nil
+	}
 	e := C.GoString(c.ptr.last_error)
 	if e == "" {
 		return nil
@@ -273,7 +276,7 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 
 	var (
 		err  error
-		proc unsafe.Pointer
+		proc C.ProcessorId
 	)
 
 	bad_str := "Error creating processor with src colorspace %v / dst colorspace %v"
@@ -373,7 +376,8 @@ Not often needed, but will allow for the re-use of atomic OCIO functionality
 (such as to apply an individual LUT file).
 */
 func (c *Config) ProcessorTransformDir(tx Transform, dir TransformDirection) (*Processor, error) {
-	ptr := C.Config_getProcessor_TX_D(c.ptr, tx.transformHandle(), C.TransformDirection(dir))
+	ptr := C.Config_getProcessor_TX_D(
+		c.ptr, tx.transformHandle(), C.TransformDirection(dir))
 	if err := c.lastError(); err != nil {
 		return nil, c.lastError()
 	}
@@ -425,7 +429,7 @@ func (c *Config) ColorSpace(name string) (*ColorSpace, error) {
 		err = fmt.Errorf("%q is not a valid ColorSpace: %v", name, err)
 		return nil, err
 	}
-	if cs == nil {
+	if cs == 0 {
 		err = fmt.Errorf("%q is not a valid ColorSpace", name)
 		return nil, err
 	}

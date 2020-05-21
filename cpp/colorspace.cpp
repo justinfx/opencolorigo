@@ -3,92 +3,96 @@
 #include <iostream>
 
 #include "ocio.h"
+#include "shared_ptr_map.h"
 
+namespace OCIO = OCIO_NAMESPACE;
+
+namespace ocigo {
+
+SharedPtrMap<OCIO::ColorSpaceRcPtr> g_ColorSpace_map;
+
+}
 
 extern "C" {
 
-    namespace OCIO = OCIO_NAMESPACE;
-
-    void deleteColorSpace(ColorSpace *p) {
-        if (p != NULL) {
-            delete static_cast<OCIO::ColorSpaceRcPtr*>(p);
-        }
+    void deleteColorSpace(ColorSpaceId p) {
+        ocigo::g_ColorSpace_map.remove(p);
     }
 
-    ColorSpace* ColorSpace_Create() {
+    ColorSpaceId ColorSpace_Create() {
         OCIO::ColorSpaceRcPtr ptr;
         BEGIN_CATCH_ERR
         ptr = OCIO::ColorSpace::Create();
         END_CATCH_ERR
-        return (ColorSpace*) new OCIO::ColorSpaceRcPtr(ptr);
+        return ocigo::g_ColorSpace_map.add(ptr);
     }
 
-    ColorSpace* ColorSpace_createEditableCopy(ColorSpace *p) {
+    ColorSpaceId ColorSpace_createEditableCopy(ColorSpaceId p) {
         OCIO::ColorSpaceRcPtr ptr;
         BEGIN_CATCH_ERR
-        ptr = static_cast<OCIO::ConstColorSpaceRcPtr*>(p)->get()->createEditableCopy();
+        ptr = ocigo::g_ColorSpace_map.get(p).get()->createEditableCopy();
         END_CATCH_ERR
-        if ( ptr == NULL) { return NULL; }
-        return (ColorSpace*) new OCIO::ColorSpaceRcPtr(ptr);
+        if ( ptr == NULL) { return 0; }
+        return ocigo::g_ColorSpace_map.add(ptr);
     }
 
-    const char* ColorSpace_getName(ColorSpace *p) {
+    const char* ColorSpace_getName(ColorSpaceId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstColorSpaceRcPtr*>(p)->get()->getName();
-        END_CATCH_ERR
-    }
-
-    void ColorSpace_setName(ColorSpace *p, const char* name) {
-        BEGIN_CATCH_ERR
-        return static_cast<OCIO::ColorSpaceRcPtr*>(p)->get()->setName(name);
+        return ocigo::g_ColorSpace_map.get(p).get()->getName();
         END_CATCH_ERR
     }
 
-    const char* ColorSpace_getFamily(ColorSpace *p) {
+    void ColorSpace_setName(ColorSpaceId p, const char* name) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstColorSpaceRcPtr*>(p)->get()->getFamily();
+        ocigo::g_ColorSpace_map.get(p).get()->setName(name);
         END_CATCH_ERR
     }
 
-    void ColorSpace_setFamily(ColorSpace *p, const char* family) {
+    const char* ColorSpace_getFamily(ColorSpaceId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ColorSpaceRcPtr*>(p)->get()->setFamily(family);
+        return ocigo::g_ColorSpace_map.get(p).get()->getFamily();
         END_CATCH_ERR
     }
 
-    const char* ColorSpace_getEqualityGroup(ColorSpace *p) {
+    void ColorSpace_setFamily(ColorSpaceId p, const char* family) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstColorSpaceRcPtr*>(p)->get()->getEqualityGroup();
+        ocigo::g_ColorSpace_map.get(p).get()->setFamily(family);
         END_CATCH_ERR
     }
 
-    void ColorSpace_setEqualityGroup(ColorSpace *p, const char* group) {
+    const char* ColorSpace_getEqualityGroup(ColorSpaceId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ColorSpaceRcPtr*>(p)->get()->setEqualityGroup(group);
+        return ocigo::g_ColorSpace_map.get(p).get()->getEqualityGroup();
         END_CATCH_ERR
     }
 
-    const char* ColorSpace_getDescription(ColorSpace *p) {
+    void ColorSpace_setEqualityGroup(ColorSpaceId p, const char* group) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstColorSpaceRcPtr*>(p)->get()->getDescription();
+        return ocigo::g_ColorSpace_map.get(p).get()->setEqualityGroup(group);
         END_CATCH_ERR
     }
 
-    void ColorSpace_setDescription(ColorSpace *p, const char* description) {
+    const char* ColorSpace_getDescription(ColorSpaceId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ColorSpaceRcPtr*>(p)->get()->setDescription(description);
+        return ocigo::g_ColorSpace_map.get(p).get()->getDescription();
         END_CATCH_ERR
     }
 
-    BitDepth ColorSpace_getBitDepth(ColorSpace *p) {
+    void ColorSpace_setDescription(ColorSpaceId p, const char* description) {
         BEGIN_CATCH_ERR
-        return (BitDepth)static_cast<OCIO::ConstColorSpaceRcPtr*>(p)->get()->getBitDepth();
+        ocigo::g_ColorSpace_map.get(p).get()->setDescription(description);
         END_CATCH_ERR
     }
 
-    void ColorSpace_setBitDepth(ColorSpace *p, BitDepth bitDepth) {
+    BitDepth ColorSpace_getBitDepth(ColorSpaceId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ColorSpaceRcPtr*>(p)->get()->setBitDepth((OCIO::BitDepth)bitDepth);
+        return (BitDepth)ocigo::g_ColorSpace_map.get(p).get()->getBitDepth();
+        END_CATCH_ERR
+    }
+
+    void ColorSpace_setBitDepth(ColorSpaceId p, BitDepth bitDepth) {
+        BEGIN_CATCH_ERR
+        ocigo::g_ColorSpace_map.get(p).get()->setBitDepth((OCIO::BitDepth)bitDepth);
         END_CATCH_ERR
     }
 

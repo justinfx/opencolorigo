@@ -12,10 +12,10 @@ import (
 )
 
 type Context struct {
-	ptr unsafe.Pointer
+	ptr C.ContextId
 }
 
-func newContext(p unsafe.Pointer) *Context {
+func newContext(p C.ContextId) *Context {
 	cfg := &Context{p}
 	runtime.SetFinalizer(cfg, deleteContext)
 	return cfg
@@ -25,10 +25,10 @@ func deleteContext(c *Context) {
 	if c == nil {
 		return
 	}
-	if c.ptr != nil {
+	if c.ptr != 0 {
 		runtime.SetFinalizer(c, nil)
 		C.deleteContext(c.ptr)
-		c.ptr = nil
+		c.ptr = 0
 	}
 	runtime.KeepAlive(c)
 }

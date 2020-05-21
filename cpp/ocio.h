@@ -1,6 +1,7 @@
 #ifndef _OPENCOLORIGO_OCIO_H_
 #define _OPENCOLORIGO_OCIO_H_
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -66,21 +67,23 @@ typedef enum TransformDirection {
     TRANSFORM_DIR_INVERSE
 } TransformDirection;
 
+typedef uint64_t HandleId;
+
 typedef struct _HandleContext {
-    void* handle;
+    HandleId handle;
     char* last_error;
 } _HandleContext;
 
 // typedef void Config;
 typedef _HandleContext Config;
-typedef void ColorSpace;
-typedef void Context;
-typedef void Processor;
-typedef void ProcessorMetadata;
+typedef HandleId ColorSpaceId;
+typedef HandleId ContextId;
+typedef HandleId ProcessorId;
+typedef HandleId ProcessorMetadataId;
 typedef void ImageDesc;
 typedef void PackedImageDesc;
-typedef void Transform;
-typedef void DisplayTransform;
+typedef HandleId TransformId;
+typedef HandleId DisplayTransformId;
 
 void freeHandleContext(_HandleContext* ctx);
 char* getLastError(_HandleContext* ctx);
@@ -95,42 +98,42 @@ void SetLoggingLevel(LoggingLevel level);
 // Config Init
 void deleteConfig(Config *p);
 Config* Config_Create();
-const Config* GetCurrentConfig();
+Config* GetCurrentConfig();
 void SetCurrentConfig(Config *p);
-const Config* Config_CreateFromEnv();
-const Config* Config_CreateFromFile(const char* filename);
-const Config* Config_CreateFromData(const char* data);
+Config* Config_CreateFromEnv();
+Config* Config_CreateFromFile(const char* filename);
+Config* Config_CreateFromData(const char* data);
 Config* Config_createEditableCopy(Config *p);
 void Config_sanityCheck(Config *p);
 
 char* Config_serialize(Config *p);
 const char* Config_getCacheID(Config *p);
-const char* Config_getCacheIDWithContext(Config *p, Context *c);
+const char* Config_getCacheIDWithContext(Config *p, ContextId c);
 const char* Config_getDescription(Config *p);
 
 // Config Resources
-Context* Config_getCurrentContext(Config *p);
+ContextId Config_getCurrentContext(Config *p);
 const char* Config_getSearchPath(Config *p);
 const char* Config_getWorkingDir(Config *p);
 
 // Config Processors
-Processor* Config_getProcessor_CT_CS_CS(Config *p, Context* ct, ColorSpace* srcCS, ColorSpace* dstCS);
-Processor* Config_getProcessor_CT_S_S(Config *p, Context* ct, const char* srcName, const char* dstName);
-Processor* Config_getProcessor_CS_CS(Config *p, ColorSpace* srcCS, ColorSpace* dstCS);
-Processor* Config_getProcessor_S_S(Config *p, const char* srcName, const char* dstName);
-Processor* Config_getProcessor_TX(Config *p, Transform* tx);
-Processor* Config_getProcessor_TX_D(Config *p, Transform* tx, TransformDirection direction);
-Processor* Config_getProcessor_CT_TX_D(Config *p, Context* ct, Transform* tx, TransformDirection direction);
+ProcessorId Config_getProcessor_CT_CS_CS(Config* p, ContextId ct, ColorSpaceId srcCS, ColorSpaceId dstCS);
+ProcessorId Config_getProcessor_CT_S_S(Config* p, ContextId ct, const char* srcName, const char* dstName);
+ProcessorId Config_getProcessor_CS_CS(Config* p, ColorSpaceId srcCS, ColorSpaceId dstCS);
+ProcessorId Config_getProcessor_S_S(Config* p, const char* srcName, const char* dstName);
+ProcessorId Config_getProcessor_TX(Config* p, TransformId tx);
+ProcessorId Config_getProcessor_TX_D(Config* p, TransformId tx, TransformDirection direction);
+ProcessorId Config_getProcessor_CT_TX_D(Config* p, ContextId ct, TransformId tx, TransformDirection direction);
 
 // Config ColorSpaces
-void deleteColorSpace(ColorSpace *p);
+void deleteColorSpace(ColorSpaceId p);
 int Config_getNumColorSpaces(Config *p);
 const char* Config_getColorSpaceNameByIndex(Config *p, int index);
-const ColorSpace* Config_getColorSpace(Config *p, const char* name);
+ColorSpaceId Config_getColorSpace(Config *p, const char* name);
 int Config_getIndexForColorSpace(Config *p, const char* name);
 bool Config_isStrictParsingEnabled(Config *p);
 void Config_setStrictParsingEnabled(Config *p, bool enabled);
-void Config_addColorSpace(Config *p, ColorSpace *cs);
+void Config_addColorSpace(Config *p, ColorSpaceId cs);
 void Config_clearColorSpaces(Config *p);
 const char* Config_parseColorSpaceFromString(Config *p, const char* str);
 
@@ -157,55 +160,55 @@ void Config_setActiveViews(Config *p, const char* views);
 const char* Config_getActiveViews(Config *p);
 
 // ColorSpaces
-ColorSpace* ColorSpace_Create();
-ColorSpace* ColorSpace_createEditableCopy(ColorSpace *p);
-const char* ColorSpace_getName(ColorSpace *p);
-void ColorSpace_setName(ColorSpace *p, const char* name);
-const char* ColorSpace_getFamily(ColorSpace *p);
-void ColorSpace_setFamily(ColorSpace *p, const char* family);
-const char* ColorSpace_getEqualityGroup(ColorSpace *p);
-void ColorSpace_setEqualityGroup(ColorSpace *p, const char* group);
-const char* ColorSpace_getDescription(ColorSpace *p);
-void ColorSpace_setDescription(ColorSpace *p, const char* description);
-BitDepth ColorSpace_getBitDepth(ColorSpace *p);
-void ColorSpace_setBitDepth(ColorSpace *p, BitDepth bitDepth);
+ColorSpaceId ColorSpace_Create();
+ColorSpaceId ColorSpace_createEditableCopy(ColorSpaceId p);
+const char* ColorSpace_getName(ColorSpaceId p);
+void ColorSpace_setName(ColorSpaceId p, const char* name);
+const char* ColorSpace_getFamily(ColorSpaceId p);
+void ColorSpace_setFamily(ColorSpaceId p, const char* family);
+const char* ColorSpace_getEqualityGroup(ColorSpaceId p);
+void ColorSpace_setEqualityGroup(ColorSpaceId p, const char* group);
+const char* ColorSpace_getDescription(ColorSpaceId p);
+void ColorSpace_setDescription(ColorSpaceId p, const char* description);
+BitDepth ColorSpace_getBitDepth(ColorSpaceId p);
+void ColorSpace_setBitDepth(ColorSpaceId p, BitDepth bitDepth);
 
 // Context
-void deleteContext(Context *p);
-Context* Context_Create();
-Context* Context_createEditableCopy(Context *p);
-const char* Context_getCacheID(Context *p);
-void Context_setSearchPath(Context *p, const char* path);
-const char* Context_getSearchPath(Context *p);
-void Context_setWorkingDir(Context *p, const char* dirname);
-const char* Context_getWorkingDir(Context *p);
-void Context_setStringVar(Context *p, const char* name, const char* value);
-const char* Context_getStringVar(Context *p, const char* name);
-void Context_loadEnvironment(Context *p);
-EnvironmentMode Context_getEnvironmentMode(Context *p);
-void Context_setEnvironmentMode(Context *p, EnvironmentMode mode);
-const char* Context_resolveStringVar(Context *p, const char* val);
-const char* Context_resolveFileLocation(Context *p, const char* filename);
+void deleteContext(ContextId p);
+ContextId Context_Create();
+ContextId Context_createEditableCopy(ContextId p);
+const char* Context_getCacheID(ContextId p);
+void Context_setSearchPath(ContextId p, const char* path);
+const char* Context_getSearchPath(ContextId p);
+void Context_setWorkingDir(ContextId p, const char* dirname);
+const char* Context_getWorkingDir(ContextId p);
+void Context_setStringVar(ContextId p, const char* name, const char* value);
+const char* Context_getStringVar(ContextId p, const char* name);
+void Context_loadEnvironment(ContextId p);
+EnvironmentMode Context_getEnvironmentMode(ContextId p);
+void Context_setEnvironmentMode(ContextId p, EnvironmentMode mode);
+const char* Context_resolveStringVar(ContextId p, const char* val);
+const char* Context_resolveFileLocation(ContextId p, const char* filename);
 
 // Processor
-void deleteProcessor(Processor* p);
-Processor* Processor_Create();
-bool Processor_isNoOp(Processor *p);
-bool Processor_hasChannelCrosstalk(Processor *p);
-ProcessorMetadata* Processor_getMetadata(Processor *p);
+void deleteProcessor(ProcessorId p);
+ProcessorId Processor_Create();
+bool Processor_isNoOp(ProcessorId p);
+bool Processor_hasChannelCrosstalk(ProcessorId p);
+ProcessorMetadataId Processor_getMetadata(ProcessorId p);
 
 // Processor CPU
-void Processor_apply(Processor *p, ImageDesc *i);
-const char* Processor_getCpuCacheID(Processor *p);
+void Processor_apply(ProcessorId p, ImageDesc *i);
+const char* Processor_getCpuCacheID(ProcessorId p);
 
-void deleteProcessorMetadata(ProcessorMetadata* p);
-ProcessorMetadata* ProcessorMetadata_Create();
-int ProcessorMetadata_getNumFiles(ProcessorMetadata *p);
-const char* ProcessorMetadata_getFile(ProcessorMetadata *p, int index);
-int ProcessorMetadata_getNumLooks(ProcessorMetadata *p);
-const char* ProcessorMetadata_getLook(ProcessorMetadata *p, int index);
-void ProcessorMetadata_addFile(ProcessorMetadata *p, const char* fname);
-void ProcessorMetadata_addLook(ProcessorMetadata *p, const char* look);
+void deleteProcessorMetadata(ProcessorMetadataId p);
+ProcessorMetadataId ProcessorMetadata_Create();
+int ProcessorMetadata_getNumFiles(ProcessorMetadataId p);
+const char* ProcessorMetadata_getFile(ProcessorMetadataId p, int index);
+int ProcessorMetadata_getNumLooks(ProcessorMetadataId p);
+const char* ProcessorMetadata_getLook(ProcessorMetadataId p, int index);
+void ProcessorMetadata_addFile(ProcessorMetadataId p, const char* fname);
+void ProcessorMetadata_addLook(ProcessorMetadataId p, const char* look);
 
 // ImageDesc
 void deletePackedImageDesc(PackedImageDesc* p);
@@ -216,23 +219,52 @@ long PackedImageDesc_getHeight(PackedImageDesc *p);
 long PackedImageDesc_getNumChannels(PackedImageDesc *p);
 
 // DisplayTransform
-void deleteDisplayTransform(DisplayTransform* d);
-DisplayTransform* DisplayTransform_Create();
-DisplayTransform* DisplayTransform_createEditableCopy(DisplayTransform *p);
-TransformDirection DisplayTransform_getDirection(DisplayTransform *p);
-void DisplayTransform_setDirection(DisplayTransform *p, TransformDirection dir);
-const char* DisplayTransform_getInputColorSpaceName(DisplayTransform *p);
-void DisplayTransform_setInputColorSpaceName(DisplayTransform *p, const char* name);
-const char* DisplayTransform_getDisplay(DisplayTransform *p);
-void DisplayTransform_setDisplay(DisplayTransform *p, const char* name);
-const char* DisplayTransform_getView(DisplayTransform *p);
-void DisplayTransform_setView(DisplayTransform *p, const char* name);
-const char* DisplayTransform_getLooksOverride(DisplayTransform *p);
-void DisplayTransform_setLooksOverride(DisplayTransform *p, const char* looks);
-bool DisplayTransform_getLooksOverrideEnabled(DisplayTransform *p);
-void DisplayTransform_setLooksOverrideEnabled(DisplayTransform *p, bool enabled);
+void deleteDisplayTransform(DisplayTransformId p);
+DisplayTransformId DisplayTransform_Create();
+DisplayTransformId DisplayTransform_createEditableCopy(DisplayTransformId p);
+TransformDirection DisplayTransform_getDirection(DisplayTransformId p);
+void DisplayTransform_setDirection(DisplayTransformId p, TransformDirection dir);
+const char* DisplayTransform_getInputColorSpaceName(DisplayTransformId p);
+void DisplayTransform_setInputColorSpaceName(DisplayTransformId p, const char* name);
+const char* DisplayTransform_getDisplay(DisplayTransformId p);
+void DisplayTransform_setDisplay(DisplayTransformId p, const char* name);
+const char* DisplayTransform_getView(DisplayTransformId p);
+void DisplayTransform_setView(DisplayTransformId p, const char* name);
+const char* DisplayTransform_getLooksOverride(DisplayTransformId p);
+void DisplayTransform_setLooksOverride(DisplayTransformId p, const char* looks);
+bool DisplayTransform_getLooksOverrideEnabled(DisplayTransformId p);
+void DisplayTransform_setLooksOverrideEnabled(DisplayTransformId p, bool enabled);
 
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+extern char* NO_ERROR;
+
+#define BEGIN_CATCH_ERR                      \
+    errno = 0;                               \
+    try {
+
+
+#define END_CATCH_ERR                        \
+    }                                        \
+    catch (const OCIO::Exception& ex) {      \
+        errno = ERR_GENERAL;                 \
+    }
+
+
+#define END_CATCH_CTX_ERR(CTX)               \
+    }                                        \
+    catch (const OCIO::Exception& ex) {      \
+        if (CTX->last_error != NULL &&       \
+            CTX->last_error != NO_ERROR) {   \
+            free(CTX->last_error);           \
+        }                                    \
+        CTX->last_error = strdup(ex.what()); \
+        errno = ERR_GENERAL;                 \
+    }
+
+_HandleContext* NEW_HANDLE_CONTEXT();
+_HandleContext* NEW_HANDLE_CONTEXT(HandleId handle);
+
+#endif // _OPENCOLORIGO_OCIO_H_

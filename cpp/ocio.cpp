@@ -5,35 +5,13 @@
 
 #include "ocio.h"
 
+char* NO_ERROR = (char*)"";
 
-#define BEGIN_CATCH_ERR                      \
-    errno = 0;                               \
-    try {                                   
+_HandleContext* NEW_HANDLE_CONTEXT() {
+    return NEW_HANDLE_CONTEXT(0);
+}
 
-
-#define END_CATCH_ERR                        \
-    }                                        \
-    catch (const OCIO::Exception& ex) {      \
-        errno = ERR_GENERAL;                 \
-    } 
-
-
-#define END_CATCH_CTX_ERR(CTX)               \
-    }                                        \
-    catch (const OCIO::Exception& ex) {      \
-        if (CTX->last_error != NULL &&       \
-            CTX->last_error != NO_ERROR) {   \
-            free(CTX->last_error);           \
-        }                                    \
-        CTX->last_error = strdup(ex.what()); \
-        errno = ERR_GENERAL;                 \
-    } 
-
-
-static char* NO_ERROR = (char*)"";
-
-
-_HandleContext* NEW_HANDLE_CONTEXT(void* handle=NULL) {
+_HandleContext* NEW_HANDLE_CONTEXT(HandleId handle) {
     _HandleContext *ctx = new _HandleContext;
     ctx->handle = handle;
     ctx->last_error = NULL;
@@ -59,9 +37,10 @@ extern "C" {
         if (ctx != NULL) {
             // Specific handle type may have already
             // deleted this for us
-            if (ctx->handle != NULL) {
-                free(ctx->handle);
-                ctx->handle = NULL;
+            if (ctx->handle) {
+                std::cerr << "Warning: OpenColorigo HandleContext handle "
+                             "id not deleted when cleaning up HandleContext!"
+                             << std::endl;
             }
             if (ctx->last_error != NULL && ctx->last_error != NO_ERROR) {
                 // from strdup()

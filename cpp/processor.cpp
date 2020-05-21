@@ -1,108 +1,113 @@
 #include <OpenColorIO/OpenColorIO.h>
 
 #include "ocio.h"
+#include "ocio_abi.h"
+#include "shared_ptr_map.h"
 
+namespace OCIO = OCIO_NAMESPACE;
+
+namespace ocigo {
+
+SharedPtrMap<OCIO::ProcessorRcPtr> g_Processor_map;
+SharedPtrMap<OCIO::ProcessorMetadataRcPtr> g_ProcessorMetadata_map;
+
+}
 
 extern "C" {
 
-    namespace OCIO = OCIO_NAMESPACE;
-
-    void deleteProcessor(Processor* p) {
-        if (p != NULL) {
-            delete (OCIO::ProcessorRcPtr*)p;
-        }
+    void deleteProcessor(ProcessorId p) {
+        ocigo::g_Processor_map.remove(p);
     }
 
-    Processor* Processor_Create() {
+    ProcessorId Processor_Create() {
         OCIO::ProcessorRcPtr ptr;
         BEGIN_CATCH_ERR
         ptr = OCIO::Processor::Create();
         END_CATCH_ERR
-        return (Processor*) new OCIO::ProcessorRcPtr(ptr);
+        return ocigo::g_Processor_map.add(ptr);
     }
 
-    bool Processor_isNoOp(Processor *p) {
+    bool Processor_isNoOp(ProcessorId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstProcessorRcPtr*>(p)->get()->isNoOp();
+        return ocigo::g_Processor_map.get(p).get()->isNoOp();
         END_CATCH_ERR
     }
 
-    bool Processor_hasChannelCrosstalk(Processor *p) {
+    bool Processor_hasChannelCrosstalk(ProcessorId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstProcessorRcPtr*>(p)->get()->hasChannelCrosstalk();
+        return ocigo::g_Processor_map.get(p).get()->hasChannelCrosstalk();
         END_CATCH_ERR
     }
 
     // Processor CPU
-    void Processor_apply(Processor *p, ImageDesc *i) {
+    void Processor_apply(ProcessorId p, ImageDesc *i) {
         OCIO::ImageDesc *img = static_cast<OCIO::ImageDesc*>(i);
         BEGIN_CATCH_ERR
-        static_cast<OCIO::ConstProcessorRcPtr*>(p)->get()->apply(*img);
+        ocigo::g_Processor_map.get(p).get()->apply(*img);
         END_CATCH_ERR
     }
 
-    const char* Processor_getCpuCacheID(Processor *p) {
+    const char* Processor_getCpuCacheID(ProcessorId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstProcessorRcPtr*>(p)->get()->getCpuCacheID();
+        return ocigo::g_Processor_map.get(p).get()->getCpuCacheID();
         END_CATCH_ERR
     }
 
     // ProcessorMetadata
-    void deleteProcessorMetadata(ProcessorMetadata* p) {
-        if (p != NULL) {
-            delete (OCIO::ProcessorMetadataRcPtr*)p;
-        }
+    void deleteProcessorMetadata(ProcessorMetadataId p) {
+        ocigo::g_ProcessorMetadata_map.remove(p);
     }
 
-    ProcessorMetadata* Processor_getMetadata(Processor *p) {
+    ProcessorMetadataId Processor_getMetadata(ProcessorId p) {
         OCIO::ConstProcessorMetadataRcPtr ptr;
         BEGIN_CATCH_ERR
-        ptr = static_cast<OCIO::ConstProcessorRcPtr*>(p)->get()->getMetadata();
+        ptr = ocigo::g_Processor_map.get(p).get()->getMetadata();
         END_CATCH_ERR
-        return (ProcessorMetadata*) new OCIO::ConstProcessorMetadataRcPtr(ptr);
+        return ocigo::g_ProcessorMetadata_map.add(
+                OCIO_CONST_POINTER_CAST<OCIO::ProcessorMetadata>(ptr));
     }
 
-    ProcessorMetadata* ProcessorMetadata_Create() {
+    ProcessorMetadataId ProcessorMetadata_Create() {
         OCIO::ProcessorMetadataRcPtr ptr;
         BEGIN_CATCH_ERR
         ptr = OCIO::ProcessorMetadata::Create();
         END_CATCH_ERR
-        return (ProcessorMetadata*) new OCIO::ProcessorMetadataRcPtr(ptr);
+        return ocigo::g_ProcessorMetadata_map.add(ptr);
     }
 
-    int ProcessorMetadata_getNumFiles(ProcessorMetadata *p) {
+    int ProcessorMetadata_getNumFiles(ProcessorMetadataId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstProcessorMetadataRcPtr*>(p)->get()->getNumFiles();
+        return ocigo::g_ProcessorMetadata_map.get(p).get()->getNumFiles();
         END_CATCH_ERR
     }
 
-    const char* ProcessorMetadata_getFile(ProcessorMetadata *p, int index) {
+    const char* ProcessorMetadata_getFile(ProcessorMetadataId p, int index) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstProcessorMetadataRcPtr*>(p)->get()->getFile(index);
+        return ocigo::g_ProcessorMetadata_map.get(p).get()->getFile(index);
         END_CATCH_ERR
     }
 
-    int ProcessorMetadata_getNumLooks(ProcessorMetadata *p) {
+    int ProcessorMetadata_getNumLooks(ProcessorMetadataId p) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstProcessorMetadataRcPtr*>(p)->get()->getNumLooks();
+        return ocigo::g_ProcessorMetadata_map.get(p).get()->getNumLooks();
         END_CATCH_ERR
     }
 
-    const char* ProcessorMetadata_getLook(ProcessorMetadata *p, int index) {
+    const char* ProcessorMetadata_getLook(ProcessorMetadataId p, int index) {
         BEGIN_CATCH_ERR
-        return static_cast<OCIO::ConstProcessorMetadataRcPtr*>(p)->get()->getLook(index);
+        return ocigo::g_ProcessorMetadata_map.get(p).get()->getLook(index);
         END_CATCH_ERR
     }
 
-    void ProcessorMetadata_addFile(ProcessorMetadata *p, const char* fname) {
+    void ProcessorMetadata_addFile(ProcessorMetadataId p, const char* fname) {
         BEGIN_CATCH_ERR
-        static_cast<OCIO::ProcessorMetadataRcPtr*>(p)->get()->addFile(fname);
+        ocigo::g_ProcessorMetadata_map.get(p).get()->addFile(fname);
         END_CATCH_ERR
     }
 
-    void ProcessorMetadata_addLook(ProcessorMetadata *p, const char* look) {
+    void ProcessorMetadata_addLook(ProcessorMetadataId p, const char* look) {
         BEGIN_CATCH_ERR
-        static_cast<OCIO::ProcessorMetadataRcPtr*>(p)->get()->addLook(look);
+        ocigo::g_ProcessorMetadata_map.get(p).get()->addLook(look);
         END_CATCH_ERR
     }
 

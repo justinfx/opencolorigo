@@ -37,6 +37,67 @@ func init() {
 	os.Setenv("OVERRIDE", "luts")
 }
 
+func testLeak(tb testing.TB) {
+	path := `/home/justin/src/go/src/github.com/justinfx/opencolorigo/testdata/spi-vfx/config.ocio`
+	cfg, err := ConfigCreateFromFile(path)
+	if err != nil {
+		tb.Fatal(err)
+	}
+	defer cfg.Destroy()
+
+	ctx, err := cfg.CurrentContext()
+	if err != nil {
+		tb.Fatal(err)
+	}
+	defer ctx.Destroy()
+
+	var colorspaces []string
+	num := cfg.NumColorSpaces()
+	for i := 0; i < num; i++ {
+		cs, _ := cfg.ColorSpaceNameByIndex(i)
+		colorspaces = append(colorspaces, cs)
+	}
+
+	displayName := "DCIP3"
+	displayTx := NewDisplayTransform()
+	displayTx.SetDisplay(displayName)
+	displayTx.SetDirection(TRANSFORM_DIR_FORWARD)
+	defer displayTx.Destroy()
+
+	numViews := cfg.NumViews(displayName)
+	for i := 0; i < numViews; i++ {
+		view := cfg.View(displayName, i)
+		if view == "" {
+			continue
+		}
+		displayTx.SetView(view)
+
+		for _, srcCs := range colorspaces {
+			displayTx.SetInputColorSpace(srcCs)
+			//proc, err := cfg.Processor(ctx, srcCs, cfg.DisplayColorSpaceName(displayName, view))
+			proc, err := cfg.ProcessorCtxTransformDir(ctx, displayTx, TRANSFORM_DIR_FORWARD)
+			if err != nil {
+				if strings.Contains(err.Error(), "inverse") {
+					continue
+				}
+				tb.Fatal(err)
+			}
+			meta := proc.Metadata()
+			//num := meta.NumFiles()
+			//tb.Logf("%d files in processor (view=%q, cs=%q", num, view, srcCs)
+			meta.Destroy()
+			proc.Destroy()
+		}
+	}
+}
+
+func BenchmarkLeak(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		b.Log(i)
+		testLeak(b)
+	}
+}
+
 // Usage Example: Compositing plugin that converts from “log” to “lin”
 func Example() {
 
@@ -656,6 +717,9 @@ func TestColorSpace(t *testing.T) {
 	c := CONFIG
 
 	name, _ := c.ColorSpaceNameByIndex(0)
+	if name == "" {
+		t.Fatal("empty colorspace name")
+	}
 	cs, err := c.ColorSpace(name)
 	if err != nil {
 		t.Fatalf("Error getting a ColorSpace from name %s: %s", name, err.Error())

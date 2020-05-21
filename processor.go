@@ -14,10 +14,10 @@ import (
 /* Processor */
 
 type Processor struct {
-	ptr unsafe.Pointer
+	ptr C.ProcessorId
 }
 
-func newProcessor(p unsafe.Pointer) *Processor {
+func newProcessor(p C.ProcessorId) *Processor {
 	cfg := &Processor{p}
 	runtime.SetFinalizer(cfg, deleteProcessor)
 	return cfg
@@ -27,10 +27,10 @@ func deleteProcessor(p *Processor) {
 	if p == nil {
 		return
 	}
-	if p.ptr != nil {
+	if p.ptr != 0 {
 		runtime.SetFinalizer(p, nil)
 		C.deleteProcessor(p.ptr)
-		p.ptr = nil
+		p.ptr = 0
 	}
 	runtime.KeepAlive(p)
 }
@@ -87,10 +87,10 @@ func (p *Processor) CpuCacheID() (string, error) {
 // This class contains meta information about the process that generated this processor.
 // The results of these functions do not impact the pixel processing.
 type ProcessorMetadata struct {
-	ptr unsafe.Pointer
+	ptr C.ProcessorMetadataId
 }
 
-func newProcessorMetadata(p unsafe.Pointer) *ProcessorMetadata {
+func newProcessorMetadata(p C.ProcessorMetadataId) *ProcessorMetadata {
 	cfg := &ProcessorMetadata{p}
 	runtime.SetFinalizer(cfg, deleteProcessorMetadata)
 	return cfg
@@ -100,10 +100,10 @@ func deleteProcessorMetadata(c *ProcessorMetadata) {
 	if c == nil {
 		return
 	}
-	if c.ptr != nil {
+	if c.ptr != 0 {
 		runtime.SetFinalizer(c, nil)
 		C.deleteProcessorMetadata(c.ptr)
-		c.ptr = nil
+		c.ptr = 0
 	}
 	runtime.KeepAlive(c)
 }

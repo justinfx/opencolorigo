@@ -23,14 +23,14 @@ const (
 // Transform interface represents the different types of
 // concrete transform types that can be passed into API calls
 type Transform interface {
-	transformHandle() unsafe.Pointer
+	transformHandle() C.HandleId
 }
 
 type DisplayTransform struct {
-	ptr unsafe.Pointer
+	ptr C.DisplayTransformId
 }
 
-func newDisplayTransform(p unsafe.Pointer) *DisplayTransform {
+func newDisplayTransform(p C.DisplayTransformId) *DisplayTransform {
 	tx := &DisplayTransform{p}
 	runtime.SetFinalizer(tx, deleteDisplayTransform)
 	return tx
@@ -40,10 +40,10 @@ func deleteDisplayTransform(tx *DisplayTransform) {
 	if tx == nil {
 		return
 	}
-	if tx.ptr != nil {
+	if tx.ptr != 0 {
 		runtime.SetFinalizer(tx, nil)
 		C.deleteDisplayTransform(tx.ptr)
-		tx.ptr = nil
+		tx.ptr = 0
 	}
 	runtime.KeepAlive(tx)
 }
@@ -60,7 +60,7 @@ func (tx *DisplayTransform) Destroy() {
 	deleteDisplayTransform(tx)
 }
 
-func (tx *DisplayTransform) transformHandle() unsafe.Pointer {
+func (tx *DisplayTransform) transformHandle() C.HandleId {
 	return tx.ptr
 }
 
