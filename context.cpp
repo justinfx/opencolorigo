@@ -1,13 +1,14 @@
 #include <OpenColorIO/OpenColorIO.h>
 
 #include "ocio.h"
-#include "shared_ptr_map.h"
+#include "ocio_abi.h"
+#include "storage.h"
 
 namespace OCIO = OCIO_NAMESPACE;
 
 namespace ocigo {
 
-SharedPtrMap<OCIO::ContextRcPtr> g_Context_map;
+IndexMap<OCIO::ContextRcPtr> g_Context_map;
 
 }
 

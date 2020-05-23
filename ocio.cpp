@@ -4,8 +4,9 @@
 #include <string>
 
 #include "ocio.h"
+#include "ocio_abi.h"
 
-char* NO_ERROR = (char*)"";
+const char* NO_ERROR = (const char*)"";
 
 _HandleContext* NEW_HANDLE_CONTEXT() {
     return NEW_HANDLE_CONTEXT(0);
@@ -42,16 +43,12 @@ extern "C" {
                              "id not deleted when cleaning up HandleContext!"
                              << std::endl;
             }
-            if (ctx->last_error != NULL && ctx->last_error != NO_ERROR) {
-                // from strdup()
-                free(ctx->last_error);
-                ctx->last_error = NULL;
-            }  
+            free_last_ctx_err(ctx);
             delete ctx;
         }
     }
 
-    char* getLastError(_HandleContext* ctx) {
+    const char* getLastError(_HandleContext* ctx) {
         return ctx->last_error;
     }
 

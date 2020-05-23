@@ -71,7 +71,7 @@ typedef uint64_t HandleId;
 
 typedef struct _HandleContext {
     HandleId handle;
-    char* last_error;
+    const char* last_error;
 } _HandleContext;
 
 // typedef void Config;
@@ -86,7 +86,7 @@ typedef HandleId TransformId;
 typedef HandleId DisplayTransformId;
 
 void freeHandleContext(_HandleContext* ctx);
-char* getLastError(_HandleContext* ctx);
+const char* getLastError(_HandleContext* ctx);
 
 // Global
 void ClearAllCaches();
@@ -238,31 +238,6 @@ void DisplayTransform_setLooksOverrideEnabled(DisplayTransformId p, bool enabled
 #ifdef __cplusplus
 }
 #endif
-
-extern char* NO_ERROR;
-
-#define BEGIN_CATCH_ERR                      \
-    errno = 0;                               \
-    try {
-
-
-#define END_CATCH_ERR                        \
-    }                                        \
-    catch (const OCIO::Exception& ex) {      \
-        errno = ERR_GENERAL;                 \
-    }
-
-
-#define END_CATCH_CTX_ERR(CTX)               \
-    }                                        \
-    catch (const OCIO::Exception& ex) {      \
-        if (CTX->last_error != NULL &&       \
-            CTX->last_error != NO_ERROR) {   \
-            free(CTX->last_error);           \
-        }                                    \
-        CTX->last_error = strdup(ex.what()); \
-        errno = ERR_GENERAL;                 \
-    }
 
 _HandleContext* NEW_HANDLE_CONTEXT();
 _HandleContext* NEW_HANDLE_CONTEXT(HandleId handle);

@@ -3,13 +3,14 @@
 #include <iostream>
 
 #include "ocio.h"
-#include "shared_ptr_map.h"
+#include "ocio_abi.h"
+#include "storage.h"
 
 namespace OCIO = OCIO_NAMESPACE;
 
 namespace ocigo {
 
-SharedPtrMap<OCIO::ColorSpaceRcPtr> g_ColorSpace_map;
+IndexMap<OCIO::ColorSpaceRcPtr> g_ColorSpace_map;
 
 }
 

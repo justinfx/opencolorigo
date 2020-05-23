@@ -2,14 +2,14 @@
 
 #include "ocio.h"
 #include "ocio_abi.h"
-#include "shared_ptr_map.h"
+#include "storage.h"
 
 namespace OCIO = OCIO_NAMESPACE;
 
 namespace ocigo {
 
-SharedPtrMap<OCIO::ProcessorRcPtr> g_Processor_map;
-SharedPtrMap<OCIO::ProcessorMetadataRcPtr> g_ProcessorMetadata_map;
+IndexMap<OCIO::ProcessorRcPtr> g_Processor_map;
+IndexMap<OCIO::ProcessorMetadataRcPtr> g_ProcessorMetadata_map;
 
 }
 
