@@ -18,6 +18,9 @@ jobs:
       image: docker.pkg.github.com/justinfx/opencolorigo/opencolorigo-ci:latest
       volumes:
         - ${GITHUB_WORKSPACE}/opencolorigo:/src/
+    steps:
+      - name: Test 
+        run: go test -count=1 -v
       
   test:
     name: Test
