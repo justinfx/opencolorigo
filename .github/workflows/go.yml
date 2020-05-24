@@ -7,17 +7,13 @@ jobs:
    runs-on: ubuntu-latest
    steps:
    - name: Check out code into the Go module directory
-     uses: actions/checkout@v2
-     with:
-        path: opencolorigo  
+     uses: actions/checkout@v2 
   
   container_test:
     runs-on: ubuntu-latest
     needs: [checkout]
     container:
       image: justinisrael/opencolorigo:test
-      volumes:
-        - ${{ github.workspace }}:/src/
     steps:
       - name: Test 
         run: go test -count=1 -v
