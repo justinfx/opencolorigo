@@ -3,9 +3,25 @@ name: Go
 on: [push, pull_request]
 
 jobs:
-
-  build:
-    name: Build
+  checkout:
+   runs-on: ubuntu-latest
+   steps:
+   - name: Check out code into the Go module directory
+     uses: actions/checkout@v2
+     with:
+        path: opencolorigo  
+  
+  container_test:
+    runs-on: ubuntu-latest
+    needs: [checkout]
+    container:
+      image: docker.pkg.github.com/justinfx/opencolorigo/opencolorigo-ci:latest
+      volumes:
+        - ${GITHUB_WORKSPACE}/opencolorigo:/src/
+      
+  test:
+    name: Test
+    needs: [checkout]
     runs-on: ubuntu-latest
     steps:
 
@@ -14,9 +30,6 @@ jobs:
       with:
         go-version: ^1.13
       id: go
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
 
     - name: Get dependencies
       run: |
