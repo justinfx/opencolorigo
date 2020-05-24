@@ -2,7 +2,7 @@ package ocio
 
 // #include "stdlib.h"
 //
-// #include "cpp/ocio.h"
+// #include "ocio.h"
 //
 import "C"
 
@@ -38,10 +38,10 @@ ColorSpaces are specific to a particular image precision (float32, uint8, etc.),
 of ColorSpaces that provide equivalent mappings (at different precisions) are referred to as a ‘family’.
 */
 type ColorSpace struct {
-	ptr unsafe.Pointer
+	ptr C.ColorSpaceId
 }
 
-func newColorSpace(p unsafe.Pointer) *ColorSpace {
+func newColorSpace(p C.ColorSpaceId) *ColorSpace {
 	cfg := &ColorSpace{p}
 	runtime.SetFinalizer(cfg, deleteColorspace)
 	return cfg
@@ -51,10 +51,10 @@ func deleteColorspace(c *ColorSpace) {
 	if c == nil {
 		return
 	}
-	if c.ptr != nil {
+	if c.ptr != 0 {
 		runtime.SetFinalizer(c, nil)
 		C.deleteColorSpace(c.ptr)
-		c.ptr = nil
+		c.ptr = 0
 	}
 	runtime.KeepAlive(c)
 }
@@ -73,7 +73,7 @@ func (c *ColorSpace) Destroy() {
 
 func (c *ColorSpace) String() string {
 	name := ""
-	if c.ptr != nil {
+	if c.ptr != 0 {
 		name = c.Name()
 	}
 	return fmt.Sprintf("ColorSpace: %q", name)

@@ -1,0 +1,10 @@
+FROM golang:1.13.11-stretch
+
+RUN apt-get update && apt-get install --no-install-recommends -y -q \
+    g++ \
+    libopencolorio-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src/
+
+CMD go test -count 1 -v .

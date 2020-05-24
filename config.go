@@ -1,8 +1,9 @@
 package ocio
 
-// #include "stdlib.h"
+// #include <stdlib.h>
+// #include <string.h>
 //
-// #include "cpp/ocio.h"
+// #include "ocio.h"
 //
 import "C"
 
@@ -105,12 +106,12 @@ func (c *Config) Destroy() {
 }
 
 func (c *Config) lastError() error {
-	e := C.GoString(c.ptr.last_error)
-	if e == "" {
+	if c == nil {
 		return nil
 	}
+	err := getLastError(c.ptr)
 	runtime.KeepAlive(c)
-	return errors.New(e)
+	return err
 }
 
 // Create a new editable copy of this Config
@@ -273,7 +274,7 @@ func (c *Config) Processor(args ...interface{}) (*Processor, error) {
 
 	var (
 		err  error
-		proc unsafe.Pointer
+		proc C.ProcessorId
 	)
 
 	bad_str := "Error creating processor with src colorspace %v / dst colorspace %v"
@@ -357,7 +358,7 @@ Not often needed, but will allow for the re-use of atomic OCIO functionality
 func (c *Config) ProcessorTransform(tx Transform) (*Processor, error) {
 	ptr := C.Config_getProcessor_TX(c.ptr, tx.transformHandle())
 	if err := c.lastError(); err != nil {
-		return nil, c.lastError()
+		return nil, err
 	}
 	proc := newProcessor(ptr)
 	runtime.KeepAlive(c)
@@ -373,9 +374,10 @@ Not often needed, but will allow for the re-use of atomic OCIO functionality
 (such as to apply an individual LUT file).
 */
 func (c *Config) ProcessorTransformDir(tx Transform, dir TransformDirection) (*Processor, error) {
-	ptr := C.Config_getProcessor_TX_D(c.ptr, tx.transformHandle(), C.TransformDirection(dir))
+	ptr := C.Config_getProcessor_TX_D(
+		c.ptr, tx.transformHandle(), C.TransformDirection(dir))
 	if err := c.lastError(); err != nil {
-		return nil, c.lastError()
+		return nil, err
 	}
 	proc := newProcessor(ptr)
 	runtime.KeepAlive(c)
@@ -397,7 +399,7 @@ func (c *Config) ProcessorCtxTransformDir(
 		c.ptr, ctx.ptr, tx.transformHandle(), C.TransformDirection(dir))
 
 	if err := c.lastError(); err != nil {
-		return nil, c.lastError()
+		return nil, err
 	}
 
 	proc := newProcessor(ptr)
@@ -425,7 +427,7 @@ func (c *Config) ColorSpace(name string) (*ColorSpace, error) {
 		err = fmt.Errorf("%q is not a valid ColorSpace: %v", name, err)
 		return nil, err
 	}
-	if cs == nil {
+	if cs == 0 {
 		err = fmt.Errorf("%q is not a valid ColorSpace", name)
 		return nil, err
 	}

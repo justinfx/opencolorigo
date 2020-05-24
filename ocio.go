@@ -6,12 +6,12 @@ OpenColorIO bindings - http://opencolorio.org/developers/api/OpenColorIO.html
 package ocio
 
 /*
-#cgo CPPFLAGS: -I./cpp -Wno-return-type
+#cgo CPPFLAGS: -I. -Wno-return-type
 #cgo LDFLAGS: -lstdc++
 
 #include "stdlib.h"
 
-#include "cpp/ocio.h"
+#include "ocio.h"
 */
 import "C"
 
@@ -64,7 +64,14 @@ Errors
 */
 
 func getLastError(ptr *C._HandleContext) error {
-	e := C.GoString(ptr.last_error)
+	if ptr == nil {
+		return nil
+	}
+	err := C.getLastError(ptr)
+	if err == nil {
+		return nil
+	}
+	e := C.GoString(err)
 	if e == "" {
 		return nil
 	}

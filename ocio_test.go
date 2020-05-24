@@ -575,74 +575,78 @@ func TestConfigDisplaysViews(t *testing.T) {
 		err error
 	)
 
-	str = CONFIG.DefaultDisplay()
-	if str != "sRGB" {
-		t.Errorf("expected DefaultDisplay to be 'sRGB', but got %q", str)
+	cfg := CONFIG.EditableCopy()
+	defer cfg.Destroy()
+
+	cfg.SetActiveDisplays("DCIP3, sRGB")
+	str = cfg.DefaultDisplay()
+	if str != "DCIP3" {
+		t.Errorf("expected DefaultDisplay to be 'DCIP3', but got %q", str)
 	}
 
-	i = CONFIG.NumDisplays()
+	i = cfg.NumDisplays()
 	if i != 2 {
 		t.Errorf("expected NumDisplays to be 2. but got %d", i)
 	}
 
 	expectStrs := []string{"DCIP3", "sRGB"}
-	strs := []string{CONFIG.Display(0), CONFIG.Display(1)}
+	strs := []string{cfg.Display(0), cfg.Display(1)}
 	sort.Strings(strs)
 	if !reflect.DeepEqual(strs, expectStrs) {
 		t.Errorf("expected displays %#v, but got %#v", expectStrs, str)
 	}
 
-	str = CONFIG.DefaultView("sRGB")
+	str = cfg.DefaultView("sRGB")
 	if str != "Film" {
 		t.Errorf("expected DefaultView for 'sRGB' to be 'Film', but got %q", str)
 	}
 
-	if i = CONFIG.NumViews("sRGB"); i != 4 {
+	if i = cfg.NumViews("sRGB"); i != 4 {
 		t.Errorf("expected NumViews to be 4. but got %d", i)
 	}
 
-	if str = CONFIG.View("sRGB", 2); str != "Raw" {
+	if str = cfg.View("sRGB", 2); str != "Raw" {
 		t.Errorf("expected View at index 2 to be 'Raw', but got %q", str)
 	}
 
-	if str = CONFIG.ActiveDisplays(); str != "sRGB, DCIP3" {
+	if str = cfg.ActiveDisplays(); str != "DCIP3, sRGB" {
 		t.Errorf("expected ActiveDisplays to be 'sRGB, DCIP3', but got %q", str)
 	}
 
-	if str = CONFIG.ActiveViews(); str != "Film, Log, Raw" {
+	if str = cfg.ActiveViews(); str != "Film, Log, Raw" {
 		t.Errorf("expected ActiveViews to be 'Film, Log, Raw', but got %q", str)
 	}
 
-	if str = CONFIG.DisplayLooks("sRGB", "Film DI"); str != "di" {
+	if str = cfg.DisplayLooks("sRGB", "Film DI"); str != "di" {
 		t.Errorf("expected DisplayLooks for 'sRGB' / 'Film DI' to be 'di', but got %q", str)
 	}
 
-	if str = CONFIG.DisplayColorSpaceName("sRGB", "Raw"); str != "nc10" {
+	if str = cfg.DisplayColorSpaceName("sRGB", "Raw"); str != "nc10" {
 		t.Errorf("expected DisplayColorSpaceName for 'sRGB' / 'Raw' to be 'nc10', but got %q", str)
 	}
 
-	prev := CONFIG.NumViews("sRGB")
-	if err = CONFIG.AddDisplay("sRGB", "TEST_VIEW", "vd8", "di"); err != nil {
+	prev := cfg.NumViews("sRGB")
+	if err = cfg.AddDisplay("sRGB", "TEST_VIEW", "vd8", "di"); err != nil {
 		t.Error(err.Error())
 	}
-	if i = CONFIG.NumViews("sRGB"); i != (prev + 1) {
+	if i = cfg.NumViews("sRGB"); i != (prev + 1) {
 		t.Errorf("expected NumViews for 'sRGB' to be %d, but got %d", prev+1, i)
 	}
-	if str = CONFIG.DisplayLooks("sRGB", "TEST_VIEW"); str != "di" {
+	if str = cfg.DisplayLooks("sRGB", "TEST_VIEW"); str != "di" {
 		t.Errorf("expected DisplayLooks for 'sRGB' / 'TEST_VIEW' to be 'di', but got %q", str)
 	}
 
-	if err = CONFIG.SetActiveDisplays("DCIP3"); err != nil {
+	if err = cfg.SetActiveDisplays("DCIP3"); err != nil {
 		t.Error(err.Error())
 	}
-	if str = CONFIG.ActiveDisplays(); str != "DCIP3" {
+	if str = cfg.ActiveDisplays(); str != "DCIP3" {
 		t.Errorf("expected ActiveDisplays to be 'DCIP3', but got %q", str)
 	}
 
-	if err = CONFIG.SetActiveViews("Log, Raw"); err != nil {
+	if err = cfg.SetActiveViews("Log, Raw"); err != nil {
 		t.Error(err.Error())
 	}
-	if str = CONFIG.ActiveViews(); str != "Log, Raw" {
+	if str = cfg.ActiveViews(); str != "Log, Raw" {
 		t.Errorf("expected ActiveViews to be 'Log, Raw', but got %q", str)
 	}
 }
@@ -656,6 +660,9 @@ func TestColorSpace(t *testing.T) {
 	c := CONFIG
 
 	name, _ := c.ColorSpaceNameByIndex(0)
+	if name == "" {
+		t.Fatal("empty colorspace name")
+	}
 	cs, err := c.ColorSpace(name)
 	if err != nil {
 		t.Fatalf("Error getting a ColorSpace from name %s: %s", name, err.Error())
@@ -884,6 +891,42 @@ func TestContextResolveStringVar(t *testing.T) {
 	}
 }
 
+func TestContextResolveFileLocation(t *testing.T) {
+	c := NewContext()
+	c.LoadEnvironment()
+	c.SetStringVar("A", "testdata")
+	c.SetStringVar("B", "spi-vfx")
+	c.SetStringVar("C", "config")
+
+	expect := "testdata/spi-vfx/config.ocio"
+
+	path, err := c.ResolveFileLocation("testdata/spi-vfx/config.ocio")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if path != expect {
+		t.Fatalf("expected %q, got %q", expect, path)
+	}
+
+	path, err = c.ResolveFileLocation("$A/$B/$C.ocio")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if path != expect {
+		t.Fatalf("expected %q, got %q", expect, path)
+	}
+
+	c.SetStringVar("C", "missing")
+
+	path, err = c.ResolveFileLocation("$A/$B/$C.ocio")
+	if err == nil {
+		t.Fatal("expected an error, got nil")
+	}
+	if !strings.Contains(err.Error(), "could not be located") {
+		t.Fatalf("unxpected error: %v", err)
+	}
+}
+
 /*
 
 ImageDesc
@@ -933,13 +976,26 @@ func TestProcessorApply(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-
-	processor.Apply(imgDesc)
+	err = processor.Apply(imgDesc)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if fmt.Sprintf("%v", imageDataCopy) == fmt.Sprintf("%v", imgDesc.Data()) {
 		t.Fatal("Original RGB data remained unchanged after Apply()")
 	}
 	imgDesc.Destroy()
+
+	imgDesc = NewPackedImageDesc([]float32{0, 0, 0}, 0, 0, 1)
+	err = processor.Apply(imgDesc)
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if !strings.Contains(err.Error(), "Image dimensions must be positive") {
+		t.Fatalf("unexpected error type: %v", err)
+	}
+	imgDesc.Destroy()
+
 	processor.Destroy()
 }
 

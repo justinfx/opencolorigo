@@ -2,7 +2,7 @@ package ocio
 
 // #include "stdlib.h"
 //
-// #include "cpp/ocio.h"
+// #include "ocio.h"
 //
 import "C"
 
@@ -14,10 +14,10 @@ import (
 /* Processor */
 
 type Processor struct {
-	ptr unsafe.Pointer
+	ptr C.ProcessorId
 }
 
-func newProcessor(p unsafe.Pointer) *Processor {
+func newProcessor(p C.ProcessorId) *Processor {
 	cfg := &Processor{p}
 	runtime.SetFinalizer(cfg, deleteProcessor)
 	return cfg
@@ -38,6 +38,15 @@ func deleteProcessor(p *Processor) {
 // Create a new empty Processor
 func NewProcessor() *Processor {
 	return newProcessor(C.Processor_Create())
+}
+
+func (p *Processor) lastError() error {
+	if p == nil {
+		return nil
+	}
+	err := getLastError(p.ptr)
+	runtime.KeepAlive(p)
+	return err
 }
 
 // Destroy immediately frees resources for this
@@ -69,28 +78,29 @@ func (p *Processor) Metadata() *ProcessorMetadata {
 
 // Apply to an image.
 func (p *Processor) Apply(i ImageDescriptor) error {
-	_, err := C.Processor_apply(p.ptr, unsafe.Pointer(i.imageDescPtr()))
+	C.Processor_apply(p.ptr, unsafe.Pointer(i.imageDescPtr()))
+	err := p.lastError()
 	runtime.KeepAlive(p)
 	runtime.KeepAlive(i)
 	return err
 }
 
 func (p *Processor) CpuCacheID() (string, error) {
-	id, err := C.Processor_getCpuCacheID(p.ptr)
-	if err != nil {
+	id := C.Processor_getCpuCacheID(p.ptr)
+	if err := p.lastError(); err != nil {
 		return "", err
 	}
 	runtime.KeepAlive(p)
-	return C.GoString(id), err
+	return C.GoString(id), nil
 }
 
 // This class contains meta information about the process that generated this processor.
 // The results of these functions do not impact the pixel processing.
 type ProcessorMetadata struct {
-	ptr unsafe.Pointer
+	ptr C.ProcessorMetadataId
 }
 
-func newProcessorMetadata(p unsafe.Pointer) *ProcessorMetadata {
+func newProcessorMetadata(p C.ProcessorMetadataId) *ProcessorMetadata {
 	cfg := &ProcessorMetadata{p}
 	runtime.SetFinalizer(cfg, deleteProcessorMetadata)
 	return cfg
@@ -100,10 +110,10 @@ func deleteProcessorMetadata(c *ProcessorMetadata) {
 	if c == nil {
 		return
 	}
-	if c.ptr != nil {
+	if c.ptr != 0 {
 		runtime.SetFinalizer(c, nil)
 		C.deleteProcessorMetadata(c.ptr)
-		c.ptr = nil
+		c.ptr = 0
 	}
 	runtime.KeepAlive(c)
 }
