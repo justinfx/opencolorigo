@@ -17,7 +17,7 @@ jobs:
     container:
       image: justinisrael/opencolorigo:test
       volumes:
-        - ${{ env.GITHUB_WORKSPACE }}/opencolorigo:/src/
+        - ${{ github.workspace }}/opencolorigo:/src/
     steps:
       - name: Test 
         run: go test -count=1 -v
