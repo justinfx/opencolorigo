@@ -1,5 +1,9 @@
 # OpenColorIO bindings for Go
 
+[![Go project version](https://img.shields.io/github/v/release/justinfx/opencolorigo.svg)](https://pkg.go.dev/github.com/justinfx/opencolorigo?tab=versions) 
+[![GoDoc](http://godoc.org/github.com/justinfx/opencolorigo?status.svg)](https://pkg.go.dev/github.com/justinfx/opencolorigo?tab=doc) 
+[![Go Report](https://goreportcard.com/badge/github.com/justinfx/opencolorigo)](https://goreportcard.com/badge/github.com/justinfx/opencolorigo)
+
 OpenColorIO (OCIO) is a complete color management solution geared towards motion picture production with an emphasis on 
 visual effects and computer animation. OCIO provides a straightforward and consistent user experience across all 
 supporting applications while allowing for sophisticated back-end configuration options suitable for high-end production 
@@ -15,14 +19,12 @@ OpenColorIO is free and is one of several open source projects actively sponsore
 
 http://opencolorio.org
 
-Requirements
-----------------------
+## Requirements
 
 * [OpenColorIO](http://opencolorio.org/)
 
 
-Status
----------
+## Status
 
 So far only parts of the API have been exposed. Most of the Config API is done, along with the ColorSpace, Context, 
 Transform, and color processing via CPU Path. 
@@ -39,8 +41,7 @@ Transform, and color processing via CPU Path.
   * [GpuShaderDesc](http://opencolorio.org/developers/api/OpenColorIO.html#gpushaderdesc)
 
 
-Installation
-------------
+## Installation
 
     go get github.com/justinfx/opencolorigo
 
@@ -58,16 +59,9 @@ Or just prefix the `install` command, and use the `no_pkgconfig` tag:
       CGO_LDFLAGS="-L/usr/local/lib -lopencolorio" \
       go get -tags no_pkgconfig github.com/justinfx/openimageigo
 
-Documentation
--------------
+## Example
 
-[http://godoc.org/github.com/justinfx/opencolorigo](http://godoc.org/github.com/justinfx/opencolorigo)
-
-
-Example
--------
-
-```
+```go
 func Example() {
 
     // Arbitrary source of image data
@@ -85,17 +79,20 @@ func Example() {
     if err != nil {
         panic(err.Error()
     }
+    defer cfg.Destroy()
 
     // Get the processor corresponding to this transform.
     processor, err := cfg.Processor("linear", "Cineon")
     if err != nil {
         panic(err.Error())
     }
+    defer processor.Destroy()
 
     // Wrap the image in a light-weight ImageDesc,
     // providing the width, height, and number of color channels
     // that imageData represents.
     imgDesc := ocio.NewPackedImageDesc(imageData, 512, 256, 3)
+    defer imgDesc.Destroy()
 
     // Apply the color transformation (in place)
     err = processor.Apply(imgDesc)
@@ -104,3 +101,10 @@ func Example() {
     }
 }
 ```
+
+## Memory Management
+
+The objects returned by the API are wrappers over C/C++ libopencolorio memory. While finalizers are defined
+on these types in order to release C memory as some point, there isn't a guarantee as to exactly when finalizers will be run
+by the garbage collector. To ensure resources are freed quickly, a direct call to the `Destroy()` method of an
+API instance will immediately free the memory.
