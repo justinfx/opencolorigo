@@ -14,6 +14,8 @@ jobs:
   container_test:
     runs-on: ubuntu-latest
     needs: [checkout]
+    env:
+      GITHUB_TOKEN: ${{ secrets.PACKAGE_REPO_TOKEN }}
     container:
       image: docker.pkg.github.com/justinfx/opencolorigo/opencolorigo-ci:latest
       volumes:
