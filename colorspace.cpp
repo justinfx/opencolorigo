@@ -38,9 +38,11 @@ extern "C" {
     }
 
     const char* ColorSpace_getName(ColorSpaceId p) {
+        const char* ret = NULL;
         BEGIN_CATCH_ERR
-        return ocigo::g_ColorSpace_map.get(p).get()->getName();
+        ret = ocigo::g_ColorSpace_map.get(p).get()->getName();
         END_CATCH_ERR
+        return ret;
     }
 
     void ColorSpace_setName(ColorSpaceId p, const char* name) {
@@ -50,9 +52,11 @@ extern "C" {
     }
 
     const char* ColorSpace_getFamily(ColorSpaceId p) {
+        const char* ret = NULL;
         BEGIN_CATCH_ERR
-        return ocigo::g_ColorSpace_map.get(p).get()->getFamily();
+        ret = ocigo::g_ColorSpace_map.get(p).get()->getFamily();
         END_CATCH_ERR
+        return ret;
     }
 
     void ColorSpace_setFamily(ColorSpaceId p, const char* family) {
@@ -62,9 +66,11 @@ extern "C" {
     }
 
     const char* ColorSpace_getEqualityGroup(ColorSpaceId p) {
+        const char* ret = NULL;
         BEGIN_CATCH_ERR
-        return ocigo::g_ColorSpace_map.get(p).get()->getEqualityGroup();
+        ret = ocigo::g_ColorSpace_map.get(p).get()->getEqualityGroup();
         END_CATCH_ERR
+        return ret;
     }
 
     void ColorSpace_setEqualityGroup(ColorSpaceId p, const char* group) {
@@ -74,9 +80,11 @@ extern "C" {
     }
 
     const char* ColorSpace_getDescription(ColorSpaceId p) {
+        const char* ret = NULL;
         BEGIN_CATCH_ERR
-        return ocigo::g_ColorSpace_map.get(p).get()->getDescription();
+        ret = ocigo::g_ColorSpace_map.get(p).get()->getDescription();
         END_CATCH_ERR
+        return ret;
     }
 
     void ColorSpace_setDescription(ColorSpaceId p, const char* description) {
@@ -86,9 +94,11 @@ extern "C" {
     }
 
     BitDepth ColorSpace_getBitDepth(ColorSpaceId p) {
+        BitDepth ret;
         BEGIN_CATCH_ERR
-        return (BitDepth)ocigo::g_ColorSpace_map.get(p).get()->getBitDepth();
+        ret = (BitDepth)ocigo::g_ColorSpace_map.get(p).get()->getBitDepth();
         END_CATCH_ERR
+        return ret;
     }
 
     void ColorSpace_setBitDepth(ColorSpaceId p, BitDepth bitDepth) {

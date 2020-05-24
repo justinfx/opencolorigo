@@ -25,10 +25,10 @@ func deleteContext(c *Context) {
 	if c == nil {
 		return
 	}
-	if c.ptr != 0 {
+	if c.ptr != nil {
 		runtime.SetFinalizer(c, nil)
 		C.deleteContext(c.ptr)
-		c.ptr = 0
+		c.ptr = nil
 	}
 	runtime.KeepAlive(c)
 }
@@ -36,6 +36,15 @@ func deleteContext(c *Context) {
 // Create a new empty Context
 func NewContext() *Context {
 	return newContext(C.Context_Create())
+}
+
+func (c *Context) lastError() error {
+	if c == nil {
+		return nil
+	}
+	err := getLastError(c.ptr)
+	runtime.KeepAlive(c)
+	return err
 }
 
 // Destroy immediately frees resources for this
@@ -53,12 +62,12 @@ func (c *Context) EditableCopy() *Context {
 }
 
 func (c *Context) CacheID() (string, error) {
-	id, err := C.Context_getCacheID(c.ptr)
-	if err != nil {
+	id := C.Context_getCacheID(c.ptr)
+	if err := c.lastError(); err != nil {
 		return "", err
 	}
 	runtime.KeepAlive(c)
-	return C.GoString(id), err
+	return C.GoString(id), nil
 }
 
 func (c *Context) SetSearchPath(path string) {
@@ -139,10 +148,10 @@ func (c *Context) ResolveStringVar(val string) string {
 func (c *Context) ResolveFileLocation(filename string) (string, error) {
 	c_name := C.CString(filename)
 	defer C.free(unsafe.Pointer(c_name))
-	val, err := C.Context_resolveFileLocation(c.ptr, c_name)
-	if err != nil {
+	val := C.Context_resolveFileLocation(c.ptr, c_name)
+	if err := c.lastError(); err != nil {
 		return "", err
 	}
 	runtime.KeepAlive(c)
-	return C.GoString(val), err
+	return C.GoString(val), nil
 }

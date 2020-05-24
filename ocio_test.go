@@ -891,6 +891,42 @@ func TestContextResolveStringVar(t *testing.T) {
 	}
 }
 
+func TestContextResolveFileLocation(t *testing.T) {
+	c := NewContext()
+	c.LoadEnvironment()
+	c.SetStringVar("A", "testdata")
+	c.SetStringVar("B", "spi-vfx")
+	c.SetStringVar("C", "config")
+
+	expect := "testdata/spi-vfx/config.ocio"
+
+	path, err := c.ResolveFileLocation("testdata/spi-vfx/config.ocio")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if path != expect {
+		t.Fatalf("expected %q, got %q", expect, path)
+	}
+
+	path, err = c.ResolveFileLocation("$A/$B/$C.ocio")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if path != expect {
+		t.Fatalf("expected %q, got %q", expect, path)
+	}
+
+	c.SetStringVar("C", "missing")
+
+	path, err = c.ResolveFileLocation("$A/$B/$C.ocio")
+	if err == nil {
+		t.Fatal("expected an error, got nil")
+	}
+	if !strings.Contains(err.Error(), "could not be located") {
+		t.Fatalf("unxpected error: %v", err)
+	}
+}
+
 /*
 
 ImageDesc

@@ -112,22 +112,28 @@ extern "C" {
     }
 
     const char* Config_getCacheID(Config* p) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getCacheID();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getCacheID();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     const char* Config_getCacheIDWithContext(Config* p, ContextId c) {
-        OCIO::ConstContextRcPtr context = ocigo::g_Context_map.get(c);
+        const char* ret = NULL;
+        OCIO::ConstContextRcPtr context = ocigo::g_Context_map.get(c->handle);
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getCacheID(context);
+        ret = ocigo::g_Config_map.get(p->handle).get()->getCacheID(context);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     const char* Config_getDescription(Config* p) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getDescription();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getDescription();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     // Config Resources
@@ -139,25 +145,29 @@ extern "C" {
         END_CATCH_CTX_ERR(p)
         if (ptr == NULL) { return 0; }
 
-        return ocigo::g_Context_map.add(ptr);
+        return NEW_HANDLE_CONTEXT(ocigo::g_Context_map.add(ptr));
     }
 
     const char* Config_getSearchPath(Config* p) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getSearchPath();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getSearchPath();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     const char* Config_getWorkingDir(Config* p) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getWorkingDir();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getWorkingDir();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     // Config Processors 
     ProcessorId Config_getProcessor_CT_CS_CS(Config* p, ContextId ct, ColorSpaceId srcCS, ColorSpaceId dstCS) {
         OCIO::ConstProcessorRcPtr   ptr;
-        OCIO::ConstContextRcPtr     ct_ptr    = ocigo::g_Context_map.get(ct);
+        OCIO::ConstContextRcPtr     ct_ptr    = ocigo::g_Context_map.get(ct->handle);
         OCIO::ConstColorSpaceRcPtr  srcCS_ptr = ocigo::g_ColorSpace_map.get(srcCS);
         OCIO::ConstColorSpaceRcPtr  dstCS_ptr = ocigo::g_ColorSpace_map.get(dstCS);
 
@@ -194,7 +204,7 @@ extern "C" {
 
     ProcessorId Config_getProcessor_CT_S_S(Config* p, ContextId ct, const char* srcName, const char* dstName) {
         OCIO::ConstProcessorRcPtr   ptr;
-        OCIO::ConstContextRcPtr     ct_ptr = ocigo::g_Context_map.get(ct);
+        OCIO::ConstContextRcPtr     ct_ptr = ocigo::g_Context_map.get(ct->handle);
 
         BEGIN_CATCH_CTX_ERR(p)
         ptr = ocigo::g_Config_map.get(p->handle).get()->getProcessor(ct_ptr, srcName, dstName);
@@ -231,7 +241,7 @@ extern "C" {
 
     ProcessorId Config_getProcessor_CT_TX_D(Config* p, ContextId ct, TransformId tx, TransformDirection direction) {
         OCIO::ConstProcessorRcPtr ptr;
-        OCIO::ConstContextRcPtr ct_ptr = ocigo::g_Context_map.get(ct);
+        OCIO::ConstContextRcPtr ct_ptr = ocigo::g_Context_map.get(ct->handle);
         OCIO::ConstTransformRcPtr tx_ptr = ocigo::g_Transform_map.get(tx);
 
         BEGIN_CATCH_CTX_ERR(p)
@@ -245,15 +255,19 @@ extern "C" {
 
     // Config ColorSpaces
     int Config_getNumColorSpaces(Config* p) {
+        int ret = 0;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getNumColorSpaces();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getNumColorSpaces();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     const char* Config_getColorSpaceNameByIndex(Config* p, int index) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getColorSpaceNameByIndex(index);
+        ret = ocigo::g_Config_map.get(p->handle).get()->getColorSpaceNameByIndex(index);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     ColorSpaceId Config_getColorSpace(Config* p, const char* name) {
@@ -268,9 +282,11 @@ extern "C" {
     }
 
     int Config_getIndexForColorSpace(Config* p, const char* name) {
+        int ret = -1;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getIndexForColorSpace(name);
+        ret =  ocigo::g_Config_map.get(p->handle).get()->getIndexForColorSpace(name);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     void Config_addColorSpace(Config* p, ColorSpaceId cs) {
@@ -287,15 +303,19 @@ extern "C" {
     }
 
     const char* Config_parseColorSpaceFromString(Config* p, const char* str) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->parseColorSpaceFromString(str);
+        ret = ocigo::g_Config_map.get(p->handle).get()->parseColorSpaceFromString(str);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     bool Config_isStrictParsingEnabled(Config* p) {
+        bool ret = false;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->isStrictParsingEnabled();
+        ret = ocigo::g_Config_map.get(p->handle).get()->isStrictParsingEnabled();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     void Config_setStrictParsingEnabled(Config* p, bool enabled) {
@@ -312,70 +332,92 @@ extern "C" {
     }
 
     int Config_getNumRoles(Config* p) {
+        int ret = 0;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getNumRoles();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getNumRoles();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     bool Config_hasRole(Config* p, const char* role) {
+        bool ret = false;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->hasRole(role);
+        ret = ocigo::g_Config_map.get(p->handle).get()->hasRole(role);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     const char* Config_getRoleName(Config* p, int index) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getRoleName(index);
+        ret = ocigo::g_Config_map.get(p->handle).get()->getRoleName(index);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
     // Config Display/View Registration 
     const char* Config_getDefaultDisplay(Config* p) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getDefaultDisplay();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getDefaultDisplay();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
     
     int Config_getNumDisplays(Config* p) {
+        int ret = 0;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getNumDisplays();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getNumDisplays();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
     
     const char* Config_getDisplay(Config* p, int index) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getDisplay(index);
+        ret = ocigo::g_Config_map.get(p->handle).get()->getDisplay(index);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
     
     const char* Config_getDefaultView(Config* p, const char* display) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getDefaultView(display);
+        ret = ocigo::g_Config_map.get(p->handle).get()->getDefaultView(display);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
     
     int Config_getNumViews(Config* p, const char* display) {
+        int ret = 0;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getNumViews(display);
+        ret = ocigo::g_Config_map.get(p->handle).get()->getNumViews(display);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
     
     const char* Config_getView(Config* p, const char* display, int index) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getView(display, index);
+        ret =  ocigo::g_Config_map.get(p->handle).get()->getView(display, index);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
     
     const char* Config_getDisplayColorSpaceName(Config* p, const char* display, const char* view) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getDisplayColorSpaceName(display, view);
+        ret =  ocigo::g_Config_map.get(p->handle).get()->getDisplayColorSpaceName(display, view);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
     
     const char* Config_getDisplayLooks(Config* p, const char* display, const char* view) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getDisplayLooks(display, view);
+        ret =  ocigo::g_Config_map.get(p->handle).get()->getDisplayLooks(display, view);
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
     
     void Config_addDisplay(Config* p, const char* display, const char* view, const char* colorSpaceName, const char* looks) {
@@ -397,9 +439,11 @@ extern "C" {
     }
     
     const char* Config_getActiveDisplays(Config* p) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getActiveDisplays();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getActiveDisplays();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
     
     void Config_setActiveViews(Config* p, const char* views) {
@@ -409,9 +453,11 @@ extern "C" {
     }
 
     const char* Config_getActiveViews(Config* p) {
+        const char* ret = NULL;
         BEGIN_CATCH_CTX_ERR(p)
-        return ocigo::g_Config_map.get(p->handle).get()->getActiveViews();
+        ret = ocigo::g_Config_map.get(p->handle).get()->getActiveViews();
         END_CATCH_CTX_ERR(p)
+        return ret;
     }
 
 }

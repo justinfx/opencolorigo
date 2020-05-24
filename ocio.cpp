@@ -58,22 +58,28 @@ extern "C" {
         END_CATCH_ERR
     }
 
-    const char* GetVersion() { 
+    const char* GetVersion() {
+        const char* ret = NULL;
         BEGIN_CATCH_ERR
-        return OCIO::GetVersion(); 
+        ret = OCIO::GetVersion();
         END_CATCH_ERR
+        return ret;
     }
 
-    int GetVersionHex() { 
+    int GetVersionHex() {
+        int ret = 0;
         BEGIN_CATCH_ERR
-        return OCIO::GetVersionHex(); 
+        ret = OCIO::GetVersionHex();
         END_CATCH_ERR
+        return ret;
     }
 
-    LoggingLevel GetLoggingLevel() { 
+    LoggingLevel GetLoggingLevel() {
+        LoggingLevel lvl;
         BEGIN_CATCH_ERR
-        return (LoggingLevel)OCIO::GetLoggingLevel(); 
+        lvl = (LoggingLevel)OCIO::GetLoggingLevel();
         END_CATCH_ERR
+        return lvl;
     }
 
     void SetLoggingLevel(LoggingLevel level) { 

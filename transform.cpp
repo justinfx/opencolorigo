@@ -37,9 +37,11 @@ extern "C" {
     }
 
     TransformDirection DisplayTransform_getDirection(DisplayTransformId p) {
+        TransformDirection ret;
         BEGIN_CATCH_ERR
-        return (TransformDirection)(ocigo::g_Transform_map.get(p).get()->getDirection());
+        ret = (TransformDirection)(ocigo::g_Transform_map.get(p).get()->getDirection());
         END_CATCH_ERR
+        return ret;
     }
 
     void DisplayTransform_setDirection(DisplayTransformId p, TransformDirection dir) {
@@ -49,10 +51,12 @@ extern "C" {
     }
 
     const char* DisplayTransform_getInputColorSpaceName(DisplayTransformId p) {
+        const char* ret = NULL;
         BEGIN_CATCH_ERR
-        return OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
+        ret = OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
                 .get()->getInputColorSpaceName();
         END_CATCH_ERR
+        return ret;
     }
 
     void DisplayTransform_setInputColorSpaceName(DisplayTransformId p, const char* name) {
@@ -63,10 +67,12 @@ extern "C" {
     }
 
     const char* DisplayTransform_getDisplay(DisplayTransformId p) {
+        const char* ret = NULL;
         BEGIN_CATCH_ERR
-        return OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
+        ret = OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
                 .get()->getDisplay();
         END_CATCH_ERR
+        return ret;
     }
 
     void DisplayTransform_setDisplay(DisplayTransformId p, const char* name) {
@@ -77,10 +83,12 @@ extern "C" {
     }
 
     const char* DisplayTransform_getView(DisplayTransformId p) {
+        const char* ret = NULL;
         BEGIN_CATCH_ERR
-        return OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
+        ret = OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
                 .get()->getView();
         END_CATCH_ERR
+        return ret;
     }
 
     void DisplayTransform_setView(DisplayTransformId p, const char* name) {
@@ -91,10 +99,12 @@ extern "C" {
     }
 
     const char* DisplayTransform_getLooksOverride(DisplayTransformId p) {
+        const char* ret = NULL;
         BEGIN_CATCH_ERR
-        return OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
+        ret = OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
                 .get()->getLooksOverride();
         END_CATCH_ERR
+        return ret;
     }
 
     void DisplayTransform_setLooksOverride(DisplayTransformId p, const char* looks) {
@@ -105,10 +115,12 @@ extern "C" {
     }
 
     bool DisplayTransform_getLooksOverrideEnabled(DisplayTransformId p) {
+        bool ret = false;
         BEGIN_CATCH_ERR
-        return OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
+        ret = OCIO_DYNAMIC_POINTER_CAST<OCIO::DisplayTransform>(ocigo::g_Transform_map.get(p))
                 .get()->getLooksOverrideEnabled();
         END_CATCH_ERR
+        return ret;
     }
 
     void DisplayTransform_setLooksOverrideEnabled(DisplayTransformId p, bool enabled) {
