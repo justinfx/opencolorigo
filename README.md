@@ -1,5 +1,6 @@
 # OpenColorIO bindings for Go
 
+[![Go CI](https://github.com/justinfx/opencolorigo/workflows/Go/badge.svg)](https://github.com/justinfx/opencolorigo/actions?query=branch%3Amaster)
 [![Go project version](https://img.shields.io/github/v/release/justinfx/opencolorigo.svg)](https://pkg.go.dev/github.com/justinfx/opencolorigo?tab=versions) 
 [![GoDoc](http://godoc.org/github.com/justinfx/opencolorigo?status.svg)](https://pkg.go.dev/github.com/justinfx/opencolorigo?tab=doc) 
 [![Go Report](https://goreportcard.com/badge/github.com/justinfx/opencolorigo)](https://goreportcard.com/badge/github.com/justinfx/opencolorigo)
