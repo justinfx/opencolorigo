@@ -16,7 +16,13 @@ IndexMap<OCIO::ProcessorMetadataRcPtr> g_ProcessorMetadata_map;
 extern "C" {
 
     void deleteProcessor(ProcessorId p) {
-        ocigo::g_Processor_map.remove(p);
+        if (p != NULL) {
+            if (p->handle) {
+                ocigo::g_Processor_map.remove(p->handle);
+                p->handle = 0;
+            }
+            freeHandleContext(p);
+        }
     }
 
     ProcessorId Processor_Create() {
@@ -24,33 +30,33 @@ extern "C" {
         BEGIN_CATCH_ERR
         ptr = OCIO::Processor::Create();
         END_CATCH_ERR
-        return ocigo::g_Processor_map.add(ptr);
+        return NEW_HANDLE_CONTEXT(ocigo::g_Processor_map.add(ptr));
     }
 
     bool Processor_isNoOp(ProcessorId p) {
-        BEGIN_CATCH_ERR
-        return ocigo::g_Processor_map.get(p).get()->isNoOp();
-        END_CATCH_ERR
+        BEGIN_CATCH_CTX_ERR(p)
+        return ocigo::g_Processor_map.get(p->handle).get()->isNoOp();
+        END_CATCH_CTX_ERR(p)
     }
 
     bool Processor_hasChannelCrosstalk(ProcessorId p) {
-        BEGIN_CATCH_ERR
-        return ocigo::g_Processor_map.get(p).get()->hasChannelCrosstalk();
-        END_CATCH_ERR
+        BEGIN_CATCH_CTX_ERR(p)
+        return ocigo::g_Processor_map.get(p->handle).get()->hasChannelCrosstalk();
+        END_CATCH_CTX_ERR(p)
     }
 
     // Processor CPU
     void Processor_apply(ProcessorId p, ImageDesc *i) {
         OCIO::ImageDesc *img = static_cast<OCIO::ImageDesc*>(i);
-        BEGIN_CATCH_ERR
-        ocigo::g_Processor_map.get(p).get()->apply(*img);
-        END_CATCH_ERR
+        BEGIN_CATCH_CTX_ERR(p)
+        ocigo::g_Processor_map.get(p->handle).get()->apply(*img);
+        END_CATCH_CTX_ERR(p)
     }
 
     const char* Processor_getCpuCacheID(ProcessorId p) {
-        BEGIN_CATCH_ERR
-        return ocigo::g_Processor_map.get(p).get()->getCpuCacheID();
-        END_CATCH_ERR
+        BEGIN_CATCH_CTX_ERR(p)
+        return ocigo::g_Processor_map.get(p->handle).get()->getCpuCacheID();
+        END_CATCH_CTX_ERR(p)
     }
 
     // ProcessorMetadata
@@ -60,9 +66,9 @@ extern "C" {
 
     ProcessorMetadataId Processor_getMetadata(ProcessorId p) {
         OCIO::ConstProcessorMetadataRcPtr ptr;
-        BEGIN_CATCH_ERR
-        ptr = ocigo::g_Processor_map.get(p).get()->getMetadata();
-        END_CATCH_ERR
+        BEGIN_CATCH_CTX_ERR(p)
+        ptr = ocigo::g_Processor_map.get(p->handle).get()->getMetadata();
+        END_CATCH_CTX_ERR(p)
         return ocigo::g_ProcessorMetadata_map.add(
                 OCIO_CONST_POINTER_CAST<OCIO::ProcessorMetadata>(ptr));
     }

@@ -78,7 +78,7 @@ typedef struct _HandleContext {
 typedef _HandleContext Config;
 typedef HandleId ColorSpaceId;
 typedef HandleId ContextId;
-typedef HandleId ProcessorId;
+typedef _HandleContext* ProcessorId;
 typedef HandleId ProcessorMetadataId;
 typedef void ImageDesc;
 typedef void PackedImageDesc;

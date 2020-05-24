@@ -936,13 +936,26 @@ func TestProcessorApply(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-
-	processor.Apply(imgDesc)
+	err = processor.Apply(imgDesc)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if fmt.Sprintf("%v", imageDataCopy) == fmt.Sprintf("%v", imgDesc.Data()) {
 		t.Fatal("Original RGB data remained unchanged after Apply()")
 	}
 	imgDesc.Destroy()
+
+	imgDesc = NewPackedImageDesc([]float32{0, 0, 0}, 0, 0, 1)
+	err = processor.Apply(imgDesc)
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if !strings.Contains(err.Error(), "Image dimensions must be positive") {
+		t.Fatalf("unexpected error type: %v", err)
+	}
+	imgDesc.Destroy()
+
 	processor.Destroy()
 }
 

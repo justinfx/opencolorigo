@@ -165,7 +165,7 @@ extern "C" {
         ptr = ocigo::g_Config_map.get(p->handle).get()->getProcessor(ct_ptr, srcCS_ptr, dstCS_ptr);
         END_CATCH_CTX_ERR(p)
 
-        return ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr));
+        return NEW_HANDLE_CONTEXT(ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr)));
     }
 
     ProcessorId Config_getProcessor_CS_CS(Config* p, ColorSpaceId srcCS, ColorSpaceId dstCS) {
@@ -178,7 +178,7 @@ extern "C" {
         END_CATCH_CTX_ERR(p)
 
         if ( ptr == NULL) { return 0; }
-        return ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr));
+        return NEW_HANDLE_CONTEXT(ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr)));
     }
 
     ProcessorId Config_getProcessor_S_S(Config* p, const char* srcName, const char* dstName) {
@@ -189,7 +189,7 @@ extern "C" {
         END_CATCH_CTX_ERR(p)
 
         if ( ptr == NULL) { return 0; }
-        return ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr));
+        return NEW_HANDLE_CONTEXT(ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr)));
     }
 
     ProcessorId Config_getProcessor_CT_S_S(Config* p, ContextId ct, const char* srcName, const char* dstName) {
@@ -201,7 +201,7 @@ extern "C" {
         END_CATCH_CTX_ERR(p)
 
         if ( ptr == NULL) { return 0; }
-        return ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr));
+        return NEW_HANDLE_CONTEXT(ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr)));
     }
 
     ProcessorId Config_getProcessor_TX(Config* p, TransformId tx) {
@@ -213,7 +213,7 @@ extern "C" {
         END_CATCH_CTX_ERR(p)
 
         if ( ptr == NULL) { return 0; }
-        return ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr));
+        return NEW_HANDLE_CONTEXT(ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr)));
     }
 
     ProcessorId Config_getProcessor_TX_D(Config* p, TransformId tx, TransformDirection direction) {
@@ -226,7 +226,7 @@ extern "C" {
         END_CATCH_CTX_ERR(p)
 
         if ( ptr == NULL) { return 0; }
-        return ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr));
+        return NEW_HANDLE_CONTEXT(ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr)));
     }
 
     ProcessorId Config_getProcessor_CT_TX_D(Config* p, ContextId ct, TransformId tx, TransformDirection direction) {
@@ -240,7 +240,7 @@ extern "C" {
         END_CATCH_CTX_ERR(p)
 
         if ( ptr == NULL) { return 0; }
-        return ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr));
+        return NEW_HANDLE_CONTEXT(ocigo::g_Processor_map.add(OCIO_CONST_POINTER_CAST<OCIO::Processor>(ptr)));
     }
 
     // Config ColorSpaces

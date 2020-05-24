@@ -27,10 +27,10 @@ func deleteProcessor(p *Processor) {
 	if p == nil {
 		return
 	}
-	if p.ptr != 0 {
+	if p.ptr != nil {
 		runtime.SetFinalizer(p, nil)
 		C.deleteProcessor(p.ptr)
-		p.ptr = 0
+		p.ptr = nil
 	}
 	runtime.KeepAlive(p)
 }
@@ -38,6 +38,15 @@ func deleteProcessor(p *Processor) {
 // Create a new empty Processor
 func NewProcessor() *Processor {
 	return newProcessor(C.Processor_Create())
+}
+
+func (p *Processor) lastError() error {
+	if p == nil {
+		return nil
+	}
+	err := getLastError(p.ptr)
+	runtime.KeepAlive(p)
+	return err
 }
 
 // Destroy immediately frees resources for this
@@ -69,19 +78,20 @@ func (p *Processor) Metadata() *ProcessorMetadata {
 
 // Apply to an image.
 func (p *Processor) Apply(i ImageDescriptor) error {
-	_, err := C.Processor_apply(p.ptr, unsafe.Pointer(i.imageDescPtr()))
+	C.Processor_apply(p.ptr, unsafe.Pointer(i.imageDescPtr()))
+	err := p.lastError()
 	runtime.KeepAlive(p)
 	runtime.KeepAlive(i)
 	return err
 }
 
 func (p *Processor) CpuCacheID() (string, error) {
-	id, err := C.Processor_getCpuCacheID(p.ptr)
-	if err != nil {
+	id := C.Processor_getCpuCacheID(p.ptr)
+	if err := p.lastError(); err != nil {
 		return "", err
 	}
 	runtime.KeepAlive(p)
-	return C.GoString(id), err
+	return C.GoString(id), nil
 }
 
 // This class contains meta information about the process that generated this processor.
