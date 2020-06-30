@@ -52,6 +52,7 @@ Prefer defining types as a _HandleContext and using BEGIN_CATCH_CTX_ERR(ctx)
 
 
 #define END_CATCH_ERR                        \
+        errno = 0;                           \
     }                                        \
     catch (const OCIO::Exception& ex) {      \
         errno = ERR_GENERAL;                 \
@@ -74,6 +75,7 @@ _HandleContext and stored in maps (Config, Context, Processor).
 
 
 #define END_CATCH_CTX_ERR(CTX)               \
+        errno = 0;                           \
     }                                        \
     catch (const OCIO::Exception& ex) {      \
         free_last_ctx_err(CTX);              \
