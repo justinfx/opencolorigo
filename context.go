@@ -38,11 +38,11 @@ func NewContext() *Context {
 	return newContext(C.Context_Create())
 }
 
-func (c *Context) lastError() error {
+func (c *Context) lastError(errno ...error) error {
 	if c == nil {
 		return nil
 	}
-	err := getLastError(c.ptr)
+	err := getLastError(c.ptr, errno...)
 	runtime.KeepAlive(c)
 	return err
 }
@@ -62,8 +62,8 @@ func (c *Context) EditableCopy() *Context {
 }
 
 func (c *Context) CacheID() (string, error) {
-	id := C.Context_getCacheID(c.ptr)
-	if err := c.lastError(); err != nil {
+	id, err := C.Context_getCacheID(c.ptr)
+	if err = c.lastError(err); err != nil {
 		return "", err
 	}
 	runtime.KeepAlive(c)
@@ -148,8 +148,8 @@ func (c *Context) ResolveStringVar(val string) string {
 func (c *Context) ResolveFileLocation(filename string) (string, error) {
 	c_name := C.CString(filename)
 	defer C.free(unsafe.Pointer(c_name))
-	val := C.Context_resolveFileLocation(c.ptr, c_name)
-	if err := c.lastError(); err != nil {
+	val, err := C.Context_resolveFileLocation(c.ptr, c_name)
+	if err = c.lastError(err); err != nil {
 		return "", err
 	}
 	runtime.KeepAlive(c)

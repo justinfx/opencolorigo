@@ -63,22 +63,37 @@ var (
 Errors
 */
 
-func getLastError(ptr *C._HandleContext) error {
+func getLastError(ptr *C._HandleContext, errno ...error) (err error) {
+	// If the function is going to return a nil error,
+	// but an errno error was passed in, return that
+	// as the default value instead.
+	// This ensures that at least the original error
+	// will be returned even if we can't acquire it from
+	// the context object
+	defer func() {
+		if err == nil && len(errno) > 0 {
+			err = errno[0]
+		}
+	}()
+
 	if ptr == nil {
-		return nil
+		return
 	}
+	// faster check to avoid copying C string
 	if !bool(C.hasLastError(ptr)) {
-		return nil
+		return
 	}
-	err := C.getLastError(ptr)
-	if err == nil {
-		return nil
+	// Get the C error string
+	cErrStr := C.getLastError(ptr)
+	if cErrStr == nil {
+		return
 	}
-	e := C.GoString(err)
+	e := C.GoString(cErrStr)
 	if e == "" {
-		return nil
+		return
 	}
-	return errors.New(e)
+	err = errors.New(e)
+	return
 }
 
 // An exception class for errors detected at runtime,
