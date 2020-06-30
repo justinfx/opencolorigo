@@ -518,17 +518,19 @@ func TestConfigProcessor(t *testing.T) {
 
 	_, err = cfg.Processor("scene_linear", "color_timing")
 	if err != nil {
-		t.Fatal("Error getting a Processor with 'scene_linear', 'color_timing'")
+		t.Fatalf("Error getting a Processor with 'scene_linear', 'color_timing': %v", err)
 	}
 
 	_, err = cfg.Processor(ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
 	if err != nil {
-		t.Fatal("Error getting a Processor with constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
+		t.Fatalf("Error getting a Processor with constants "+
+			"ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR: %v", err)
 	}
 
 	_, err = cfg.Processor(ct, ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR)
 	if err != nil {
-		t.Fatal("Error getting a Processor with current context and constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR")
+		t.Fatalf("Error getting a Processor with current context "+
+			"and constants ROLE_COMPOSITING_LOG, ROLE_SCENE_LINEAR: %v", err)
 	}
 
 	// From data

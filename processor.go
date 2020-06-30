@@ -40,11 +40,11 @@ func NewProcessor() *Processor {
 	return newProcessor(C.Processor_Create())
 }
 
-func (p *Processor) lastError() error {
+func (p *Processor) lastError(errno ...error) error {
 	if p == nil {
 		return nil
 	}
-	err := getLastError(p.ptr)
+	err := getLastError(p.ptr, errno...)
 	runtime.KeepAlive(p)
 	return err
 }
@@ -78,16 +78,16 @@ func (p *Processor) Metadata() *ProcessorMetadata {
 
 // Apply to an image.
 func (p *Processor) Apply(i ImageDescriptor) error {
-	C.Processor_apply(p.ptr, unsafe.Pointer(i.imageDescPtr()))
-	err := p.lastError()
+	_, err := C.Processor_apply(p.ptr, unsafe.Pointer(i.imageDescPtr()))
+	err = p.lastError(err)
 	runtime.KeepAlive(p)
 	runtime.KeepAlive(i)
 	return err
 }
 
 func (p *Processor) CpuCacheID() (string, error) {
-	id := C.Processor_getCpuCacheID(p.ptr)
-	if err := p.lastError(); err != nil {
+	id, err := C.Processor_getCpuCacheID(p.ptr)
+	if err = p.lastError(err); err != nil {
 		return "", err
 	}
 	runtime.KeepAlive(p)
