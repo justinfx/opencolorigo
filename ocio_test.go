@@ -158,6 +158,16 @@ func TestConfigFromFile(t *testing.T) {
 
 	t.Logf("Config read from temp file %s (%v)", fname, c)
 	c.Destroy()
+
+	_, err = ConfigCreateFromFile("/path/to/missing/ocio/file.ocio")
+	if err == nil {
+		t.Fatal("expected missing config file path to return error; got nil")
+	}
+	actual := err.Error()
+	substr := "Error could not read '/path/to/missing/ocio/file.ocio' OCIO profile"
+	if !strings.Contains(actual, substr) {
+		t.Fatalf("expected error %q to contain %q", actual, substr)
+	}
 }
 
 func TestConfigFromData(t *testing.T) {
@@ -166,6 +176,16 @@ func TestConfigFromData(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 	t.Logf("Config: %+v", c)
+
+	_, err = ConfigCreateFromData("_bad_config_data_")
+	if err == nil {
+		t.Fatal("expected bad config data to return an error; got nil")
+	}
+	actual := err.Error()
+	substr := "Error: Loading the OCIO profile"
+	if !strings.Contains(actual, substr) {
+		t.Fatalf("expected error %q to contain %q", actual, substr)
+	}
 }
 
 func TestConfigSerialize(t *testing.T) {
@@ -363,6 +383,14 @@ func TestConfigParseColorSpace(t *testing.T) {
 		if actual != expected {
 			t.Errorf("Expected to parse %q from string, but got %q", expected, actual)
 		}
+	}
+
+	actual, err = CONFIG.ParseColorSpaceFromString("bad")
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if actual != "" {
+		t.Errorf("expected an empty string; got %q", actual)
 	}
 }
 

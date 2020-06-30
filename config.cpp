@@ -297,7 +297,7 @@ extern "C" {
     }
 
     void Config_clearColorSpaces(Config* p) {
-        BEGIN_CATCH_ERR
+        BEGIN_CATCH_CTX_ERR(p)
         ocigo::g_Config_map.get(p->handle).get()->clearColorSpaces();
         END_CATCH_CTX_ERR(p)
     }

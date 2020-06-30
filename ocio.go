@@ -67,6 +67,9 @@ func getLastError(ptr *C._HandleContext) error {
 	if ptr == nil {
 		return nil
 	}
+	if !bool(C.hasLastError(ptr)) {
+		return nil
+	}
 	err := C.getLastError(ptr)
 	if err == nil {
 		return nil

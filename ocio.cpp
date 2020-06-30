@@ -16,6 +16,7 @@ _HandleContext* NEW_HANDLE_CONTEXT(HandleId handle) {
     _HandleContext *ctx = new _HandleContext;
     ctx->handle = handle;
     ctx->last_error = NULL;
+    ctx->has_error = false;
     return ctx;
 }
 
@@ -46,6 +47,10 @@ extern "C" {
             free_last_ctx_err(ctx);
             delete ctx;
         }
+    }
+
+    bool hasLastError(_HandleContext* ctx) {
+        return ctx->has_error;
     }
 
     const char* getLastError(_HandleContext* ctx) {
@@ -87,11 +92,5 @@ extern "C" {
         OCIO::SetLoggingLevel((OCIO::LoggingLevel)level); 
         END_CATCH_ERR
     };
-
-    // const char* GetLastError() {
-    //     (void) pthread_once(&last_err_once, make_last_err);
-    //     char *err= (char*) pthread_getspecific(last_err);
-    //     return err;
-    // }
 
 }
