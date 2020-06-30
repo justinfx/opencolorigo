@@ -27,10 +27,11 @@ extern "C" {
 
     ProcessorId Processor_Create() {
         OCIO::ProcessorRcPtr ptr;
-        BEGIN_CATCH_ERR
-        ptr = OCIO::Processor::Create();
-        END_CATCH_ERR
-        return NEW_HANDLE_CONTEXT(ocigo::g_Processor_map.add(ptr));
+        ProcessorId p = NEW_HANDLE_CONTEXT();
+        BEGIN_CATCH_CTX_ERR(p)
+        p->handle = ocigo::g_Processor_map.add(OCIO::Processor::Create());
+        END_CATCH_CTX_ERR(p)
+        return p;
     }
 
     bool Processor_isNoOp(ProcessorId p) {

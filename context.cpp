@@ -25,10 +25,11 @@ extern "C" {
 
     ContextId Context_Create() {
         OCIO::ContextRcPtr ptr;
-        BEGIN_CATCH_ERR
-        ptr = OCIO::Context::Create();
-        END_CATCH_ERR
-        return NEW_HANDLE_CONTEXT(ocigo::g_Context_map.add(ptr));
+        ContextId ctx = NEW_HANDLE_CONTEXT();
+        BEGIN_CATCH_CTX_ERR(ctx)
+        ctx->handle = ocigo::g_Context_map.add(OCIO::Context::Create());
+        END_CATCH_CTX_ERR(ctx)
+        return ctx;
     }
 
     ContextId Context_createEditableCopy(ContextId p) {

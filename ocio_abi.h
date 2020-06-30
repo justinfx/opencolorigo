@@ -33,10 +33,19 @@ inline void free_last_ctx_err(_HandleContext* ctx) {
     if (ctx->last_error != NULL && ctx->last_error != NO_ERROR) {
         free((char*)(ctx->last_error));
         ctx->last_error = NULL;
+        ctx->has_error = false;
     }
 }
 
+/*
+BEGIN_CATCH_ERR / END_CATCH_ERR
 
+Macros are used to wrap arbitrary OCIO calls to catch an exception
+and signal the failure by way of setting errno to a known value.
+It does not capture the error message; only that there was a failure.
+
+Prefer defining types as a _HandleContext and using BEGIN_CATCH_CTX_ERR(ctx)
+*/
 #define BEGIN_CATCH_ERR                      \
     errno = 0;                               \
     try {
@@ -49,6 +58,15 @@ inline void free_last_ctx_err(_HandleContext* ctx) {
     }
 
 
+/*
+BEGIN_CATCH_CTX_ERR / END_CATCH_CTX_ERR
+
+Macros are used to wrap OCIO calls in functions that have a _HandleContext
+type that can store exception information.
+
+Only some of the types that need to convey error details are defined as
+_HandleContext and stored in maps (Config, Context, Processor).
+*/
 #define BEGIN_CATCH_CTX_ERR(CTX)             \
     errno = 0;                               \
     free_last_ctx_err(CTX);                  \
@@ -60,6 +78,7 @@ inline void free_last_ctx_err(_HandleContext* ctx) {
     catch (const OCIO::Exception& ex) {      \
         free_last_ctx_err(CTX);              \
         CTX->last_error = strdup(ex.what()); \
+        CTX->has_error = true;               \
         errno = ERR_GENERAL;                 \
     }
 

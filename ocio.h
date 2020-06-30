@@ -72,6 +72,7 @@ typedef uint64_t HandleId;
 typedef struct _HandleContext {
     HandleId handle;
     const char* last_error;
+    bool has_error;
 } _HandleContext;
 
 // typedef void Config;
@@ -86,6 +87,7 @@ typedef HandleId TransformId;
 typedef HandleId DisplayTransformId;
 
 void freeHandleContext(_HandleContext* ctx);
+bool hasLastError(_HandleContext* ctx);
 const char* getLastError(_HandleContext* ctx);
 
 // Global
